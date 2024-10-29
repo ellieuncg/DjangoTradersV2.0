@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Our Customers</h1>
+    <a href="{% url 'DjTraders:CustomerCreate' %}" class="action-btn create-btn" title="Add Customer">
+        <i class="fas fa-plus"></i>
+    </a>
+</div>
+
+<!-- Search Box -->
+<div class="search-container">
+    <div class="search-wrapper">
+        <i class="fas fa-users"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search Customers">
+    </div>
+</div>
+
+<!-- Status Filter Links -->
+<div class="status-links">
+    <a href="{% url 'DjTraders:Customers' %}" 
+       class="status-btn {% if not request.GET.status %}active{% endif %}">
+        Active Only
+    </a>
+    <a href="{% url 'DjTraders:Customers' %}?status=inactive" 
+       class="status-btn {% if request.GET.status == 'inactive' %}active{% endif %}">
+        Show Inactive
+    </a>
+    <a href="{% url 'DjTraders:Customers' %}?status=all" 
+       class="status-btn {% if request.GET.status == 'all' %}active{% endif %}">
+        Show All
+    </a>
+</div>
+
+<!-- Alphabet Links -->
+<div class="alphabet-links">
+    <a href="{% url 'DjTraders:Customers' %}" 
+       class="{% if not request.GET.letter %}active{% endif %}">
+        All
+    </a>
+    {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+        <a href="?letter={{ letter }}" 
+           class="{% if request.GET.letter == letter %}active{% endif %}">
+            {{ letter }}
+        </a>
+    {% endfor %}
+</div>
+
+<!-- Customer Cards -->
+<div class="card-grid">
+    {% for customer in customers %}
+    <div class="card {% if customer.status != 'active' %}inactive{% endif %}">
+        <h3 class="card-title">{{ customer.customer_name }}</h3>
+        <div class="card-info">
+            <span><strong>Contact:</strong> {{ customer.contact_name }}</span>
+            <span><strong>Address:</strong> {{ customer.address }}</span>
+            <span><strong>City:</strong> {{ customer.city }}</span>
+            <span><strong>Postal Code:</strong> {{ customer.postal_code }}</span>
+            <span><strong>Country:</strong> {{ customer.country }}</span>
+            {% if customer.status != 'active' %}
+                <span><strong>Status:</strong> {{ customer.get_status_display }}</span>
+            {% endif %}
+        </div>
+        <div class="card-actions">
+            <a href="{% url 'DjTraders:CustomerDetail' pk=customer.pk %}" class="action-btn view-btn" title="View">
+                <i class="fas fa-search"></i>
+            </a>
+            <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn edit-btn" title="Edit">
+                <i class="fas fa-pencil-alt"></i>
+            </a>
+            {% if customer.status == 'active' %}
+                <form method="POST" action="{% url 'DjTraders:CustomerStatus' pk=customer.pk %}" class="inline-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="inactive">
+                    <button type="submit" class="action-btn status-btn" title="Deactivate" 
+                            onclick="return confirm('Are you sure you want to deactivate this customer?');">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="no-results">
+        <p>No customers found matching your criteria.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Our Products</h1>
+    <a href="{% url 'DjTraders:ProductCreate' %}" class="action-btn create-btn" title="Add Product">
+        <i class="fas fa-plus"></i>
+    </a>
+</div>
+
+<!-- Search Box -->
+<div class="search-container">
+    <div class="search-wrapper">
+        <i class="fas fa-box"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search Products">
+        <input type="number" id="minPrice" class="price-input" placeholder="Min Price">
+        <input type="number" id="maxPrice" class="price-input" placeholder="Max Price">
+    </div>
+</div>
+
+<!-- Status Filter Buttons -->
+<div class="status-links">
+    <a href="{% url 'DjTraders:Products' %}" 
+       class="status-btn {% if not request.GET.status %}active{% endif %}">
+        Active Only
+    </a>
+    <a href="{% url 'DjTraders:Products' %}?status=inactive" 
+       class="status-btn {% if request.GET.status == 'inactive' %}active{% endif %}">
+        Show Inactive
+    </a>
+    <a href="{% url 'DjTraders:Products' %}?status=all" 
+       class="status-btn {% if request.GET.status == 'all' %}active{% endif %}">
+        Show All
+    </a>
+</div>
+
+<!-- Categories -->
+<div class="category-links">
+    {% for category in categories %}
+        <a href="?category={{ category.category_id }}" 
+           class="{% if selected_category == category.category_id %}active{% endif %}">
+            {{ category.category_name }}
+        </a>
+    {% endfor %}
+</div>
+
+<!-- Product Cards -->
+<div class="card-grid">
+    {% for product in products %}
+    <div class="card {% if product.status != 'active' %}inactive{% endif %}">
+        <h3 class="card-title">{{ product.product_name }}</h3>
+        <div class="card-info">
+            <span><strong>Category:</strong> {{ product.category.category_name }}</span>
+            <span><strong>Unit:</strong> {{ product.unit }}</span>
+            <span><strong>Price:</strong> ${{ product.price }}</span>
+            {% if product.status != 'active' %}
+                <span><strong>Status:</strong> {{ product.get_status_display }}</span>
+            {% endif %}
+        </div>
+        <div class="card-actions">
+            <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn view-btn" title="View">
+                <i class="fas fa-search"></i>
+            </a>
+            <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn edit-btn" title="Edit">
+                <i class="fas fa-pencil-alt"></i>
+            </a>
+            {% if product.status == 'active' %}
+                <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="discontinued">
+                    <button type="submit" class="action-btn status-btn" title="Discontinue"
+                            onclick="return confirm('Are you sure you want to discontinue this product?');">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="no-results">
+        <p>No products found matching your criteria.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

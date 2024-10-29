@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ customer.customer_name }}</h1>
+    <p class="header-subtitle">
+        {% if customer.NumberOfOrders == 0 %}
+            No orders placed
+        {% elif customer.NumberOfOrders == 1 %}
+            1 order placed
+        {% else %}
+            {{ customer.NumberOfOrders }} orders placed
+        {% endif %}
+    </p>
+</div>
+
+<div class="details-container">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Customer Details Card -->
+    <div class="detail-card">
+        <h2 class="detail-title">Customer Details</h2>
+        <div class="detail-content">
+            <div class="detail-row">
+                <span class="detail-label">Customer:</span>
+                <span class="detail-value">{{ customer.customer_name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Contact:</span>
+                <span class="detail-value">{{ customer.contact_name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Address:</span>
+                <span class="detail-value">{{ customer.address }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Location:</span>
+                <span class="detail-value">{{ customer.city }}, {{ customer.country }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value">
+                    {{ customer.get_status_display }}
+                    {% if customer.status == 'archived' %}
+                        (Archived on {{ customer.archived_date|date:"M d, Y" }})
+                    {% else %}
+                        (Last activity: {{ customer.last_activity_date|date:"M d, Y" }})
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        
+        <div class="card-actions">
+            {% if customer.status != 'archived' %}
+                <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn edit-btn" title="Edit">
+                    <i class="fas fa-pen"></i>
+                </a>
+            {% endif %}
+            <a href="{% url 'DjTraders:CustomerCreate' %}" class="action-btn view-btn" title="Create New">
+                <i class="fas fa-plus"></i>
+            </a>
+            {% if not customer.status == 'archived' %}
+                <a href="{% url 'DjTraders:CustomerArchive' pk=customer.pk %}" 
+                   class="action-btn status-btn"
+                   title="Archive Customer"
+                   onclick="return confirm('Are you sure you want to archive this customer?');">
+                    <i class="fas fa-box-archive"></i>
+                </a>
+            {% endif %}
+            <a href="{% url 'DjTraders:Customers' %}" class="action-btn return-btn" title="Return">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Orders Card -->
+    {% if customer_orders %}
+    {% for order in customer_orders %}
+    <div class="detail-card">
+        <h2 class="detail-title">
+            Order #{{ order.order_id }}
+            <span class="order-date">{{ order.order_date }}</span>
+        </h2>
+        <div class="detail-content">
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-end">Price</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in order.order_details %}
+                    <tr>
+                        <td>{{ detail.product_name }}</td>
+                        <td class="text-center">{{ detail.quantity }}</td>
+                        <td class="text-end">${{ detail.price }}</td>
+                        <td class="text-end">${{ detail.total }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="order-total">
+                        <td colspan="3" class="text-end">Order Total:</td>
+                        <td class="text-end">${{ order.order_total }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="detail-card">
+        <div class="detail-content">
+            <p class="no-orders">No orders found for this customer.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,613 @@
+/* Variables */
+:root {
+    --primary-1: #BC984E;    /* Gold primary */
+    --primary-2: #879681;    /* Sage green primary */
+    --neutral-1: #C3C6BF;    /* Light gray neutral */
+    --neutral-2: #ECE6D9;    /* Off-white neutral */
+    --accent: #23645C;       /* Teal accent */
+    --text: #33312E;         /* Dark text */
+    --white: #FFFFFF;
+    --danger: #dc3545;       /* Red for status/alerts */
+    --success: #198754;      /* Green for success states */
+    --nav-bg: #d8d4d5;       /* Navigation background */
+    --nav-text: #384d48;     /* Navigation text */
+}
+
+/* Base Styles */
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--neutral-2);
+    color: var(--text);
+}
+
+/* Navigation */
+.navbar {
+    background-color: var(--nav-bg) !important;
+}
+
+.navbar-brand, 
+.nav-link {
+    color: var(--nav-text) !important;
+}
+
+/* Page Header */
+.page-header {
+    background-color: var(--primary-2);
+    color: var(--white);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.header-subtitle {
+    opacity: 0.9;
+    margin-top: 0.5rem;
+    color: var(--white);
+}
+
+/* Headings */
+h2 {
+    color: var(--text);
+    margin: 2rem 0 1rem 0;
+    font-size: 1.5rem;
+}
+
+/* Search Container */
+.search-container {
+    margin-bottom: 1.5rem;
+}
+
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--white);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    padding: 0.5rem;
+    font-size: 1rem;
+    outline: none;
+}
+
+.price-input {
+    width: 150px;
+    padding: 0.5rem;
+    border: 1px solid var(--neutral-1);
+    border-radius: 0.25rem;
+}
+
+/* Status Filter */
+.status-filter {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-filter .filter-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background: var(--neutral-1);
+    color: var(--text);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex: 1;
+    text-align: center;
+}
+
+.status-filter .filter-btn.active {
+    background: var(--primary-2);
+    color: var(--white);
+}
+
+.status-filter .filter-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Category Links and Alphabet Links */
+.category-links,
+.alphabet-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    background: var(--white);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.category-links a,
+.alphabet-links a {
+    color: var(--accent);
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+}
+
+.category-links a:hover,
+.alphabet-links a:hover,
+.category-links a.active,
+.alphabet-links a.active {
+    text-decoration: underline;
+}
+
+/* Card Grid */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.card {
+    background: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    position: relative;
+}
+
+.card.inactive {
+    background: var(--neutral-1);
+    opacity: 0.8;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+
+.card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.card-info span {
+    display: flex;
+    align-items: baseline;
+}
+
+.card-info strong {
+    width: 100px;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* Action Buttons */
+.action-buttons,
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+    color: var(--white);
+    text-decoration: none;
+}
+
+.action-btn i {
+    text-decoration: none;
+}
+
+.view-btn { background-color: var(--accent); }
+.edit-btn { background-color: var(--primary-1); }
+.status-btn { background-color: var(--danger); }
+.create-btn { background-color: var(--primary-1); }
+.activate-btn { background-color: var(--success); }
+.save-btn { background-color: var(--accent); }
+.return-btn { background-color: var(--primary-2); }
+
+/* Forms */
+.form-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.detail-row {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--neutral-1);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 500;
+    margin-right: 1rem;
+}
+
+.detail-field input,
+.detail-field select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--neutral-1);
+    border-radius: 0.25rem;
+    font-size: 1rem;
+}
+
+/* Tables */
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.order-table th,
+.order-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--neutral-1);
+}
+
+.order-table th {
+    font-weight: 500;
+}
+
+.order-table a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.order-table a:hover {
+    text-decoration: underline;
+}
+
+/* Messages */
+.messages {
+    margin-bottom: 1rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.alert-success {
+    background-color: var(--success);
+    color: var(--white);
+}
+
+.alert-danger {
+    background-color: var(--danger);
+    color: var(--white);
+}
+
+/* Error Messages */
+.error-message {
+    color: var(--danger);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Status Related */
+.no-orders,
+.no-results {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text);
+    opacity: 0.7;
+}
+
+/* Text Utilities */
+.text-center { text-align: center; }
+.text-end { text-align: right; }
+.inline-form { display: inline; }
+
+/* Footer */
+.footer {
+    background-color: var(--nav-bg);
+    color: var(--nav-text);
+    padding: 1rem 0;
+    margin-top: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-container {
+        padding: 0 1rem;
+    }
+    
+    .category-links,
+    .alphabet-links,
+    .status-filter {
+        justify-content: center;
+    }
+
+    .status-filter {
+        flex-direction: column;
+    }
+    
+    .status-filter .filter-btn {
+        width: 100%;
+    }
+    
+    .action-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+    }
+    
+    .detail-label {
+        margin-bottom: 0.5rem;
+    }
+
+    .search-wrapper {
+        flex-direction: column;
+    }
+
+    .price-input {
+        width: 100%;
+    }
+}
+
+.search-container {
+    margin-bottom: 1.5rem;
+}
+
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--white);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    padding: 0.5rem;
+    font-size: 1rem;
+    outline: none;
+}
+
+.price-input {
+    width: 150px;
+    padding: 0.5rem;
+    border: 1px solid var(--neutral-1);
+    border-radius: 0.25rem;
+}
+
+/* Status Filter */
+.status-filter {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-filter button {
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background: var(--neutral-1);
+    color: var(--text);
+    transition: all 0.2s ease;
+    flex: 1;
+    text-align: center;
+}
+
+.status-filter button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.status-filter button.active {
+    background: var(--primary-2);
+    color: var(--white);
+}
+
+/* Category Links */
+.category-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    background: var(--white);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.category-links a {
+    color: var(--accent);
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+}
+
+.category-links a:hover,
+.category-links a.active {
+    text-decoration: underline;
+}
+
+/* Add/update these CSS styles in your style.css */
+.status-filter {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-filter .filter-btn {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background: var(--neutral-1);
+    color: var(--text);
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.status-filter .filter-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.status-filter .filter-btn.active {
+    background: var(--primary-2);
+    color: var(--white);
+}
+
+.status-filter {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-filter .filter-btn {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: var(--neutral-1);
+    color: var(--text);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.status-filter .filter-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.status-filter .filter-btn.active {
+    background: var(--primary-2);
+    color: var(--white);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filter-buttons form {
+    flex: 1;
+}
+
+.filter-btn {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: var(--neutral-1);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.filter-btn.active {
+    background: var(--primary-2);
+    color: var(--white);
+}
+
+/* Add these styles to your style.css */
+.status-links {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-btn {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background: var(--neutral-1);
+    color: var(--text);
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.status-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.status-btn.active {
+    background: var(--primary-2);
+    color: var(--white);
+}

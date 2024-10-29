@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Welcome to Django Traders</h1>
+    <p class="header-subtitle">Your one-stop solution for managing products, customers, and orders with ease.</p>
+</div>
+
+<div class="home-container">
+    <!-- Welcome Card with Image -->
+    <div class="welcome-card">
+        <img src="{% static '/images/NotesLogo.jpg'%}" alt="Django Traders Logo" class="welcome-image" />
+        <div class="welcome-content">
+            <div class="welcome-actions">
+                <a href="{% url 'DjTraders:Customers' %}" class="action-card">
+                    <h3 class="card-title">Manage Customers</h3>
+                    <p>View, add, edit, and manage your customer database. Track customer orders and contact information.</p>
+                    <div class="card-buttons">
+                        <span class="view-link" title="View Customers">
+                            <i class="fas fa-users"></i>
+                        </span>
+                        <span class="edit-link" title="Add Customer">
+                            <i class="fas fa-user-plus"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <a href="{% url 'DjTraders:Products' %}" class="action-card">
+                    <h3 class="card-title">Manage Products</h3>
+                    <p>Browse your product catalog, update pricing, and manage inventory across all categories.</p>
+                    <div class="card-buttons">
+                        <span class="view-link" title="View Products">
+                            <i class="fas fa-box"></i>
+                        </span>
+                        <span class="edit-link" title="Add Product">
+                            <i class="fas fa-plus-circle"></i>
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
