@@ -1,36 +1,33 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block content %}
-<div class="container index-page">
-    <!-- Welcome Header -->
-    <div class="page-header">
-        <h1>Welcome to Django Traders</h1>
-        <p class="header-subtitle">Your one-stop solution for managing products, customers, and orders with ease.</p>
-    </div>
+<body class="index-page">
+    <div class="container-fluid">
+        <!-- Header Section -->
+        <div class="page-header header-index">
+            <h1>Welcome to Django Traders</h1>
+            <p>Your one-stop solution for managing products, customers, and orders with ease.</p>
+        </div>
 
-    <!-- Hero Image -->
-    <div class="hero-image">
-        <img src="{% static 'images/NotesLogo.jpg' %}" alt="hero image">
-    </div>
-
-    <!-- Category Cards -->
-    <div class="category-grid">
-        <!-- Customers Category -->
-        <a href="{% url 'DjTraders:Customers' %}" class="category-card">
-            <div class="card-content">
-                <i class="fas fa-users"></i>
+        <!-- Image Section -->
+        <div class="index-image">
+            <img src="{% static 'images/NotesLogo.jpg' %}" alt="Welcome to Django Traders" class="main-image">
+        </div>
+        
+        <!-- Index-specific Category Grid for Links -->
+        <div class="index-category-grid">
+            <a href="{% url 'DjTraders:Customers' %}" class="index-category-box">
+                <i class="fas fa-user index-icon"></i>
                 <h2>Customers</h2>
                 <p>Manage your customer database with ease</p>
-            </div>
-        </a>
-        <!-- Products Category -->
-        <a href="{% url 'DjTraders:Products' %}" class="category-card">
-            <div class="card-content">
-                <i class="fas fa-box-open"></i>
+            </a>
+            <a href="{% url 'DjTraders:Products' %}" class="index-category-box">
+                <i class="fas fa-box index-icon"></i>
                 <h2>Products</h2>
                 <p>Keep track of your product inventory</p>
-            </div>
-        </a>
+            </a>
+        </div>
     </div>
-</div>
+</body>
 {% endblock %}

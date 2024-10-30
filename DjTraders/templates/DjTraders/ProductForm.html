@@ -1,92 +1,63 @@
+{% load static %}
 {% extends "base.html" %}
 
 {% block content %}
-<div class="page-header">
+<div class="page-header header-product-form">
     <h1>{% if form.instance.pk %}Update{% else %}New{% endif %} Product</h1>
 </div>
 
-<div class="form-container">
-    <div class="detail-card">
-        <form method="post" class="detail-form">
-            {% csrf_token %}
-            
-            <div class="detail-row">
-                <span class="detail-label">Product name:</span>
-                <div class="detail-field">
-                    {{ form.product_name }}
-                    {% if form.product_name.errors %}
-                        <div class="error-message">
-                            {{ form.product_name.errors|join:", " }}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="detail-row">
-                <span class="detail-label">Category:</span>
-                <div class="detail-field">
-                    {{ form.category }}
-                    {% if form.category.errors %}
-                        <div class="error-message">
-                            {{ form.category.errors|join:", " }}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="detail-row">
-                <span class="detail-label">Unit:</span>
-                <div class="detail-field">
-                    {{ form.unit }}
-                    {% if form.unit.errors %}
-                        <div class="error-message">
-                            {{ form.unit.errors|join:", " }}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="detail-row">
-                <span class="detail-label">Price:</span>
-                <div class="detail-field">
-                    {{ form.price }}
-                    {% if form.price.errors %}
-                        <div class="error-message">
-                            {{ form.price.errors|join:", " }}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <!-- Save Button -->
-                <button type="submit" class="action-btn save-btn" title="Save"
-                        onclick="return confirm('Are you sure you want to save these changes?');">
-                    <i class="fas fa-save"></i>
-                </button>
-
-                <!-- Discontinue Button (only show for existing products) -->
-                {% if product and product.status != 'discontinued' %}
-                    <a href="{% url 'DjTraders:ProductStatus' pk=product.pk %}" 
-                       class="action-btn status-btn" 
-                       title="Discontinue Product"
-                       onclick="return confirm('Are you sure you want to discontinue this product?');">
-                        <i class="fas fa-box-archive"></i>
-                    </a>
-                {% endif %}
-
-                <!-- Return Button -->
-                {% if product %}
-                    <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn return-btn" title="Return">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                {% else %}
-                    <a href="{% url 'DjTraders:Products' %}" class="action-btn return-btn" title="Return">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
+<div class="form-container form-container-product">
+    <form method="post" class="detail-form">
+        {% csrf_token %}
+        
+        <div class="detail-row detail-row-product">
+            <span class="detail-label">Product name:</span>
+            <div class="detail-field">
+                {{ form.product_name }}
+                {% if form.product_name.errors %}
+                    <div class="error-message">{{ form.product_name.errors|join:", " }}</div>
                 {% endif %}
             </div>
-        </form>
-    </div>
-</div>
-{% endblock %}
+        </div>
+
+        <div class="detail-row detail-row-product">
+            <span class="detail-label">Category:</span>
+            <div class="detail-field">
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <div class="error-message">{{ form.category.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="detail-row detail-row-product">
+            <span class="detail-label">Unit:</span>
+            <div class="detail-field">
+                {{ form.unit }}
+                {% if form.unit.errors %}
+                    <div class="error-message">{{ form.unit.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="detail-row detail-row-product">
+            <span class="detail-label">Price:</span>
+            <div class="detail-field">
+                {{ form.price }}
+                {% if form.price.errors %}
+                    <div class="error-message">{{ form.price.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="action-buttons action-buttons-product">
+            <button type="submit" class="action-btn save-btn" title="Save">
+                <i class="fas fa-save"></i> Save
+            </button>
+            {% if product %}
+                <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn return-btn" title="Return">
+                    <i class="fas fa-chevron-left"></i> Return
+                </a>
+            {% endif %}
+        </div>
+    </

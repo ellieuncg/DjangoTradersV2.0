@@ -15,6 +15,72 @@ class DJTraders {
         
         // Initialize action buttons
         this.initializeActionButtons();
+
+        // Highlight active letter in alphabetical navigation
+        this.highlightActiveLetter();
+
+        // Highlight active category in category navigation
+        this.highlightActiveCategory();
+    }
+
+    highlightActiveLetter() {
+        // Only run on the Customers page by checking the URL
+        if (!window.location.href.includes('Customers')) return;
+    
+        // Get the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedLetter = urlParams.get('letter');
+        console.log("Selected letter from URL:", selectedLetter);
+    
+        // Select all alphabetical links
+        const alphaLinks = document.querySelectorAll('.alphabet-links a');
+    
+        // Loop through each link and add active class if it matches the selected letter
+        alphaLinks.forEach(link => {
+            if (link.textContent.trim() === selectedLetter) {
+                link.classList.add('active');
+                console.log("Adding active class to:", link.textContent);
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    
+        // If no letter is selected (e.g., "All" link), apply the active class to "All"
+        if (!selectedLetter) {
+            const allLink = document.querySelector('.alphabet-links a:first-child');
+            allLink.classList.add('active');
+            console.log("Adding active class to 'All' link");
+        }
+    }
+
+    highlightActiveCategory() {
+        // Only run on the Products page by checking the URL
+        if (!window.location.href.includes('Products')) return;
+
+        // Get the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedCategory = urlParams.get('category');
+        console.log("Selected category from URL:", selectedCategory);
+
+        // Select all category links
+        const categoryLinks = document.querySelectorAll('.categories-wrapper .category-link');
+
+        // Loop through each link and add active class if it matches the selected category
+        categoryLinks.forEach(link => {
+            if (link.getAttribute('href').includes(`category=${selectedCategory}`)) {
+                link.classList.add('active');
+                console.log("Adding active class to:", link.textContent);
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // If no category is selected (e.g., "All Categories" link), apply the active class to "All Categories"
+        if (!selectedCategory) {
+            const allLink = document.querySelector('.categories-wrapper .category-link:first-child');
+            allLink.classList.add('active');
+            console.log("Adding active class to 'All Categories' link");
+        }
     }
 
     initializeTooltips() {

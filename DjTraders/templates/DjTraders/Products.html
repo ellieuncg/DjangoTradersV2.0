@@ -1,153 +1,83 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<div class="container">
-    <!-- Header with Add Product Icon -->
-    <div class="page-header">
-        <h1>Our Products</h1>
-        <a href="{% url 'DjTraders:ProductCreate' %}" class="add-product-icon" title="Add Product">
-            <i class="fas fa-plus-circle"></i>
-        </a>
-    </div>
+<div class="products-page">
+    <div class="container">
+        <div class="page-header header-products">
+            <h1>Our Products</h1>
+            <a href="{% url 'DjTraders:ProductCreate' %}" class="add-product-icon" title="Add Product">
+                <i class="fas fa-plus-circle"></i>
+            </a>
+        </div>
 
-    <!-- Search and Filter Container -->
-    <div class="search-container">
-        <!-- Search Wrapper with Inputs -->
-        <div class="search-wrapper">
+        <!-- Search Container for Products -->
+        <div class="search-container search-container-products">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" class="search-input" placeholder="Search Products" value="{{ request.GET.q }}">
-            <input type="number" id="minPrice" class="price-input" placeholder="Min Price" value="{{ request.GET.min_price }}">
-            <input type="number" id="maxPrice" class="price-input" placeholder="Max Price" value="{{ request.GET.max_price }}">
+            <input type="text" id="searchInput" placeholder="Product Name" value="{{ request.GET.q }}">
+            <input type="number" id="minPrice" placeholder="Min Price" value="{{ request.GET.min_price }}">
+            <input type="number" id="maxPrice" placeholder="Max Price" value="{{ request.GET.max_price }}">
+            <button type="submit" class="search-button search-button-products">Search</button>
+            <select class="status-select status-select-products" onchange="window.location.href=this.value">
+                <option value="{% url 'DjTraders:Products' %}" {% if not request.GET.status %}selected{% endif %}>Active Only</option>
+                <option value="{% url 'DjTraders:Products' %}?status=inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Show Inactive</option>
+                <option value="{% url 'DjTraders:Products' %}?status=all" {% if request.GET.status == 'all' %}selected{% endif %}>Show All</option>
+            </select>
         </div>
 
-        <!-- Status Filter Buttons -->
-        <div class="status-links">
-            <a href="{% url 'DjTraders:Products' %}" class="status-btn {% if not request.GET.status %}active{% endif %}">
-                Active Only
-            </a>
-            <a href="{% url 'DjTraders:Products' %}?status=inactive" class="status-btn {% if request.GET.status == 'inactive' %}active{% endif %}">
-                Show Inactive
-            </a>
-            <a href="{% url 'DjTraders:Products' %}?status=all" class="status-btn {% if request.GET.status == 'all' %}active{% endif %}">
-                Show All
-            </a>
+        <!-- Categories Wrapper for Products -->
+        <div class="categories-wrapper categories-wrapper-products">
+            <a href="{% url 'DjTraders:Products' %}" class="category-link {% if not selected_category %}active{% endif %}">All Categories</a>
+            {% for category in categories %}
+                <a href="?category={{ category.category_id }}" class="category-link {% if selected_category == category.category_id %}active{% endif %}">{{ category.category_name }}</a>
+            {% endfor %}
         </div>
-    </div>
 
-    <!-- Categories (Centered) -->
-    <div class="category-links">
-        {% for category in categories %}
-            <a href="?category={{ category.category_id }}" class="{% if selected_category == category.category_id %}active{% endif %}">
-                {{ category.category_name }}
-            </a>
-        {% endfor %}
-    </div>
-
-    <!-- Product Cards -->
-    <div class="card-grid">
-        {% for product in products %}
-        <div class="card {% if product.status != 'active' %}inactive{% endif %}">
-            <h3 class="card-title">{{ product.product_name }}</h3>
-            <div class="card-info">
-                <span><strong>Category:</strong> {{ product.category.category_name }}</span>
-                <span><strong>Unit:</strong> {{ product.unit }}</span>
-                <span><strong>Price:</strong> ${{ product.price }}</span>
-                {% if product.status != 'active' %}
-                    <span><strong>Status:</strong> {{ product.get_status_display }}</span>
-                {% endif %}
+        <!-- Product Card Grid -->
+        <div class="card-grid card-grid-products">
+            {% for product in products %}
+            <div class="card card-products {% if product.status != 'active' %}inactive{% endif %}">
+                <h3 class="card-title">{{ product.product_name }}</h3>
+                <div class="card-info">
+                    <span><strong>Category:</strong> {{ product.category.category_name }}</span>
+                    <span><strong>Unit:</strong> {{ product.unit }}</span>
+                    <span><strong>Price:</strong> ${{ product.price }}</span>
+                    {% if product.status != 'active' %}
+                        <span><strong>Status:</strong> {{ product.get_status_display }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-actions card-actions-products">
+                    <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn view-btn" title="View">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn edit-btn" title="Edit">
+                        <i class="fas fa-pen"></i> Edit
+                    </a>
+                    {% if product.status == 'active' %}
+                        <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="inactive">
+                            <button type="submit" class="action-btn delete-btn" title="Archive">
+                                <i class="fas fa-archive"></i> Archive
+                            </button>
+                        </form>
+                    {% elif product.status == 'inactive' %}
+                        <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="active">
+                            <button type="submit" class="action-btn delete-btn" title="Unarchive">
+                                <i class="fas fa-box-open"></i> Unarchive
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
             </div>
-            <div class="card-actions">
-                <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn view-btn" title="View">
-                    <i class="fas fa-search"></i>
-                </a>
-                <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn edit-btn" title="Edit">
-                    <i class="fas fa-pencil-alt"></i>
-                </a>
-                {% if product.status == 'active' %}
-                    <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="status" value="inactive">
-                        <button type="submit" class="action-btn status-btn" title="Archive" 
-                                onclick="return confirm('Are you sure you want to archive this product?');">
-                            <i class="fas fa-archive"></i>
-                        </button>
-                    </form>
-                {% elif product.status == 'inactive' %}
-                    <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="status" value="active">
-                        <button type="submit" class="action-btn unarchive-btn" title="Unarchive" 
-                                onclick="return confirm('Are you sure you want to unarchive this product?');">
-                            <i class="fas fa-box-open"></i>
-                        </button>
-                    </form>
-                {% endif %}
+            {% empty %}
+            <div class="no-results">
+                <p>No products found matching your criteria.</p>
             </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="no-results">
-            <p>No products found matching your criteria.</p>
-        </div>
-        {% endfor %}
     </div>
 </div>
-
-<!-- JavaScript for Search and Filters -->
-<script>
-document.getElementById('searchInput').addEventListener('input', function(e) {
-    let searchQuery = e.target.value.toLowerCase();
-    let currentUrl = new URL(window.location.href);
-    
-    if (searchQuery) {
-        currentUrl.searchParams.set('q', searchQuery);
-    } else {
-        currentUrl.searchParams.delete('q');
-    }
-    
-    window.location.href = currentUrl.toString();
-});
-
-document.getElementById('minPrice').addEventListener('change', function(e) {
-    let minPrice = e.target.value;
-    let currentUrl = new URL(window.location.href);
-    
-    if (minPrice) {
-        currentUrl.searchParams.set('min_price', minPrice);
-    } else {
-        currentUrl.searchParams.delete('min_price');
-    }
-    
-    window.location.href = currentUrl.toString();
-});
-
-document.getElementById('maxPrice').addEventListener('change', function(e) {
-    let maxPrice = e.target.value;
-    let currentUrl = new URL(window.location.href);
-    
-    if (maxPrice) {
-        currentUrl.searchParams.set('max_price', maxPrice);
-    } else {
-        currentUrl.searchParams.delete('max_price');
-    }
-    
-    window.location.href = currentUrl.toString();
-});
-
-window.addEventListener('load', function() {
-    let urlParams = new URLSearchParams(window.location.search);
-    let searchQuery = urlParams.get('q');
-    let minPrice = urlParams.get('min_price');
-    let maxPrice = urlParams.get('max_price');
-    
-    if (searchQuery) {
-        document.getElementById('searchInput').value = searchQuery;
-    }
-    if (minPrice) {
-        document.getElementById('minPrice').value = minPrice;
-    }
-    if (maxPrice) {
-        document.getElementById('maxPrice').value = maxPrice;
-    }
-});
-</script>
 {% endblock %}

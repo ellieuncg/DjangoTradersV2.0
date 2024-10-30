@@ -1,68 +1,64 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<div class="container">
-    <!-- Header with Add Customer Icon -->
-    <div class="page-header">
-        <h1>Our Customers</h1>
-        <a href="{% url 'DjTraders:CustomerCreate' %}" class="add-product-icon" title="Add Customer">
-            <i class="fas fa-plus-circle"></i>
-        </a>
-    </div>
-
-    <!-- Search Box and Status Filters -->
-    <div class="search-container">
-        <i class="fas fa-search"></i>
-        <input type="text" name="customer" class="search-input" placeholder="Customer Name" value="{{ customer_query }}">
-        <input type="text" name="contact" class="search-input" placeholder="Contact" value="{{ contact_query }}">
-        <input type="text" name="city" class="search-input" placeholder="City" value="{{ city_query }}">
-        <input type="text" name="country" class="search-input" placeholder="Country" value="{{ country_query }}">
-        <button type="submit" class="search-button">Search</button>
-    </div>
-
-    <div class="status-links">
-        <a href="{% url 'DjTraders:Customers' %}" class="status-btn active">Active Only</a>
-        <a href="{% url 'DjTraders:Customers' %}?status=inactive" class="status-btn">Show Inactive</a>
-        <a href="{% url 'DjTraders:Customers' %}?status=all" class="status-btn">Show All</a>
-    </div>
-
-    <!-- Alphabet Filter -->
-    <div class="alphabet-links">
-        <a href="{% url 'DjTraders:Customers' %}" 
-           class="{% if not request.GET.letter %}active{% endif %}">
-            All
-        </a>
-        {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
-            <a href="?letter={{ letter }}" 
-               class="{% if request.GET.letter == letter %}active{% endif %}">
-                {{ letter }}
-            </a>
-        {% endfor %}
-    </div>
-
-    <!-- Customer Cards -->
-    <div class="card-grid">
-        {% for customer in customers %}
-        <div class="card">
-            <h3 class="card-title">{{ customer.customer_name }}</h3>
-            <div class="card-info">
-                <span><strong>Contact:</strong> {{ customer.contact_name }}</span>
-                <span><strong>City:</strong> {{ customer.city }}</span>
-                <span><strong>Country:</strong> {{ customer.country }}</span>
-            </div>
-            <div class="card-actions">
-                <a href="{% url 'DjTraders:CustomerDetail' pk=customer.pk %}" class="action-btn view-btn" title="View">
-                    <i class="fas fa-search"></i>
-                </a>
-                <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn edit-btn" title="Edit">
-                    <i class="fas fa-pencil-alt"></i>
-                </a>
-                <a href="{% url 'DjTraders:CustomerStatus' pk=customer.pk %}" class="action-btn delete-btn" title="Delete">
-                    <i class="fas fa-trash-alt"></i>
-                </a>
-            </div>
+<div class="customers-page">
+    <div class="container">
+        <div class="page-header">
+            <h1>Our Customers</h1>
         </div>
-        {% endfor %}
+        
+        <!-- Search Bar and Filter -->
+        <form method="get" class="search-container-customers">
+            <i class="fas fa-search"></i>
+            <input type="text" name="customer" placeholder="Customer Name" value="{{ customer_query }}">
+            <input type="text" name="contact" placeholder="Contact" value="{{ contact_query }}">
+            <input type="text" name="city" placeholder="City" value="{{ city_query }}">
+            <input type="text" name="country" placeholder="Country" value="{{ country_query }}">
+            <button type="submit" class="search-button-customers">Search</button>
+            <select name="status" class="status-select">
+                <option {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                <option {% if status_filter == 'inactive' %}selected{% endif %}>Show Inactive</option>
+                <option {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
+            </select>
+        </form>
+
+        <!-- Alphabet Filter -->
+        <div class="alphabet-links-customers">
+            <a href="?letter=All" class="{% if selected_letter == 'All' %}active{% endif %}">All</a>
+            {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                <a href="?letter={{ letter }}" class="{% if selected_letter == letter %}active{% endif %}">{{ letter }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- Customer Card Grid -->
+        <div class="card-grid-customers">
+            {% for customer in customers %}
+            <div class="card-customers">
+                <h3 class="card-title">{{ customer.name }}</h3>
+                <div class="card-info">
+                    <p><strong>Contact:</strong> {{ customer.contact_name }}</p>
+                    <p><strong>Address:</strong> {{ customer.address }}</p>
+                    <p><strong>City:</strong> {{ customer.city }}</p>
+                    <p><strong>Country:</strong> {{ customer.country }}</p>
+                    <p><strong>Status:</strong> {{ customer.status }}</p>
+                </div>
+                <div class="card-actions-customers">
+                    <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn-customers edit-btn" title="Edit">
+                        <i class="fas fa-pen"></i> Edit
+                    </a>
+                    <a href="{% url 'DjTraders:CustomerDetail' pk=customer.pk %}" class="action-btn-customers view-btn" title="View">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    <a href="{% url 'DjTraders:Customers' %}" class="action-btn-customers return-btn" title="Return">
+                        <i class="fas fa-chevron-left"></i> Return
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <p>No customers found.</p>
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}
