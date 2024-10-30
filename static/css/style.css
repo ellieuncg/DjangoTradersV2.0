@@ -1,45 +1,48 @@
-/* Variables */
+/* Base Styles */
 :root {
-    --primary-1: #BC984E;    /* Gold primary */
-    --primary-2: #879681;    /* Sage green primary */
-    --neutral-1: #C3C6BF;    /* Light gray neutral */
-    --neutral-2: #ECE6D9;    /* Off-white neutral */
-    --accent: #23645C;       /* Teal accent */
-    --text: #33312E;         /* Dark text */
-    --white: #FFFFFF;
-    --danger: #dc3545;       /* Red for status/alerts */
-    --success: #198754;      /* Green for success states */
-    --nav-bg: #d8d4d5;       /* Navigation background */
-    --nav-text: #384d48;     /* Navigation text */
+    --primary-color: #879681;
+    --secondary-color: #BC984E;
+    --background-color: #ECE6D9;
+    --text-color: #33312E;
+    --card-background: #FFFFFF;
+    --accent-color: #23645C;
+    --neutral-light: #D8D4D5;
+    --neutral-dark: #384d48;
+    --success-color: #198754;
+    --danger-color: #dc3545;
 }
 
-/* Base Styles */
 body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: var(--neutral-2);
-    color: var(--text);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
 }
 
-/* Navigation */
+/* Navbar */
 .navbar {
-    background-color: var(--nav-bg) !important;
+    background-color: var(--neutral-light);
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.navbar-brand, 
-.nav-link {
-    color: var(--nav-text) !important;
+.navbar a {
+    color: var(--neutral-dark);
+    text-decoration: none;
+    font-weight: bold;
 }
 
-/* Page Header */
+/* Header and Page Titles */
 .page-header {
-    background-color: var(--primary-2);
-    color: var(--white);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
+    background-color: var(--primary-color);
+    color: var(--card-background);
+    padding: 1rem 2rem;
     border-radius: 0.5rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
 .page-header h1 {
@@ -47,567 +50,217 @@ body {
     font-size: 2rem;
 }
 
-.header-subtitle {
-    opacity: 0.9;
-    margin-top: 0.5rem;
-    color: var(--white);
-}
-
-/* Headings */
-h2 {
-    color: var(--text);
-    margin: 2rem 0 1rem 0;
+.page-header a {
+    color: var(--secondary-color);
     font-size: 1.5rem;
+    text-decoration: none;
 }
 
-/* Search Container */
+/* General Button Styles */
+button, .status-btn, .search-button, .action-btn {
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 0.3rem;
+    transition: background-color 0.3s;
+}
+
+.status-btn.active, .status-btn:hover, .search-button:hover {
+    background-color: var(--accent-color);
+    color: var(--card-background);
+}
+
+.action-btn {
+    background-color: var(--secondary-color);
+    color: var(--card-background);
+}
+
+.action-btn:hover {
+    background-color: var(--accent-color);
+}
+
+.search-button {
+    background-color: var(--secondary-color);
+    color: var(--card-background);
+}
+
+/* Card Styles */
+.card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.card {
+    background: var(--card-background);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 300px;
+}
+
+.card h3 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    color: var(--text-color);
+}
+
+.card-info span {
+    display: block;
+    color: var(--text-color);
+    margin-bottom: 0.3rem;
+}
+
+.card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* Icon Styles */
+.card-actions i, .page-header i, .search-wrapper i {
+    color: var(--accent-color);
+}
+
+.card-actions .action-btn.view-btn {
+    background-color: var(--accent-color);
+}
+
+.card-actions .action-btn.edit-btn {
+    background-color: var(--primary-color);
+}
+
+.card-actions .action-btn.status-btn, .card-actions .action-btn.unarchive-btn {
+    background-color: var(--danger-color);
+}
+
+/* Specific Styles for index.html */
+.index-page .hero-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+}
+
+.index-page .category-grid {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.index-page .category-card {
+    text-decoration: none;
+    color: var(--text-color);
+    background: var(--card-background);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+}
+
+.index-page .category-card i {
+    font-size: 2rem;
+    color: var(--secondary-color);
+}
+
+.index-page .category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Specific Styles for products.html */
 .search-container {
-    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1rem;
 }
 
 .search-wrapper {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--white);
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 0.5rem;
+    background-color: var(--card-background);
+    border-radius: 0.3rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.search-input {
-    flex: 1;
+.search-input, .price-input {
     border: none;
-    padding: 0.5rem;
-    font-size: 1rem;
     outline: none;
+    font-size: 0.9rem;
+    padding: 0.4rem;
 }
 
-.price-input {
-    width: 150px;
-    padding: 0.5rem;
-    border: 1px solid var(--neutral-1);
-    border-radius: 0.25rem;
-}
-
-/* Status Filter */
-.status-filter {
+.status-links {
     display: flex;
-    gap: 0.5rem;
-    margin: 1rem 0;
-    padding: 0.5rem;
-    background: var(--white);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    gap: 1rem;
+    margin-top: 0.5rem;
+    align-items: center;
 }
 
-.status-filter .filter-btn {
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    background: var(--neutral-1);
-    color: var(--text);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    flex: 1;
-    text-align: center;
-}
-
-.status-filter .filter-btn.active {
-    background: var(--primary-2);
-    color: var(--white);
-}
-
-.status-filter .filter-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-/* Category Links and Alphabet Links */
-.category-links,
+/* Specific Styles for customers.html */
 .alphabet-links {
+    margin-top: 1rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin: 1rem 0;
-    background: var(--white);
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.category-links a,
 .alphabet-links a {
-    color: var(--accent);
+    color: var(--text-color);
     text-decoration: none;
-    padding: 0.25rem 0.5rem;
 }
 
-.category-links a:hover,
-.alphabet-links a:hover,
-.category-links a.active,
-.alphabet-links a.active {
+.alphabet-links a:hover {
+    color: var(--accent-color);
     text-decoration: underline;
 }
 
-/* Card Grid */
-.card-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    padding: 1.5rem;
-}
-
-.card {
-    background: var(--white);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    padding: 1.5rem;
-    position: relative;
-}
-
-.card.inactive {
-    background: var(--neutral-1);
-    opacity: 0.8;
-}
-
-.card-title {
-    font-size: 1.25rem;
-    font-weight: 500;
-    margin-bottom: 1rem;
-    color: var(--text);
-}
-
-.card-info {
+/* Product Details and Order History alignment */
+.product-details, .order-history {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.card-info span {
-    display: flex;
-    align-items: baseline;
-}
-
-.card-info strong {
-    width: 100px;
-    display: inline-block;
-    flex-shrink: 0;
-}
-
-/* Action Buttons */
-.action-buttons,
-.card-actions {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-    margin-top: 1rem;
-}
-
-.action-btn {
-    width: 36px;
-    height: 36px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.25rem;
-    border: none;
-    color: var(--white);
-    cursor: pointer;
-    transition: transform 0.2s ease;
-    text-decoration: none;
-}
-
-.action-btn:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
-    color: var(--white);
-    text-decoration: none;
-}
-
-.action-btn i {
-    text-decoration: none;
-}
-
-.view-btn { background-color: var(--accent); }
-.edit-btn { background-color: var(--primary-1); }
-.status-btn { background-color: var(--danger); }
-.create-btn { background-color: var(--primary-1); }
-.activate-btn { background-color: var(--success); }
-.save-btn { background-color: var(--accent); }
-.return-btn { background-color: var(--primary-2); }
-
-/* Forms */
-.form-container {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.detail-row {
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--neutral-1);
-}
-
-.detail-row:last-child {
-    border-bottom: none;
-}
-
-.detail-label {
-    font-weight: 500;
-    margin-right: 1rem;
-}
-
-.detail-field input,
-.detail-field select {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid var(--neutral-1);
-    border-radius: 0.25rem;
-    font-size: 1rem;
-}
-
-/* Tables */
-.order-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.order-table th,
-.order-table td {
-    padding: 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid var(--neutral-1);
-}
-
-.order-table th {
-    font-weight: 500;
-}
-
-.order-table a {
-    color: var(--accent);
-    text-decoration: none;
-}
-
-.order-table a:hover {
-    text-decoration: underline;
-}
-
-/* Messages */
-.messages {
-    margin-bottom: 1rem;
-}
-
-.alert {
+    margin: 1rem;
     padding: 1rem;
-    border-radius: 0.25rem;
-    margin-bottom: 0.5rem;
+    background: var(--card-background);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.alert-success {
-    background-color: var(--success);
-    color: var(--white);
+.order-history {
+    flex: 1;
 }
 
-.alert-danger {
-    background-color: var(--danger);
-    color: var(--white);
-}
-
-/* Error Messages */
-.error-message {
-    color: var(--danger);
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-/* Status Related */
-.no-orders,
-.no-results {
-    text-align: center;
-    padding: 2rem;
-    color: var(--text);
-    opacity: 0.7;
-}
-
-/* Text Utilities */
-.text-center { text-align: center; }
-.text-end { text-align: right; }
-.inline-form { display: inline; }
-
-/* Footer */
-.footer {
-    background-color: var(--nav-bg);
-    color: var(--nav-text);
-    padding: 1rem 0;
-    margin-top: 2rem;
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .card-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
-    .card-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-container {
-        padding: 0 1rem;
-    }
-    
-    .category-links,
-    .alphabet-links,
-    .status-filter {
-        justify-content: center;
+    .page-header h1 {
+        font-size: 1.5rem;
     }
 
-    .status-filter {
+    .status-links, .search-container, .alphabet-links, .category-grid, .card-grid {
         flex-direction: column;
+        align-items: center;
     }
-    
-    .status-filter .filter-btn {
-        width: 100%;
-    }
-    
-    .action-buttons {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .detail-row {
-        flex-direction: column;
-    }
-    
-    .detail-label {
-        margin-bottom: 0.5rem;
+
+    .card-grid .card, .index-page .category-card {
+        max-width: 100%;
+        width: 90%;
     }
 
     .search-wrapper {
         flex-direction: column;
     }
 
-    .price-input {
-        width: 100%;
+    .page-header, .category-grid {
+        padding: 1rem;
     }
-}
-
-.search-container {
-    margin-bottom: 1.5rem;
-}
-
-.search-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--white);
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.search-input {
-    flex: 1;
-    border: none;
-    padding: 0.5rem;
-    font-size: 1rem;
-    outline: none;
-}
-
-.price-input {
-    width: 150px;
-    padding: 0.5rem;
-    border: 1px solid var(--neutral-1);
-    border-radius: 0.25rem;
-}
-
-/* Status Filter */
-.status-filter {
-    display: flex;
-    gap: 0.5rem;
-    margin: 1rem 0;
-    padding: 0.5rem;
-    background: var(--white);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.status-filter button {
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    background: var(--neutral-1);
-    color: var(--text);
-    transition: all 0.2s ease;
-    flex: 1;
-    text-align: center;
-}
-
-.status-filter button:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.status-filter button.active {
-    background: var(--primary-2);
-    color: var(--white);
-}
-
-/* Category Links */
-.category-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 1rem 0;
-    background: var(--white);
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.category-links a {
-    color: var(--accent);
-    text-decoration: none;
-    padding: 0.25rem 0.5rem;
-}
-
-.category-links a:hover,
-.category-links a.active {
-    text-decoration: underline;
-}
-
-/* Add/update these CSS styles in your style.css */
-.status-filter {
-    display: flex;
-    gap: 0.5rem;
-    margin: 1rem 0;
-    padding: 0.5rem;
-    background: var(--white);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.status-filter .filter-btn {
-    flex: 1;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    background: var(--neutral-1);
-    color: var(--text);
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.2s ease;
-}
-
-.status-filter .filter-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.status-filter .filter-btn.active {
-    background: var(--primary-2);
-    color: var(--white);
-}
-
-.status-filter {
-    display: flex;
-    gap: 0.5rem;
-    margin: 1rem 0;
-    padding: 0.5rem;
-    background: var(--white);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.status-filter .filter-btn {
-    flex: 1;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.25rem;
-    background: var(--neutral-1);
-    color: var(--text);
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s ease;
-}
-
-.status-filter .filter-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.status-filter .filter-btn.active {
-    background: var(--primary-2);
-    color: var(--white);
-}
-
-.filter-buttons {
-    display: flex;
-    gap: 1rem;
-    margin: 1rem 0;
-    padding: 1rem;
-    background: var(--white);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.filter-buttons form {
-    flex: 1;
-}
-
-.filter-btn {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.25rem;
-    background: var(--neutral-1);
-    color: var(--text);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.filter-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.filter-btn.active {
-    background: var(--primary-2);
-    color: var(--white);
-}
-
-/* Add these styles to your style.css */
-.status-links {
-    display: flex;
-    gap: 0.5rem;
-    margin: 1rem 0;
-    padding: 0.5rem;
-    background: var(--white);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.status-btn {
-    flex: 1;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    background: var(--neutral-1);
-    color: var(--text);
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.2s ease;
-}
-
-.status-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-    text-decoration: none;
-}
-
-.status-btn.active {
-    background: var(--primary-2);
-    color: var(--white);
 }

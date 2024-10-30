@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, ListView
-from django.db.models import Q
+from django.views.generic.edit import UpdateView  # Add this import
+from django.db.models import Q, Sum
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils import timezone
@@ -17,23 +18,35 @@ class DjTradersCustomersView(ListView):
 
     def get_queryset(self):
         queryset = Customer.objects.all()
-        query = self.request.GET.get('q', '')
+        
+        # Get search parameters
+        customer_query = self.request.GET.get('customer', '')
+        contact_query = self.request.GET.get('contact', '')
+        city_query = self.request.GET.get('city', '')
+        country_query = self.request.GET.get('country', '')
         letter = self.request.GET.get('letter', '')
         status = self.request.GET.get('status', '')
 
-        if query:
-            queryset = queryset.filter(
-                Q(customer_name__icontains=query) |
-                Q(contact_name__icontains=query) |
-                Q(city__icontains=query) |
-                Q(country__icontains=query)
-            )
+        # Apply search filters
+        if customer_query:
+            queryset = queryset.filter(customer_name__icontains=customer_query)
         
+        if contact_query:
+            queryset = queryset.filter(contact_name__icontains=contact_query)
+        
+        if city_query:
+            queryset = queryset.filter(city__icontains=city_query)
+        
+        if country_query:
+            queryset = queryset.filter(country__icontains=country_query)
+
+        # Apply letter filter
         if letter:
             queryset = queryset.filter(customer_name__istartswith=letter)
-            
+        
+        # Apply status filter
         if status == 'inactive':
-            queryset = queryset.filter(status='inactive')
+            queryset = queryset.filter(Q(status='inactive') | Q(status='archived'))
         elif status == 'all':
             pass  # Show all customers
         else:
@@ -43,9 +56,13 @@ class DjTradersCustomersView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('q', '')
-        context['active_letter'] = self.request.GET.get('letter', '')
-        context['status_filter'] = self.request.GET.get('status', '')
+        # Add search queries to context for form repopulation
+        context.update({
+            'customer_query': self.request.GET.get('customer', ''),
+            'contact_query': self.request.GET.get('contact', ''),
+            'city_query': self.request.GET.get('city', ''),
+            'country_query': self.request.GET.get('country', '')
+        })
         return context
 
 class DjTradersProductsView(ListView):
@@ -71,17 +88,23 @@ class DjTradersProductsView(ListView):
             queryset = queryset.filter(category_id=category)
             
         if min_price:
-            queryset = queryset.filter(price__gte=min_price)
+            try:
+                queryset = queryset.filter(price__gte=float(min_price))
+            except ValueError:
+                pass
         
         if max_price:
-            queryset = queryset.filter(price__lte=max_price)
+            try:
+                queryset = queryset.filter(price__lte=float(max_price))
+            except ValueError:
+                pass
             
         if status == 'inactive':
-            queryset = queryset.filter(status='discontinued')
+            queryset = queryset.filter(Q(status='inactive') | Q(status='discontinued'))
         elif status == 'all':
             pass  # Show all products
         else:
-            queryset = queryset.filter(status='active')  # Default: show only active
+            queryset = queryset.filter(status='active')  # Default
         
         return queryset.order_by('product_name')
 
@@ -127,6 +150,28 @@ class DjTradersCustomerDetailView(DetailView):
             )
         } for order in orders]
 
+class DjTradersProductDetailView(DetailView):
+    model = Product
+    template_name = 'DjTraders/ProductDetail.html'
+    context_object_name = 'product'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        order_details = OrderDetail.objects.filter(product=product).order_by('-order__order_date')
+        
+        order_details_with_total = []
+        for detail in order_details:
+            order_details_with_total.append({
+                'order': detail.order,
+                'quantity': detail.quantity,
+                'total': detail.quantity * product.price
+            })
+        
+        context['order_details'] = order_details_with_total
+        context['orders_count'] = len(order_details_with_total)
+        return context
+
 def create_customer(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
@@ -163,38 +208,6 @@ def update_customer_status(request, pk):
             messages.success(request, f'Customer status updated to {new_status}.')
     return redirect('DjTraders:Customers')
 
-def archive_customer(request, pk):
-    customer = get_object_or_404(Customer, pk=pk)
-    if customer.should_be_archived():
-        customer.archive()
-        messages.success(request, f'Customer "{customer.customer_name}" has been archived.')
-    else:
-        messages.warning(request, 
-            f'Customer cannot be archived yet. Only {customer.days_inactive} days inactive out of required 365.')
-    return redirect('DjTraders:CustomerDetail', pk=pk)
-
-class DjTradersProductDetailView(DetailView):
-    model = Product
-    template_name = 'DjTraders/ProductDetail.html'
-    context_object_name = 'product'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        product = self.get_object()
-        order_details = OrderDetail.objects.filter(product=product).order_by('-order__order_date')
-        
-        order_details_with_total = []
-        for detail in order_details:
-            order_details_with_total.append({
-                'order': detail.order,
-                'quantity': detail.quantity,
-                'total': detail.quantity * product.price
-            })
-        
-        context['order_details'] = order_details_with_total
-        context['orders_count'] = len(order_details_with_total)
-        return context
-
 def create_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST)
@@ -222,12 +235,24 @@ def update_product(request, pk):
     })
 
 def update_product_status(request, pk):
-    if request.method == 'POST' or request.method == 'GET':
+    if request.method == 'POST':
         product = get_object_or_404(Product, pk=pk)
-        if product.status != 'discontinued':
-            product.status = 'discontinued'
+        new_status = request.POST.get('status')
+        if new_status in ['active', 'inactive', 'discontinued']:
+            product.status = new_status
             product.save()
-            messages.success(request, f'Product "{product.product_name}" has been discontinued.')
-        else:
-            messages.warning(request, f'Product "{product.product_name}" is already discontinued.')
+            messages.success(request, f'Product status updated to {new_status}.')
     return redirect('DjTraders:Products')
+
+class CustomerArchiveView(UpdateView):
+    model = Customer
+    fields = []
+    template_name = 'DjTraders/customer_detail.html'
+    
+    def form_valid(self, form):
+        customer = self.get_object()
+        customer.status = 'archived'
+        customer.archived_date = timezone.now()
+        customer.save()
+        messages.success(self.request, f'Customer {customer.customer_name} has been archived.')
+        return redirect('DjTraders:CustomerDetail', pk=customer.pk)

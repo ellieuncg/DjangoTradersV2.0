@@ -50,6 +50,12 @@ class Customer(models.Model):
         self.archived_date = timezone.now()
         self.save()
         
+    def unarchive(self):
+        self.status = 'active'
+        self.archived_date = None
+        self.last_activity_date = timezone.now()
+        self.save()
+        
     @property
     def days_inactive(self):
         return (timezone.now() - self.last_activity_date).days
@@ -57,14 +63,12 @@ class Customer(models.Model):
 class Product(models.Model):
     STATUS_CHOICES = [
         ('active', 'Active'),
-        ('discontinued', 'Discontinued')
+        ('inactive', 'Inactive')
     ]
     
     product_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=255)
-    category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, related_name='products'
-    )
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     unit = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='active')
@@ -77,9 +81,7 @@ class Product(models.Model):
 
 class Order(models.Model):
     order_id = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(
-        Customer, on_delete=models.CASCADE, related_name='orders'
-    )
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders')
     order_date = models.DateField()
 
     class Meta:
@@ -90,12 +92,8 @@ class Order(models.Model):
 
 class OrderDetail(models.Model):
     order_detail_id = models.AutoField(primary_key=True)
-    order = models.ForeignKey(
-        Order, on_delete=models.CASCADE, related_name='orderdetails'
-    )
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name='orderdetails'
-    )
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='orderdetails')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='orderdetails')
     quantity = models.PositiveIntegerField()
 
     class Meta:

@@ -1,79 +1,78 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="page-header">
-    <h1>{{ product.product_name }}</h1>
-    <span class="header-subtitle">Status: {{ product.get_status_display }}</span>
+<div class="page-header" style="background-color: var(--primary-color); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+    <h1 style="color: white; margin: 0; font-size: 2rem;">{{ product.product_name }}</h1>
+    <div style="background-color: var(--accent-color); padding: 0.5rem 1rem; border-radius: 0.3rem; color: white;">
+        Status: {{ product.get_status_display }}
+    </div>
 </div>
 
-<div class="card">
-    <h2>Product Details</h2>
-
-    <div class="detail-row">
-        <span class="detail-label">Category:</span>
-        <span class="detail-field">{{ product.category.category_name }}</span>
-    </div>
+<div style="background-color: white; border-radius: 0.5rem; padding: 2rem; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="margin-top: 0; color: var(--text-color); font-size: 1.5rem;">Product Details</h2>
     
-    <div class="detail-row">
-        <span class="detail-label">Unit:</span>
-        <span class="detail-field">{{ product.unit }}</span>
-    </div>
-    
-    <div class="detail-row">
-        <span class="detail-label">Price:</span>
-        <span class="detail-field">${{ product.price }}</span>
-    </div>
-    
-    <div class="detail-row">
-        <span class="detail-label">Status:</span>
-        <span class="detail-field">{{ product.get_status_display }}</span>
+    <div style="margin-bottom: 1rem;">
+        <div style="margin-bottom: 0.5rem;">
+            <strong>Category:</strong> {{ product.category.category_name }}
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+            <strong>Unit:</strong> {{ product.unit }}
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+            <strong>Price:</strong> ${{ product.price }}
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <strong>Status:</strong> {{ product.get_status_display }}
+        </div>
     </div>
 
-    <div style="background-color: var(--neutral-1); padding: 0.5rem; border-radius: 0.25rem; margin-top: 1rem; display: flex; justify-content: space-between;">
-        <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn" style="background-color: var(--primary-1);">
-            <i class="fas fa-pen"></i>
+    <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" 
+           style="background-color: var(--primary-color); padding: 0.5rem 1rem; border-radius: 0.3rem; border: none; cursor: pointer;">
+            <i class="fas fa-pen" style="color: white;"></i>
         </a>
         
         <a href="{% url 'DjTraders:ProductStatus' pk=product.pk %}" 
-           class="action-btn"
-           style="background-color: var(--neutral-1);"
+           style="background-color: var(--danger-color); padding: 0.5rem 1rem; border-radius: 0.3rem; border: none; cursor: pointer;"
            onclick="return confirm('Are you sure you want to discontinue this product?');">
-            <i class="fas fa-trash"></i>
+            <i class="fas fa-trash" style="color: white;"></i>
         </a>
         
-        <a href="{% url 'DjTraders:Products' %}" class="action-btn" style="background-color: var(--primary-2);">
-            <i class="fas fa-chevron-left"></i>
+        <a href="{% url 'DjTraders:Products' %}" 
+           style="background-color: var(--accent-color); padding: 0.5rem 1rem; border-radius: 0.3rem; border: none; cursor: pointer;">
+            <i class="fas fa-chevron-left" style="color: white;"></i>
         </a>
     </div>
 </div>
 
-<div class="card">
-    <h2>Order History</h2>
+<div style="background-color: white; border-radius: 0.5rem; padding: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="margin-top: 0; color: var(--text-color); font-size: 1.5rem;">Order History</h2>
     
-    <table class="order-table">
+    <table style="width: 100%; border-collapse: collapse;">
         <thead>
             <tr>
-                <th>Customer</th>
-                <th>Order Date</th>
-                <th>Quantity</th>
-                <th>Total</th>
+                <th style="text-align: left; padding: 0.5rem 0;">Customer</th>
+                <th style="text-align: left; padding: 0.5rem 0;">Order Date</th>
+                <th style="text-align: left; padding: 0.5rem 0;">Quantity</th>
+                <th style="text-align: left; padding: 0.5rem 0;">Total</th>
             </tr>
         </thead>
         <tbody>
             {% for detail in order_details %}
             <tr>
-                <td>
-                    <a href="{% url 'DjTraders:CustomerDetail' pk=detail.order.customer.pk %}">
+                <td style="padding: 0.5rem 0;">
+                    <a href="{% url 'DjTraders:CustomerDetail' pk=detail.order.customer.pk %}" 
+                       style="color: var(--accent-color); text-decoration: none;">
                         {{ detail.order.customer.customer_name }}
                     </a>
                 </td>
-                <td>{{ detail.order.order_date }}</td>
-                <td>{{ detail.quantity }}</td>
-                <td>${{ detail.total }}</td>
+                <td style="padding: 0.5rem 0;">{{ detail.order.order_date }}</td>
+                <td style="padding: 0.5rem 0;">{{ detail.quantity }}</td>
+                <td style="padding: 0.5rem 0;">${{ detail.total }}</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="4" class="no-orders">No orders found for this product.</td>
+                <td colspan="4" style="padding: 1rem 0; text-align: center;">No orders found for this product.</td>
             </tr>
             {% endfor %}
         </tbody>

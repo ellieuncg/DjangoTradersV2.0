@@ -1,52 +1,36 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block content %}
-<div class="page-header">
-    <div>
+<div class="container index-page">
+    <!-- Welcome Header -->
+    <div class="page-header">
         <h1>Welcome to Django Traders</h1>
         <p class="header-subtitle">Your one-stop solution for managing products, customers, and orders with ease.</p>
     </div>
-</div>
 
-<!-- Main white container -->
-<div class="card" style="padding: 0; overflow: hidden;">
-    <!-- Cropped image section -->
-    <div style="margin-bottom: 2rem;">
-        <img src="{% static 'images/NotesLogo.jpg' %}" alt="Laptop with sticky notes" style="width: 100%; height: 300px; object-fit: cover; object-position: center;">
+    <!-- Hero Image -->
+    <div class="hero-image">
+        <img src="{% static 'images/NotesLogo.jpg' %}" alt="hero image">
     </div>
 
-    <!-- Management sections in white background -->
-    <div style="padding: 1rem;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <!-- Manage Customers section -->
-            <div style="background-color: var(--neutral-2); padding: 1.5rem; border-radius: 0.5rem;">
-                <h2 style="color: var(--text); font-size: 1.25rem; margin-bottom: 1rem;">Manage Customers</h2>
-                <p style="margin-bottom: 1.5rem;">View, add, edit, and manage your customer database. Track customer orders and contact information.</p>
-                <div class="card-actions">
-                    <a href="{% url 'DjTraders:Customers' %}" class="action-btn view-btn">
-                        <i class="fas fa-users"></i>
-                    </a>
-                    <a href="{% url 'DjTraders:CustomerCreate' %}" class="action-btn create-btn">
-                        <i class="fas fa-user-plus"></i>
-                    </a>
-                </div>
+    <!-- Category Cards -->
+    <div class="category-grid">
+        <!-- Customers Category -->
+        <a href="{% url 'DjTraders:Customers' %}" class="category-card">
+            <div class="card-content">
+                <i class="fas fa-users"></i>
+                <h2>Customers</h2>
+                <p>Manage your customer database with ease</p>
             </div>
-
-            <!-- Manage Products section -->
-            <div style="background-color: var(--neutral-2); padding: 1.5rem; border-radius: 0.5rem;">
-                <h2 style="color: var(--text); font-size: 1.25rem; margin-bottom: 1rem;">Manage Products</h2>
-                <p style="margin-bottom: 1.5rem;">Browse your product catalog, update pricing, and manage inventory across all categories.</p>
-                <div class="card-actions">
-                    <a href="{% url 'DjTraders:Products' %}" class="action-btn view-btn">
-                        <i class="fas fa-box"></i>
-                    </a>
-                    <a href="{% url 'DjTraders:ProductCreate' %}" class="action-btn create-btn">
-                        <i class="fas fa-plus-circle"></i>
-                    </a>
-                </div>
+        </a>
+        <!-- Products Category -->
+        <a href="{% url 'DjTraders:Products' %}" class="category-card">
+            <div class="card-content">
+                <i class="fas fa-box-open"></i>
+                <h2>Products</h2>
+                <p>Keep track of your product inventory</p>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 {% endblock %}

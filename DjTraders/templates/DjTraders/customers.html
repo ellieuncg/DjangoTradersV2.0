@@ -1,89 +1,68 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="page-header">
-    <h1>Our Customers</h1>
-    <a href="{% url 'DjTraders:CustomerCreate' %}" class="action-btn create-btn" title="Add Customer">
-        <i class="fas fa-plus"></i>
-    </a>
-</div>
-
-<!-- Search Box -->
-<div class="search-container">
-    <div class="search-wrapper">
-        <i class="fas fa-users"></i>
-        <input type="text" id="searchInput" class="search-input" placeholder="Search Customers">
-    </div>
-</div>
-
-<!-- Status Filter Links -->
-<div class="status-links">
-    <a href="{% url 'DjTraders:Customers' %}" 
-       class="status-btn {% if not request.GET.status %}active{% endif %}">
-        Active Only
-    </a>
-    <a href="{% url 'DjTraders:Customers' %}?status=inactive" 
-       class="status-btn {% if request.GET.status == 'inactive' %}active{% endif %}">
-        Show Inactive
-    </a>
-    <a href="{% url 'DjTraders:Customers' %}?status=all" 
-       class="status-btn {% if request.GET.status == 'all' %}active{% endif %}">
-        Show All
-    </a>
-</div>
-
-<!-- Alphabet Links -->
-<div class="alphabet-links">
-    <a href="{% url 'DjTraders:Customers' %}" 
-       class="{% if not request.GET.letter %}active{% endif %}">
-        All
-    </a>
-    {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
-        <a href="?letter={{ letter }}" 
-           class="{% if request.GET.letter == letter %}active{% endif %}">
-            {{ letter }}
+<div class="container">
+    <!-- Header with Add Customer Icon -->
+    <div class="page-header">
+        <h1>Our Customers</h1>
+        <a href="{% url 'DjTraders:CustomerCreate' %}" class="add-product-icon" title="Add Customer">
+            <i class="fas fa-plus-circle"></i>
         </a>
-    {% endfor %}
-</div>
+    </div>
 
-<!-- Customer Cards -->
-<div class="card-grid">
-    {% for customer in customers %}
-    <div class="card {% if customer.status != 'active' %}inactive{% endif %}">
-        <h3 class="card-title">{{ customer.customer_name }}</h3>
-        <div class="card-info">
-            <span><strong>Contact:</strong> {{ customer.contact_name }}</span>
-            <span><strong>Address:</strong> {{ customer.address }}</span>
-            <span><strong>City:</strong> {{ customer.city }}</span>
-            <span><strong>Postal Code:</strong> {{ customer.postal_code }}</span>
-            <span><strong>Country:</strong> {{ customer.country }}</span>
-            {% if customer.status != 'active' %}
-                <span><strong>Status:</strong> {{ customer.get_status_display }}</span>
-            {% endif %}
-        </div>
-        <div class="card-actions">
-            <a href="{% url 'DjTraders:CustomerDetail' pk=customer.pk %}" class="action-btn view-btn" title="View">
-                <i class="fas fa-search"></i>
-            </a>
-            <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn edit-btn" title="Edit">
-                <i class="fas fa-pencil-alt"></i>
-            </a>
-            {% if customer.status == 'active' %}
-                <form method="POST" action="{% url 'DjTraders:CustomerStatus' pk=customer.pk %}" class="inline-form">
-                    {% csrf_token %}
-                    <input type="hidden" name="status" value="inactive">
-                    <button type="submit" class="action-btn status-btn" title="Deactivate" 
-                            onclick="return confirm('Are you sure you want to deactivate this customer?');">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </form>
-            {% endif %}
-        </div>
+    <!-- Search Box and Status Filters -->
+    <div class="search-container">
+        <i class="fas fa-search"></i>
+        <input type="text" name="customer" class="search-input" placeholder="Customer Name" value="{{ customer_query }}">
+        <input type="text" name="contact" class="search-input" placeholder="Contact" value="{{ contact_query }}">
+        <input type="text" name="city" class="search-input" placeholder="City" value="{{ city_query }}">
+        <input type="text" name="country" class="search-input" placeholder="Country" value="{{ country_query }}">
+        <button type="submit" class="search-button">Search</button>
     </div>
-    {% empty %}
-    <div class="no-results">
-        <p>No customers found matching your criteria.</p>
+
+    <div class="status-links">
+        <a href="{% url 'DjTraders:Customers' %}" class="status-btn active">Active Only</a>
+        <a href="{% url 'DjTraders:Customers' %}?status=inactive" class="status-btn">Show Inactive</a>
+        <a href="{% url 'DjTraders:Customers' %}?status=all" class="status-btn">Show All</a>
     </div>
-    {% endfor %}
+
+    <!-- Alphabet Filter -->
+    <div class="alphabet-links">
+        <a href="{% url 'DjTraders:Customers' %}" 
+           class="{% if not request.GET.letter %}active{% endif %}">
+            All
+        </a>
+        {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+            <a href="?letter={{ letter }}" 
+               class="{% if request.GET.letter == letter %}active{% endif %}">
+                {{ letter }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <!-- Customer Cards -->
+    <div class="card-grid">
+        {% for customer in customers %}
+        <div class="card">
+            <h3 class="card-title">{{ customer.customer_name }}</h3>
+            <div class="card-info">
+                <span><strong>Contact:</strong> {{ customer.contact_name }}</span>
+                <span><strong>City:</strong> {{ customer.city }}</span>
+                <span><strong>Country:</strong> {{ customer.country }}</span>
+            </div>
+            <div class="card-actions">
+                <a href="{% url 'DjTraders:CustomerDetail' pk=customer.pk %}" class="action-btn view-btn" title="View">
+                    <i class="fas fa-search"></i>
+                </a>
+                <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn edit-btn" title="Edit">
+                    <i class="fas fa-pencil-alt"></i>
+                </a>
+                <a href="{% url 'DjTraders:CustomerStatus' pk=customer.pk %}" class="action-btn delete-btn" title="Delete">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

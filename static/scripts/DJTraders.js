@@ -10,37 +10,11 @@ class DJTraders {
     }
 
     initializeComponents() {
-        // Initialize DataTables
-        this.initializeDataTables();
-        
         // Initialize tooltips
         this.initializeTooltips();
         
         // Initialize action buttons
         this.initializeActionButtons();
-    }
-
-    initializeDataTables() {
-        const dataTableConfig = {
-            order: [0, 'asc'],
-            responsive: true,
-            pageLength: 10,
-            language: {
-                search: "Filter results:",
-                zeroRecords: "No records found",
-                paginate: {
-                    next: "Next",
-                    previous: "Previous"
-                }
-            },
-            drawCallback: () => {
-                this.initializeActionButtons();
-            }
-        };
-
-        $('.data-table').each(function() {
-            $(this).DataTable(dataTableConfig);
-        });
     }
 
     initializeTooltips() {
@@ -173,5 +147,26 @@ class DJTraders {
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.set('filter', filter);
         window.location.href = currentUrl.toString();
+    }
+
+    performAction($btn) {
+        const action = $btn.data('action');
+        const url = $btn.data('url');
+        const method = $btn.data('method') || 'POST';
+        
+        $.ajax({
+            url: url,
+            method: method,
+            success: (response) => {
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                } else {
+                    location.reload();
+                }
+            },
+            error: (xhr) => {
+                alert('An error occurred. Please try again.');
+            }
+        });
     }
 }
