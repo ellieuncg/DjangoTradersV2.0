@@ -7,9 +7,11 @@ from .models import Customer, Product, Category, OrderDetail
 from .forms import CustomerForm, ProductForm
 
 def index(request):
+    """Home page view"""
     return render(request, 'DjTraders/index.html')
 
 class DjTradersCustomersView(ListView):
+    """Customer list view with search and filtering"""
     model = Customer
     template_name = 'DjTraders/customers.html'
     context_object_name = 'customers'
@@ -23,9 +25,9 @@ class DjTradersCustomersView(ListView):
         city_query = self.request.GET.get('city', '')
         country_query = self.request.GET.get('country', '')
         letter = self.request.GET.get('letter', '')
-        status = self.request.GET.get('status', 'active')  # Default to active
+        status = self.request.GET.get('status', 'active')
 
-        # Apply search filters
+        # Apply filters
         if customer_query:
             queryset = queryset.filter(customer_name__icontains=customer_query)
         if contact_query:
@@ -34,91 +36,84 @@ class DjTradersCustomersView(ListView):
             queryset = queryset.filter(city__icontains=city_query)
         if country_query:
             queryset = queryset.filter(country__icontains=country_query)
-
-        # Apply letter filter
         if letter:
             queryset = queryset.filter(customer_name__istartswith=letter)
         
-        # Apply status filter
-        if status == 'inactive':
-            queryset = queryset.filter(status='inactive')
-        elif status == 'all':
-            pass  # Show all customers
-        else:  # Default to showing only active
-            queryset = queryset.filter(status='active')
-        
+        # Status filter
+        if status != 'all':
+            queryset = queryset.filter(status=status)
+
         return queryset.order_by('customer_name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add search queries to context for form repopulation
         context.update({
             'customer_query': self.request.GET.get('customer', ''),
             'contact_query': self.request.GET.get('contact', ''),
             'city_query': self.request.GET.get('city', ''),
             'country_query': self.request.GET.get('country', ''),
-            'status_filter': self.request.GET.get('status', 'active'),  # Pass current status to context
+            'status_filter': self.request.GET.get('status', 'active'),
         })
         return context
 
 class DjTradersProductsView(ListView):
+    """Product list view with search and filtering"""
     model = Product
-    template_name = 'DjTraders/Products.html'
+    template_name = 'DjTraders/products.html'
     context_object_name = 'products'
 
     def get_queryset(self):
         queryset = Product.objects.all()
-        query = self.request.GET.get('q', '')
+        
+        # Get search parameters
+        product_query = self.request.GET.get('product', '')
+        supplier_query = self.request.GET.get('supplier', '')
         category = self.request.GET.get('category', '')
         min_price = self.request.GET.get('min_price', '')
         max_price = self.request.GET.get('max_price', '')
-        status = self.request.GET.get('status', 'active')  # Default to active
+        status = self.request.GET.get('status', 'active')
 
-        if query:
-            queryset = queryset.filter(
-                Q(product_name__icontains=query) |
-                Q(category__category_name__icontains=query)
-            )
-        
+        # Apply filters
+        if product_query:
+            queryset = queryset.filter(product_name__icontains=product_query)
+        if supplier_query:
+            queryset = queryset.filter(supplier__company_name__icontains=supplier_query)
         if category:
-            queryset = queryset.filter(category_id=category)
-            
+            queryset = queryset.filter(category__category_id=category)
         if min_price:
             try:
                 queryset = queryset.filter(price__gte=float(min_price))
             except ValueError:
                 pass
-        
         if max_price:
             try:
                 queryset = queryset.filter(price__lte=float(max_price))
             except ValueError:
                 pass
-            
-        if status == 'inactive':
-            queryset = queryset.filter(Q(status='inactive') | Q(status='discontinued'))
-        elif status == 'all':
-            pass  # Show all products
-        else:
-            queryset = queryset.filter(status='active')  # Default
-        
+
+        # Status filter
+        if status != 'all':
+            queryset = queryset.filter(status=status)
+
         return queryset.order_by('product_name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Get categories for filter
         categories = Category.objects.all().order_by('category_name')
-        context['categories'] = [
-            {'category_id': cat.category_id, 'category_name': cat.category_name}
-            for cat in categories
-        ]
-        context['search_query'] = self.request.GET.get('q', '')
-        context['selected_category'] = self.request.GET.get('category', '')
-        context['min_price'] = self.request.GET.get('min_price', '')
-        context['max_price'] = self.request.GET.get('max_price', '')
-        context['status_filter'] = self.request.GET.get('status', 'active')  # Pass current status to context
+        context.update({
+            'categories': categories,
+            'product_query': self.request.GET.get('product', ''),
+            'supplier_query': self.request.GET.get('supplier', ''),
+            'min_price': self.request.GET.get('min_price', ''),
+            'max_price': self.request.GET.get('max_price', ''),
+            'selected_category': self.request.GET.get('category', ''),
+            'status_filter': self.request.GET.get('status', 'active'),
+        })
         return context
 
 class DjTradersCustomerDetailView(DetailView):
+    """Customer detail view"""
     model = Customer
     template_name = 'DjTraders/CustomerDetail.html'
     context_object_name = 'customer'
@@ -126,27 +121,22 @@ class DjTradersCustomerDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         customer = self.get_object()
-        context['customer_orders'] = self.get_customer_orders(customer)
+        order_details = []
+        for order in customer.orders.all().order_by('-order_date'):
+            details = {
+                'order_id': order.order_id,
+                'order_date': order.order_date,
+                'products': [{
+                    'product': detail.product,
+                    'quantity': detail.quantity,
+                } for detail in order.orderdetails.all()]
+            }
+            order_details.append(details)
+        context['orders'] = order_details
         return context
 
-    def get_customer_orders(self, customer):
-        orders = customer.orders.all()
-        return [{
-            'order_id': order.order_id,
-            'order_date': order.order_date,
-            'order_details': [{
-                'product_name': detail.product.product_name,
-                'quantity': detail.quantity,
-                'price': detail.product.price,
-                'total': detail.quantity * detail.product.price,
-            } for detail in order.orderdetails.all()],
-            'order_total': sum(
-                detail.quantity * detail.product.price 
-                for detail in order.orderdetails.all()
-            )
-        } for order in orders]
-
 class DjTradersProductDetailView(DetailView):
+    """Product detail view"""
     model = Product
     template_name = 'DjTraders/ProductDetail.html'
     context_object_name = 'product'
@@ -155,20 +145,33 @@ class DjTradersProductDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         product = self.get_object()
         order_details = OrderDetail.objects.filter(product=product).order_by('-order__order_date')
-        
-        order_details_with_total = []
-        for detail in order_details:
-            order_details_with_total.append({
-                'order': detail.order,
-                'quantity': detail.quantity,
-                'total': detail.quantity * product.price
-            })
-        
-        context['order_details'] = order_details_with_total
-        context['orders_count'] = len(order_details_with_total)
+        context['order_details'] = [{
+            'order': detail.order,
+            'quantity': detail.quantity,
+            'unit_price': detail.product.price,
+            'total': detail.product.price * detail.quantity,
+        } for detail in order_details]
+        context['total_orders'] = len(order_details)
+        context['total_units_sold'] = sum(detail.quantity for detail in order_details)
+        context['total_revenue'] = sum(detail.product.price * detail.quantity for detail in order_details)
         return context
 
+class CustomerArchiveView(UpdateView):
+    """View for archiving customers"""
+    model = Customer
+    fields = []
+    template_name = 'DjTraders/CustomerDetail.html'
+    
+    def form_valid(self, form):
+        customer = self.get_object()
+        customer.status = 'inactive'
+        customer.archived_date = timezone.now()
+        customer.save()
+        messages.success(self.request, f'Customer {customer.customer_name} has been archived.')
+        return redirect('DjTraders:CustomerDetail', pk=customer.pk)
+
 def create_customer(request):
+    """Create new customer"""
     if request.method == 'POST':
         form = CustomerForm(request.POST)
         if form.is_valid():
@@ -180,6 +183,7 @@ def create_customer(request):
     return render(request, 'DjTraders/CustomerForm.html', {'form': form})
 
 def update_customer(request, pk):
+    """Update existing customer"""
     customer = get_object_or_404(Customer, pk=pk)
     if request.method == 'POST':
         form = CustomerForm(request.POST, instance=customer)
@@ -195,6 +199,7 @@ def update_customer(request, pk):
     })
 
 def update_customer_status(request, pk):
+    """Update customer active/inactive status"""
     if request.method == 'POST':
         customer = get_object_or_404(Customer, pk=pk)
         new_status = request.POST.get('status')
@@ -205,6 +210,7 @@ def update_customer_status(request, pk):
     return redirect('DjTraders:Customers')
 
 def create_product(request):
+    """Create new product"""
     if request.method == 'POST':
         form = ProductForm(request.POST)
         if form.is_valid():
@@ -216,6 +222,7 @@ def create_product(request):
     return render(request, 'DjTraders/ProductForm.html', {'form': form})
 
 def update_product(request, pk):
+    """Update existing product"""
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
@@ -231,24 +238,12 @@ def update_product(request, pk):
     })
 
 def update_product_status(request, pk):
+    """Update product active/inactive status"""
     if request.method == 'POST':
         product = get_object_or_404(Product, pk=pk)
         new_status = request.POST.get('status')
-        if new_status in ['active', 'inactive', 'discontinued']:
+        if new_status in ['active', 'inactive']:
             product.status = new_status
             product.save()
             messages.success(request, f'Product status updated to {new_status}.')
     return redirect('DjTraders:Products')
-
-class CustomerArchiveView(UpdateView):
-    model = Customer
-    fields = []
-    template_name = 'DjTraders/customer_detail.html'
-    
-    def form_valid(self, form):
-        customer = self.get_object()
-        customer.status = 'archived'
-        customer.archived_date = timezone.now()
-        customer.save()
-        messages.success(self.request, f'Customer {customer.customer_name} has been archived.')
-        return redirect('DjTraders:CustomerDetail', pk=customer.pk)
