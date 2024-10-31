@@ -2,42 +2,60 @@
 {% load static %}
 
 {% block content %}
-<div class="page-header header-customer-detail">
-    <h1>{{ customer.customer_name }}</h1>
-    <div class="header-stats">{{ customer.NumberOfOrders }} orders placed</div>
-</div>
+<div class="customer-form-page">
+    <div class="header-customer-form">
+        <h1 class="customer-form-title">{% if customer %}Update{% else %}New{% endif %} Customer</h1>
+    </div>
 
-<div class="details details-customer">
-    <h2>Customer Details</h2>
-    <div class="detail-row"><span class="detail-label">Contact:</span> <span>{{ customer.contact_name }}</span></div>
-    <div class="detail-row"><span class="detail-label">Address:</span> <span>{{ customer.address }}</span></div>
-    <div class="detail-row"><span class="detail-label">Location:</span> <span>{{ customer.city }}, {{ customer.country }}</span></div>
-    <div class="detail-row"><span class="detail-label">Status:</span> <span>Active</span></div>
-</div>
-
-<div class="action-buttons">
-    <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn save-btn edit-btn" title="Edit">
-        <i class="fas fa-pen"></i> Edit
-    </a>
-    <a href="{% url 'DjTraders:Customers' %}" class="action-btn return-btn" title="Return">
-        <i class="fas fa-chevron-left"></i> Return
-    </a>
-</div>
-
-<div class="order-history order-history-customer">
-    <h2>Order History</h2>
-    {% for order in customer_orders %}
-        <div class="order">
-            <div class="order-id">Order #{{ order.order_id }}</div>
-            <div class="order-details">
-                {% for detail in order.order_details %}
-                    {{ detail.quantity }}x {{ detail.product_name }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
+    <div class="form-container-customer">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-row-customer">
+                <label class="form-label-customer">Customer name:</label>
+                <div class="form-field-customer">
+                    <input type="text" name="customer_name" value="{{ customer.customer_name }}" required>
+                </div>
             </div>
-            <div class="order-total">${{ order.order_total }}</div>
-        </div>
-    {% empty %}
-        <div class="empty-state">No orders found for this customer.</div>
-    {% endfor %}
+            <div class="form-row-customer">
+                <label class="form-label-customer">Contact name:</label>
+                <div class="form-field-customer">
+                    <input type="text" name="contact_name" value="{{ customer.contact_name }}" required>
+                </div>
+            </div>
+            <div class="form-row-customer">
+                <label class="form-label-customer">Address:</label>
+                <div class="form-field-customer">
+                    <input type="text" name="address" value="{{ customer.address }}" required>
+                </div>
+            </div>
+            <div class="form-row-customer">
+                <label class="form-label-customer">City:</label>
+                <div class="form-field-customer">
+                    <input type="text" name="city" value="{{ customer.city }}" required>
+                </div>
+            </div>
+            <div class="form-row-customer">
+                <label class="form-label-customer">Postal code:</label>
+                <div class="form-field-customer">
+                    <input type="text" name="postal_code" value="{{ customer.postal_code }}" required>
+                </div>
+            </div>
+            <div class="form-row-customer">
+                <label class="form-label-customer">Country:</label>
+                <div class="form-field-customer">
+                    <input type="text" name="country" value="{{ customer.country }}" required>
+                </div>
+            </div>
+            
+            <div class="action-buttons-customer">
+                <button type="submit" class="action-btn-customer save-btn-customer">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <a href="{% url 'DjTraders:Customers' %}" class="action-btn-customer return-btn-customer">
+                    <i class="fas fa-chevron-left"></i> Return
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

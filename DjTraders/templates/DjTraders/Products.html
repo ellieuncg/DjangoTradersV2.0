@@ -46,7 +46,7 @@
                         <span><strong>Status:</strong> {{ product.get_status_display }}</span>
                     {% endif %}
                 </div>
-                <div class="card-actions card-actions-products">
+                <div class="card-actions">
                     <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn view-btn" title="View">
                         <i class="fas fa-eye"></i> View
                     </a>
@@ -57,7 +57,7 @@
                         <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="inactive">
-                            <button type="submit" class="action-btn delete-btn" title="Archive">
+                            <button type="submit" class="action-btn archive-btn" title="Archive">
                                 <i class="fas fa-archive"></i> Archive
                             </button>
                         </form>
@@ -65,7 +65,7 @@
                         <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="active">
-                            <button type="submit" class="action-btn delete-btn" title="Unarchive">
+                            <button type="submit" class="action-btn archive-btn" title="Unarchive">
                                 <i class="fas fa-box-open"></i> Unarchive
                             </button>
                         </form>

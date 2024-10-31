@@ -1,5 +1,5 @@
-{% load static %}
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 <div class="page-header header-product-form">
@@ -50,14 +50,14 @@
             </div>
         </div>
 
-        <div class="action-buttons action-buttons-product">
-            <button type="submit" class="action-btn save-btn" title="Save">
+        <div class="action-buttons">
+            <button type="submit" class="custom-action-btn save-btn">
                 <i class="fas fa-save"></i> Save
             </button>
-            {% if product %}
-                <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn return-btn" title="Return">
-                    <i class="fas fa-chevron-left"></i> Return
-                </a>
-            {% endif %}
+            <a href="{% url 'DjTraders:Products' %}" class="custom-action-btn return-btn">
+                <i class="fas fa-chevron-left"></i> Return
+            </a>
         </div>
-    </
+    </form>
+</div>
+{% endblock %}

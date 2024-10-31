@@ -1,29 +1,61 @@
-{% extends "base.html" %} {% block content %}
-{% if form.instance.pk %}Update{% else %}New{% endif %} Customer
-{% csrf_token %}
-Customer name:
-{{ form.customer_name }} {% if form.customer_name.errors %}
-{{ form.customer_name.errors|join:", " }}
-{% endif %}
-Contact name:
-{{ form.contact_name }} {% if form.contact_name.errors %}
-{{ form.contact_name.errors|join:", " }}
-{% endif %}
-Address:
-{{ form.address }} {% if form.address.errors %}
-{{ form.address.errors|join:", " }}
-{% endif %}
-City:
-{{ form.city }} {% if form.city.errors %}
-{{ form.city.errors|join:", " }}
-{% endif %}
-Postal code:
-{{ form.postal_code }} {% if form.postal_code.errors %}
-{{ form.postal_code.errors|join:", " }}
-{% endif %}
-Country:
-{{ form.country }} {% if form.country.errors %}
-{{ form.country.errors|join:", " }}
-{% endif %}
-Save {% if customer %} Return {% endif %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="customer-form-page">
+    <div class="header-customer-form">
+        <h1>{% if customer %}Update{% else %}New{% endif %} Customer</h1>
+    </div>
+
+    <div class="form-container-customer">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-row-customer">
+                <label class="form-label">Customer name:</label>
+                <div class="form-field">
+                    <input type="text" name="customer_name" value="{{ customer.customer_name }}" required>
+                </div>
+            </div>
+            <div class="form-row-customer">
+                <label class="form-label">Contact name:</label>
+                <div class="form-field">
+                    <input type="text" name="contact_name" value="{{ customer.contact_name }}" required>
+                </div>
+            </div>
+            <div class="form-row-customer">
+                <label class="form-label">Address:</label>
+                <div class="form-field">
+                    <input type="text" name="address" value="{{ customer.address }}" required>
+                </div>
+            </div>
+            <div class="form-row-customer">
+                <label class="form-label">City:</label>
+                <div class="form-field">
+                    <input type="text" name="city" value="{{ customer.city }}" required>
+                </div>
+            </div>
+            <div class="form-row-customer">
+                <label class="form-label">Postal code:</label>
+                <div class="form-field">
+                    <input type="text" name="postal_code" value="{{ customer.postal_code }}" required>
+                </div>
+            </div>
+            <div class="form-row-customer">
+                <label class="form-label">Country:</label>
+                <div class="form-field">
+                    <input type="text" name="country" value="{{ customer.country }}" required>
+                </div>
+            </div>
+            
+            <div class="action-buttons-customer">
+                <button type="submit" class="custom-action-btn save-btn">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <a href="{% url 'DjTraders:Customers' %}" class="custom-action-btn return-btn">
+                    <i class="fas fa-chevron-left"></i> Return
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

@@ -1,11 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView, ListView
-from django.views.generic.edit import UpdateView  # Add this import
-from django.db.models import Q, Sum
-from django.http import JsonResponse
+from django.views.generic import DetailView, ListView, UpdateView
+from django.db.models import Q
 from django.contrib import messages
 from django.utils import timezone
-from .models import Customer, Product, Order, OrderDetail, Category
+from .models import Customer, Product, Category, OrderDetail
 from .forms import CustomerForm, ProductForm
 
 def index(request):
@@ -25,18 +23,15 @@ class DjTradersCustomersView(ListView):
         city_query = self.request.GET.get('city', '')
         country_query = self.request.GET.get('country', '')
         letter = self.request.GET.get('letter', '')
-        status = self.request.GET.get('status', '')
+        status = self.request.GET.get('status', 'active')  # Default to active
 
         # Apply search filters
         if customer_query:
             queryset = queryset.filter(customer_name__icontains=customer_query)
-        
         if contact_query:
             queryset = queryset.filter(contact_name__icontains=contact_query)
-        
         if city_query:
             queryset = queryset.filter(city__icontains=city_query)
-        
         if country_query:
             queryset = queryset.filter(country__icontains=country_query)
 
@@ -46,11 +41,11 @@ class DjTradersCustomersView(ListView):
         
         # Apply status filter
         if status == 'inactive':
-            queryset = queryset.filter(Q(status='inactive') | Q(status='archived'))
+            queryset = queryset.filter(status='inactive')
         elif status == 'all':
             pass  # Show all customers
-        else:
-            queryset = queryset.filter(status='active')  # Default: show only active
+        else:  # Default to showing only active
+            queryset = queryset.filter(status='active')
         
         return queryset.order_by('customer_name')
 
@@ -61,7 +56,8 @@ class DjTradersCustomersView(ListView):
             'customer_query': self.request.GET.get('customer', ''),
             'contact_query': self.request.GET.get('contact', ''),
             'city_query': self.request.GET.get('city', ''),
-            'country_query': self.request.GET.get('country', '')
+            'country_query': self.request.GET.get('country', ''),
+            'status_filter': self.request.GET.get('status', 'active'),  # Pass current status to context
         })
         return context
 
@@ -76,7 +72,7 @@ class DjTradersProductsView(ListView):
         category = self.request.GET.get('category', '')
         min_price = self.request.GET.get('min_price', '')
         max_price = self.request.GET.get('max_price', '')
-        status = self.request.GET.get('status', '')
+        status = self.request.GET.get('status', 'active')  # Default to active
 
         if query:
             queryset = queryset.filter(
@@ -119,7 +115,7 @@ class DjTradersProductsView(ListView):
         context['selected_category'] = self.request.GET.get('category', '')
         context['min_price'] = self.request.GET.get('min_price', '')
         context['max_price'] = self.request.GET.get('max_price', '')
-        context['status_filter'] = self.request.GET.get('status', '')
+        context['status_filter'] = self.request.GET.get('status', 'active')  # Pass current status to context
         return context
 
 class DjTradersCustomerDetailView(DetailView):

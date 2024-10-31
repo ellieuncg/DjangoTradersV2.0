@@ -20,17 +20,20 @@
     </div>
 
     <div class="product-actions">
-        <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn edit-btn">
-            <i class="fas fa-pen"></i>
+        <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="custom-action-btn save-btn">
+            <i class="fas fa-pen"></i> Edit
         </a>
         
-        <a href="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="action-btn delete-btn"
-           onclick="return confirm('Are you sure you want to discontinue this product?');">
-            <i class="fas fa-trash"></i>
-        </a>
+        <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="inactive">
+            <button type="submit" class="custom-action-btn archive-btn">
+                <i class="fas fa-trash"></i> Archive
+            </button>
+        </form>
         
-        <a href="{% url 'DjTraders:Products' %}" class="action-btn return-btn">
-            <i class="fas fa-chevron-left"></i>
+        <a href="{% url 'DjTraders:Products' %}" class="custom-action-btn return-btn">
+            <i class="fas fa-chevron-left"></i> Return
         </a>
     </div>
 </div>
