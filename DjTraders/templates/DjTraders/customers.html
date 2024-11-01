@@ -10,21 +10,21 @@
         </div>
         
         <!-- Search Bar and Filter -->
-        <form method="get" class="search-container-customers" id="customerFilterForm">
-            <div class="search-field-group">
-                <div class="search-field-header">
+        <form method="get" class="customer-search-container" id="customerFilterForm">
+            <div class="customer-search-field-group">
+                <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon" data-sort="customer"></i>
                     <input type="text" name="customer" placeholder="Customer Name" value="{{ customer_query }}">
                 </div>
-                <div class="search-field-header">
+                <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon" data-sort="contact"></i>
                     <input type="text" name="contact" placeholder="Contact" value="{{ contact_query }}">
                 </div>
-                <div class="search-field-header">
+                <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon" data-sort="city"></i>
                     <input type="text" name="city" placeholder="City" value="{{ city_query }}">
                 </div>
-                <div class="search-field-header">
+                <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon" data-sort="country"></i>
                     <select name="country" class="status-select">
                         <option value="">Select Country</option>
@@ -69,7 +69,7 @@
             <div class="card-customers {% if customer.status == 'inactive' %}inactive{% endif %}">
                 <h3 class="card-title">{{ customer.customer_name }}</h3>
                 <div class="card-info">
-                    <p><strong>Company Name:</strong> {{ customer.company_name }}</p>
+                    <!-- <p><strong>Company Name:</strong> {{ customer.company_name }}</p> -->
                     <p><strong>Contact:</strong> {{ customer.contact_name }}</p>
                     <p><strong>Address:</strong> {{ customer.address }}</p>
                     <p><strong>City:</strong> {{ customer.city }}</p>

@@ -63,7 +63,7 @@ body {
 .page-header, .header-product-form, .header-product-detail, .header-customer-detail {
     background-color: var(--primary-color);
     color: var(--card-background);
-    padding: 1.5rem 2rem; /* Increased padding for a bolder look */
+    padding: 1.5rem 2rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
     display: flex;
@@ -73,7 +73,7 @@ body {
 }
 
 .page-header h1, .header-product-detail h1, .header-customer-detail h1 {
-    font-size: 2rem; /* Increased font size for emphasis */
+    font-size: 2rem;
     margin: 0;
     letter-spacing: -0.01em;
     font-weight: bold;
@@ -92,8 +92,8 @@ body {
 .index-page .index-category-grid {
     display: flex;
     justify-content: center;
-    gap: 2rem; /* Increased spacing between items */
-    padding: 2rem; /* Larger padding for more breathing space */
+    gap: 2rem;
+    padding: 2rem;
 }
 
 .index-page .index-category-box {
@@ -119,47 +119,230 @@ body {
     display: block;
 }
 
+/* UNCHANGED CUSTOMER SEARCH STYLES */
+
 /*===============================
-  Shared Search and Link Styles
+  Customer Search Form Styles
 ===============================*/
-.search-container-customers, .search-container-products {
+.customer-search-container {
     display: flex;
-    flex-wrap: wrap; /* Allows wrapping on smaller screens */
+    align-items: center;
     gap: 1rem;
-    padding: 1.5rem;
+    padding: 1rem;
     background-color: var(--card-background);
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    margin-bottom: 1.5rem;
-    align-items: center;
+    margin-bottom: 1rem;
 }
 
-.search-container-customers .search-field-group,
-.search-container-products .search-field-group {
-    flex: 1 1 200px; /* Ensures each field is equally spaced */
+.customer-search-field-group {
     display: flex;
-    flex-direction: column; /* Stacks on mobile */
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
 }
 
-.search-container-customers .status-select,
+.customer-search-field-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.customer-search-field-header input[type="text"] {
+    width: 150px;
+    padding: 0.5rem;
+    border: 1px solid var(--neutral-light);
+    border-radius: 4px;
+}
+
+.customer-search-field-header select {
+    width: 150px;
+    padding: 0.5rem;
+    border: 1px solid var(--neutral-light);
+    border-radius: 4px;
+}
+
+.sort-icon {
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+/* Search Button Styles */
+.search-button {
+    padding: 0.5rem 1.25rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Clear Button Styles */
+.clear-search-btn {
+    padding: 0.5rem 1.25rem;
+    white-space: nowrap;
+}
+
+/* Status Select Styles */
+.status-select {
+    padding: 0.5rem;
+    border: 1px solid var(--neutral-light);
+    border-radius: 4px;
+    background-color: white;
+    min-width: 120px;
+}
+
+/*===============================
+  Product Search and Filter Styles
+===============================*/
+.search-container-products {
+    display: flex;
+    padding: 1rem;
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1rem;
+}
+
+.search-container-products .search-form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    position: relative;
+}
+
+.search-container-products .search-field-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    order: 1;
+}
+
+.search-container-products .search-field-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Product-specific search field styles */
+.search-container-products input[type="text"],
+.search-container-products input[type="number"] {
+    width: 150px;
+    padding: 0.5rem;
+    border: 1px solid var(--neutral-light);
+    border-radius: 4px;
+}
+
+.search-container-products input[type="number"] {
+    width: 120px;
+}
+
+.search-container-products .button-group {
+    display: flex;
+    gap: 0.5rem;
+    order: 1;
+}
+
+.search-container-products .search-button {
+    padding: 0.5rem 1.25rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.search-container-products .clear-search-btn {
+    padding: 0.5rem;
+    white-space: nowrap;
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    min-width: 60px;
+    height: 38px; /* Match the height of the search button */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .search-container-products .status-select {
-    min-width: 160px; /* Keeps dropdowns consistent */
-}
-
-/* Align buttons to the right */
-.search-container-customers button,
-.search-container-products button {
-    flex-shrink: 0;
+    padding: 0.5rem;
+    border: 1px solid var(--neutral-light);
+    border-radius: 4px;
+    background-color: white;
+    min-width: 120px;
+    order: 3;
     margin-left: auto;
 }
 
-/* Adjust text input widths */
-.search-container-customers input[type="text"],
-.search-container-products input[type="text"],
-.search-container-customers input[type="number"],
-.search-container-products input[type="number"] {
-    width: 100%; /* Full-width within container */
-    max-width: 200px; /* Controls max width */
+/* Product Search Responsive Styles */
+@media (max-width: 1200px) {
+    .search-container-products input[type="text"],
+    .search-container-products input[type="number"] {
+        width: 120px;
+    }
+}
+
+@media (max-width: 992px) {
+    .search-container-products .search-form {
+        flex-wrap: wrap;
+    }
+
+    .search-container-products .status-select {
+        order: 1;
+        margin-left: 0;
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    .search-container-products .search-field-group {
+        order: 2;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .search-container-products .button-group {
+        order: 3;
+        margin-top: 1rem;
+    }
+
+    .search-container-products .search-field-header {
+        flex: 1 1 calc(50% - 1rem);
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .search-container-products .search-field-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-container-products input[type="text"],
+    .search-container-products input[type="number"],
+    .search-container-products .status-select {
+        width: 100%;
+    }
+
+    .search-container-products .button-group {
+        width: 100%;
+        display: flex;
+        gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .search-container-products .search-button,
+        .search-container-products .clear-search-btn {
+            flex: 1;
+        }
+    }
 }
 
 /*===============================
@@ -253,45 +436,6 @@ body {
 }
 
 /*===============================
-  Responsive Styles
-===============================*/
-@media (max-width: 768px) {
-    .container, .page-header, .index-page .index-category-box {
-        padding: 1rem;
-    }
-
-    .index-page .index-category-grid, 
-    .search-container-customers, 
-    .search-container-products {
-        flex-direction: column; /* Stack fields vertically */
-        gap: 1rem;
-    }
-
-    .card-grid-customers, .card-grid-products {
-        grid-template-columns: 1fr;
-    }
-
-    .page-header h1, .header-product-detail h1, .header-customer-detail h1 {
-        font-size: 1.5rem;
-    }
-
-    .product-actions, .action-buttons-customer {
-        flex-direction: column;
-    }
-
-    .alphabet-links-customers a, .categories-wrapper-products a {
-        padding: 0.5rem;
-        font-size: 0.875rem;
-    }
-
-    .custom-action-btn, .action-btn-customer {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-
-/*===============================
   Page-Specific Styles
 ===============================*/
 /* Customer Update Page */
@@ -328,51 +472,131 @@ body {
     font-size: 0.9375rem;
 }
 
-/* Product Order History */
-.product-order-history, .order-history-product {
-}
-
 /*===============================
   Category and Alphabet Link Styling
 ===============================*/
-.categories-wrapper-products, .alphabet-links-customers {
+/* Category wrapper styles */
+.categories-wrapper-products {
     display: flex;
-    flex-wrap: wrap; /* Wraps content if too wide */
-    justify-content: center; /* Centers the links */
-    gap: 0.5rem;
-    padding: 1rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.75rem;
     background-color: var(--card-background);
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     margin-bottom: 1.5rem;
+    overflow-x: hidden;
+    white-space: nowrap;
 }
 
-.categories-wrapper-products a, .alphabet-links-customers a {
-    padding: 0.5rem 1rem;
-    color: var(--text-color);
+.categories-wrapper-products a {
+    padding: 0.35rem 0.75rem;
+    text-align: center;
     border: 1px solid var(--neutral-light);
-    border-radius: 6px;
+    border-radius: 4px;
+    color: var(--text-color);
     text-decoration: none;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Active link styling */
-.categories-wrapper-products a.active, .alphabet-links-customers a.active {
+.categories-wrapper-products a.active {
     background-color: var(--primary-color);
     color: var(--card-background);
     font-weight: bold;
 }
 
-//*===============================
+/* Alphabet links styles */
+.alphabet-links-customers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.75rem;
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+.alphabet-links-customers a {
+    padding: 0.25rem 0.35rem;
+    min-width: 1.5rem;
+    text-align: center;
+    border: 1px solid var(--neutral-light);
+    border-radius: 4px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alphabet-links-customers a.active {
+    background-color: var(--primary-color);
+    color: var(--card-background);
+    font-weight: bold;
+}
+
+/* Responsive handling */
+@media (max-width: 768px) {
+    .container, .page-header, .index-page .index-category-box {
+        padding: 1rem;
+    }
+
+    .index-page .index-category-grid, 
+    .search-container-customers, 
+    .search-container-products {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .card-grid-customers, .card-grid-products {
+        grid-template-columns: 1fr;
+    }
+
+    .page-header h1, .header-product-detail h1, .header-customer-detail h1 {
+        font-size: 1.5rem;
+    }
+
+    .product-actions, .action-buttons-customer {
+        flex-direction: column;
+    }
+
+    .alphabet-links-customers, .categories-wrapper-products {
+        overflow-x: auto;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .alphabet-links-customers::-webkit-scrollbar,
+    .categories-wrapper-products::-webkit-scrollbar {
+        display: none;
+    }
+
+    .custom-action-btn, .action-btn-customer {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/*===============================
   Inactive Item Styling
 ===============================*/
-
 /* Styling for inactive customer and product cards */
 .card-customers.inactive,
 .card-products.inactive {
-    opacity: 0.6; /* Reduces opacity for a subtle faded effect */
-    background-color: var(--neutral-light); /* Light gray background for inactive items */
-    color: var(--neutral-dark); /* Ensures text remains visible against lighter background */
+    opacity: 0.6;
+    background-color: var(--neutral-light);
+    color: var(--neutral-dark);
 }
-

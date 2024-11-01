@@ -26,17 +26,17 @@
                         <input type="number" name="min_price" placeholder="Min Price" value="{{ min_price }}">
                         <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}">
                     </div>
-                    <select name="status" class="status-select">
-                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
-                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
-                        <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
-                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
-                    </select>
                 </div>
-                <button type="submit" class="search-button">Search</button>
-                <button type="button" class="action-btn archive-btn clear-search-btn">
-                    <i class="fas fa-times"></i> Clear
-                </button>
+                <select name="status" class="status-select">
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
+                </select>
+                <div class="button-group">
+                    <button class="search-button">Search</button>
+                    <button class="clear-search-btn">Clear</button>
+                </div>
             </form>
         </div>
 
@@ -61,7 +61,7 @@
                 <h3 class="card-title">{{ product.product_name }}</h3>
                 <div class="card-info">
                     <p><strong>Category:</strong> {{ product.category.category_name }}</p>
-                    <p><strong>Supplier:</strong> {{ product.supplier.company_name }}</p>
+                    <!-- <p><strong>Supplier:</strong> {{ product.supplier.company_name }}</p> -->
                     <p><strong>Unit Price:</strong> ${{ product.price|floatformat:2 }}</p>
                     <p><strong>Units in Stock:</strong> {{ product.units_in_stock }}</p>
                     <p><strong>Status:</strong> {{ product.status }}</p>
