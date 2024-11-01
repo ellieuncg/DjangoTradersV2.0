@@ -5,6 +5,10 @@ $(document).ready(function() {
 
 class DJTraders {
     constructor() {
+        this.currentSort = {
+            field: null,
+            direction: null
+        };
         this.initializeComponents();
         this.setupEventListeners();
     }
@@ -33,7 +37,7 @@ class DJTraders {
         console.log("Selected letter from URL:", selectedLetter);
     
         // Select all alphabetical links
-        const alphaLinks = document.querySelectorAll('.alphabet-links a');
+        const alphaLinks = document.querySelectorAll('.alphabet-links-customers a');
     
         // Loop through each link and add active class if it matches the selected letter
         alphaLinks.forEach(link => {
@@ -47,7 +51,7 @@ class DJTraders {
     
         // If no letter is selected (e.g., "All" link), apply the active class to "All"
         if (!selectedLetter) {
-            const allLink = document.querySelector('.alphabet-links a:first-child');
+            const allLink = document.querySelector('.alphabet-links-customers a:first-child');
             allLink.classList.add('active');
             console.log("Adding active class to 'All' link");
         }
@@ -63,7 +67,7 @@ class DJTraders {
         console.log("Selected category from URL:", selectedCategory);
 
         // Select all category links
-        const categoryLinks = document.querySelectorAll('.categories-wrapper .category-link');
+        const categoryLinks = document.querySelectorAll('.categories-wrapper-products a');
 
         // Loop through each link and add active class if it matches the selected category
         categoryLinks.forEach(link => {
@@ -77,7 +81,7 @@ class DJTraders {
 
         // If no category is selected (e.g., "All Categories" link), apply the active class to "All Categories"
         if (!selectedCategory) {
-            const allLink = document.querySelector('.categories-wrapper .category-link:first-child');
+            const allLink = document.querySelector('.categories-wrapper-products a:first-child');
             allLink.classList.add('active');
             console.log("Adding active class to 'All Categories' link");
         }
@@ -108,6 +112,92 @@ class DJTraders {
 
         // Filter buttons
         $('.filter-btn').on('click', (e) => this.handleFilter(e));
+
+        // Status select dropdown
+        $('.status-select').on('change', (e) => {
+            if (!$(e.target).hasClass('sort-control')) {
+                e.target.form.submit();
+            }
+        });
+
+        // Clear button
+        $('.clear-search-btn').on('click', () => this.clearSearch());
+
+        // Sort icon click handler
+        $('.sort-icon').on('click', (e) => this.handleSortClick(e));
+    }
+
+    handleSortClick(e) {
+        const $icon = $(e.currentTarget);
+        const field = $icon.data('sort');
+        
+        // Toggle sort direction or set initial direction
+        if (this.currentSort.field === field) {
+            this.currentSort.direction = this.currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.currentSort.field = field;
+            this.currentSort.direction = 'asc';
+        }
+
+        // Update icon states
+        $('.sort-icon').removeClass('active-asc active-desc');
+        $icon.addClass(`active-${this.currentSort.direction}`);
+
+        // Perform the sort
+        this.sortCards();
+    }
+
+    sortCards() {
+        const $container = $('.card-grid-products, .card-grid-customers');
+        const $cards = $container.children().toArray();
+        const field = this.currentSort.field;
+        const direction = this.currentSort.direction;
+
+        $cards.sort((a, b) => {
+            const aVal = this.getSortValue($(a), field);
+            const bVal = this.getSortValue($(b), field);
+
+            if (field === 'price') {
+                const aNum = parseFloat(aVal);
+                const bNum = parseFloat(bVal);
+                return direction === 'asc' ? aNum - bNum : bNum - aNum;
+            }
+
+            return direction === 'asc' ? 
+                aVal.localeCompare(bVal) : 
+                bVal.localeCompare(aVal);
+        });
+
+        $container.append($cards);
+    }
+
+    getSortValue($card, field) {
+        switch (field) {
+            case 'product':
+                return $card.find('.card-title').text().trim();
+            case 'supplier':
+                return $card.find('strong:contains("Supplier")').parent().text().split(':')[1].trim();
+            case 'price':
+                const priceText = $card.find('strong:contains("Unit Price")').parent().text();
+                return priceText.replace(/[^0-9.-]+/g, '');
+            case 'customer':
+                return $card.find('.card-title').text().trim();
+            case 'contact':
+                return $card.find('strong:contains("Contact")').parent().text().split(':')[1].trim();
+            case 'city':
+                return $card.find('strong:contains("City")').parent().text().split(':')[1].trim();
+            case 'country':
+                return $card.find('strong:contains("Country")').parent().text().split(':')[1].trim();
+            default:
+                return '';
+        }
+    }
+
+    clearSearch() {
+        // Get current URL without parameters
+        const baseUrl = window.location.pathname;
+        // Redirect to base URL
+        window.location.href = baseUrl;
     }
 
     handleActionButton(e, $btn) {

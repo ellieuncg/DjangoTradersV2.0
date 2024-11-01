@@ -25,7 +25,7 @@ class DjTradersCustomersView(ListView):
         city_query = self.request.GET.get('city', '')
         country_query = self.request.GET.get('country', '')
         letter = self.request.GET.get('letter', '')
-        status = self.request.GET.get('status', 'active')
+        status = self.request.GET.get('status', 'active')  # Default to active
 
         # Apply filters
         if customer_query:
@@ -40,19 +40,27 @@ class DjTradersCustomersView(ListView):
             queryset = queryset.filter(customer_name__istartswith=letter)
         
         # Status filter
-        if status != 'all':
-            queryset = queryset.filter(status=status)
+        if status == 'active':
+            queryset = queryset.filter(status='active')
+        elif status == 'inactive':
+            queryset = queryset.filter(status='inactive')
+        elif status == 'archived':
+            queryset = queryset.filter(status='archived')
+        # 'all' shows everything, so no filter needed
 
         return queryset.order_by('customer_name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Get unique countries from the database
+        countries = Customer.objects.values_list('country', flat=True).distinct().order_by('country')
         context.update({
             'customer_query': self.request.GET.get('customer', ''),
             'contact_query': self.request.GET.get('contact', ''),
             'city_query': self.request.GET.get('city', ''),
             'country_query': self.request.GET.get('country', ''),
             'status_filter': self.request.GET.get('status', 'active'),
+            'countries': countries  # Add this line to provide countries to template
         })
         return context
 
@@ -238,12 +246,15 @@ def update_product(request, pk):
     })
 
 def update_product_status(request, pk):
-    """Update product active/inactive status"""
+    """Update product active/inactive/archived status"""
     if request.method == 'POST':
         product = get_object_or_404(Product, pk=pk)
         new_status = request.POST.get('status')
-        if new_status in ['active', 'inactive']:
+        if new_status in ['active', 'inactive', 'archived']:
             product.status = new_status
+            # Set archived date if status is changing to archived
+            if new_status == 'archived':
+                product.archived_date = timezone.now()
             product.save()
             messages.success(request, f'Product status updated to {new_status}.')
     return redirect('DjTraders:Products')

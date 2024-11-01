@@ -6,24 +6,37 @@
     <div class="container">
         <div class="page-header">
             <h1>Our Products</h1>
+            <a href="{% url 'DjTraders:ProductCreate' %}"><i class="fas fa-plus"></i></a>
         </div>
         
         <!-- Search Bar and Filter -->
         <div class="search-container-products">
             <form method="get" class="search-form">
-                <div class="search-icon">
-                    <i class="fas fa-search"></i>
+                <div class="search-field-group">
+                    <div class="search-field-header">
+                        <i class="fas fa-sort sort-icon" data-sort="product"></i>
+                        <input type="text" name="product" placeholder="Product Name" value="{{ product_query }}">
+                    </div>
+                    <div class="search-field-header">
+                        <i class="fas fa-sort sort-icon" data-sort="supplier"></i>
+                        <input type="text" name="supplier" placeholder="Supplier" value="{{ supplier_query }}">
+                    </div>
+                    <div class="search-field-header">
+                        <i class="fas fa-sort sort-icon" data-sort="price"></i>
+                        <input type="number" name="min_price" placeholder="Min Price" value="{{ min_price }}">
+                        <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}">
+                    </div>
+                    <select name="status" class="status-select">
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
+                    </select>
                 </div>
-                <input type="text" name="product" placeholder="Product Name" value="{{ product_query }}">
-                <input type="text" name="supplier" placeholder="Supplier" value="{{ supplier_query }}">
-                <input type="number" name="min_price" placeholder="Min Price" value="{{ min_price }}">
-                <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}">
                 <button type="submit" class="search-button">Search</button>
-                <select name="status" class="status-select">
-                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
-                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Show Inactive</option>
-                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
-                </select>
+                <button type="button" class="action-btn archive-btn clear-search-btn">
+                    <i class="fas fa-times"></i> Clear
+                </button>
             </form>
         </div>
 
