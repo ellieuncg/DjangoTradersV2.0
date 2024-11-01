@@ -3,8 +3,8 @@
 
 {% block content %}
 <div class="page-header header-product-detail">
-    <h1 class="product-title">{{ product.product_name }}</h1>
-    <div class="product-status">
+    <h1>{{ product.product_name }}</h1>
+    <div class="status-badge">
         Status: {{ product.get_status_display }}
     </div>
 </div>
@@ -13,10 +13,22 @@
     <h2 class="section-title">Product Details</h2>
     
     <div class="product-info">
-        <div><strong>Category:</strong> {{ product.category.category_name }}</div>
-        <div><strong>Unit:</strong> {{ product.unit }}</div>
-        <div><strong>Price:</strong> ${{ product.price }}</div>
-        <div><strong>Status:</strong> {{ product.get_status_display }}</div>
+        <div>
+            <strong>Category:</strong> 
+            {{ product.category.category_name }}
+        </div>
+        <div>
+            <strong>Unit:</strong> 
+            {{ product.unit }}
+        </div>
+        <div>
+            <strong>Price:</strong> 
+            ${{ product.price }}
+        </div>
+        <div>
+            <strong>Status:</strong> 
+            {{ product.get_status_display }}
+        </div>
     </div>
 
     <div class="product-actions">

@@ -4,60 +4,80 @@
 {% block content %}
 <div class="products-page">
     <div class="container">
-        <div class="page-header header-products">
+        <div class="page-header">
             <h1>Our Products</h1>
-            <a href="{% url 'DjTraders:ProductCreate' %}" class="add-product-icon" title="Add Product">
-                <i class="fas fa-plus-circle"></i>
+            <a href="{% url 'DjTraders:ProductCreate' %}"><i class="fas fa-plus"></i></a>
+        </div>
+        
+        <!-- Search Bar and Filter -->
+        <div class="search-container-products">
+            <form method="get" class="search-form">
+                <div class="search-field-group">
+                    <div class="search-field-header">
+                        <i class="fas fa-sort sort-icon" data-sort="product"></i>
+                        <input type="text" name="product" placeholder="Product Name" value="{{ product_query }}">
+                    </div>
+                    <div class="search-field-header">
+                        <i class="fas fa-sort sort-icon" data-sort="supplier"></i>
+                        <input type="text" name="supplier" placeholder="Supplier" value="{{ supplier_query }}">
+                    </div>
+                    <div class="search-field-header">
+                        <i class="fas fa-sort sort-icon" data-sort="price"></i>
+                        <input type="number" name="min_price" placeholder="Min Price" value="{{ min_price }}">
+                        <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}">
+                    </div>
+                    <select name="status" class="status-select">
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
+                    </select>
+                </div>
+                <button type="submit" class="search-button">Search</button>
+                <button type="button" class="action-btn archive-btn clear-search-btn">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </form>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="categories-wrapper-products">
+            <a href="{% url 'DjTraders:Products' %}{% if request.GET.status %}?status={{ request.GET.status }}{% endif %}" 
+               class="{% if not selected_category %}active{% endif %}">
+                All
             </a>
-        </div>
-
-        <!-- Search Container for Products -->
-        <div class="search-container search-container-products">
-            <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Product Name" value="{{ request.GET.q }}">
-            <input type="number" id="minPrice" placeholder="Min Price" value="{{ request.GET.min_price }}">
-            <input type="number" id="maxPrice" placeholder="Max Price" value="{{ request.GET.max_price }}">
-            <button type="submit" class="search-button search-button-products">Search</button>
-            <select class="status-select status-select-products" onchange="window.location.href=this.value">
-                <option value="{% url 'DjTraders:Products' %}" {% if not request.GET.status %}selected{% endif %}>Active Only</option>
-                <option value="{% url 'DjTraders:Products' %}?status=inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Show Inactive</option>
-                <option value="{% url 'DjTraders:Products' %}?status=all" {% if request.GET.status == 'all' %}selected{% endif %}>Show All</option>
-            </select>
-        </div>
-
-        <!-- Categories Wrapper for Products -->
-        <div class="categories-wrapper categories-wrapper-products">
-            <a href="{% url 'DjTraders:Products' %}" class="category-link {% if not selected_category %}active{% endif %}">All Categories</a>
             {% for category in categories %}
-                <a href="?category={{ category.category_id }}" class="category-link {% if selected_category == category.category_id %}active{% endif %}">{{ category.category_name }}</a>
+                <a href="{% url 'DjTraders:Products' %}?category={{ category.category_id }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                   class="{% if selected_category == category.category_id|stringformat:'s' %}active{% endif %}">
+                    {{ category.category_name }}
+                </a>
             {% endfor %}
         </div>
 
         <!-- Product Card Grid -->
-        <div class="card-grid card-grid-products">
+        <div class="card-grid-products">
             {% for product in products %}
-            <div class="card card-products {% if product.status != 'active' %}inactive{% endif %}">
+            <div class="card-products {% if product.status == 'inactive' %}inactive{% endif %}">
                 <h3 class="card-title">{{ product.product_name }}</h3>
                 <div class="card-info">
-                    <span><strong>Category:</strong> {{ product.category.category_name }}</span>
-                    <span><strong>Unit:</strong> {{ product.unit }}</span>
-                    <span><strong>Price:</strong> ${{ product.price }}</span>
-                    {% if product.status != 'active' %}
-                        <span><strong>Status:</strong> {{ product.get_status_display }}</span>
-                    {% endif %}
+                    <p><strong>Category:</strong> {{ product.category.category_name }}</p>
+                    <p><strong>Supplier:</strong> {{ product.supplier.company_name }}</p>
+                    <p><strong>Unit Price:</strong> ${{ product.price|floatformat:2 }}</p>
+                    <p><strong>Units in Stock:</strong> {{ product.units_in_stock }}</p>
+                    <p><strong>Status:</strong> {{ product.status }}</p>
                 </div>
                 <div class="card-actions">
-                    <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn view-btn" title="View">
+                    <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn view-btn">
                         <i class="fas fa-eye"></i> View
                     </a>
-                    <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn edit-btn" title="Edit">
+                    <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn edit-btn">
                         <i class="fas fa-pen"></i> Edit
                     </a>
                     {% if product.status == 'active' %}
                         <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="inactive">
-                            <button type="submit" class="action-btn archive-btn" title="Archive">
+                            <button type="submit" class="action-btn archive-btn">
                                 <i class="fas fa-archive"></i> Archive
                             </button>
                         </form>
@@ -65,7 +85,7 @@
                         <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="active">
-                            <button type="submit" class="action-btn archive-btn" title="Unarchive">
+                            <button type="submit" class="action-btn archive-btn">
                                 <i class="fas fa-box-open"></i> Unarchive
                             </button>
                         </form>
@@ -73,9 +93,7 @@
                 </div>
             </div>
             {% empty %}
-            <div class="no-results">
-                <p>No products found matching your criteria.</p>
-            </div>
+            <p>No products found.</p>
             {% endfor %}
         </div>
     </div>
