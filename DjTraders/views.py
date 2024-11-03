@@ -75,7 +75,6 @@ class DjTradersProductsView(ListView):
         
         # Get search parameters
         product_query = self.request.GET.get('product', '')
-        supplier_query = self.request.GET.get('supplier', '')
         category = self.request.GET.get('category', '')
         min_price = self.request.GET.get('min_price', '')
         max_price = self.request.GET.get('max_price', '')
@@ -84,8 +83,6 @@ class DjTradersProductsView(ListView):
         # Apply filters
         if product_query:
             queryset = queryset.filter(product_name__icontains=product_query)
-        if supplier_query:
-            queryset = queryset.filter(supplier__company_name__icontains=supplier_query)
         if category:
             queryset = queryset.filter(category__category_id=category)
         if min_price:
@@ -112,7 +109,6 @@ class DjTradersProductsView(ListView):
         context.update({
             'categories': categories,
             'product_query': self.request.GET.get('product', ''),
-            'supplier_query': self.request.GET.get('supplier', ''),
             'min_price': self.request.GET.get('min_price', ''),
             'max_price': self.request.GET.get('max_price', ''),
             'selected_category': self.request.GET.get('category', ''),
