@@ -17,19 +17,19 @@
             <div><strong>Price:</strong> ${{ product.price }}</div>
             <div><strong>Status:</strong> {{ product.get_status_display }}</div>
         </div>
-        <div class="product-actions">
-            <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="custom-action-btn edit-btn">
-                <i class="fas fa-pen"></i> Edit
+        <div class="button-group">
+            <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn btn-edit" title="Edit">
+                <i class="fas fa-pen"></i>
             </a>
-            <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" style="display: inline;">
+            <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
                 {% csrf_token %}
                 <input type="hidden" name="status" value="inactive">
-                <button type="submit" class="custom-action-btn archive-btn">
-                    <i class="fas fa-trash"></i> Archive
+                <button type="submit" class="action-btn btn-delete" title="Archive">
+                    <i class="fas fa-trash"></i>
                 </button>
             </form>
-            <a href="{% url 'DjTraders:Products' %}" class="custom-action-btn return-btn">
-                <i class="fas fa-chevron-left"></i> Return
+            <a href="{% url 'DjTraders:Products' %}" class="action-btn btn-view" title="Return">
+                <i class="fas fa-chevron-left"></i>
             </a>
         </div>
     </div>

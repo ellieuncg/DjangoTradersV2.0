@@ -3,12 +3,12 @@
 
 {% block content %}
 <div class="customer-detail-page">
-    <div class="customer-header-section">
+    <div class="page-header">
         <h1>{{ customer.customer_name }}</h1>
-        <div class="customer-status-badge">Status: {{ customer.get_status_display }}</div>
+        <div class="status-badge">Status: {{ customer.get_status_display }}</div>
     </div>
 
-    <div class="customer-info-section">
+    <div class="customer-info-grid">
         <div class="customer-info-details">
             <div><strong>Contact Name:</strong> {{ customer.contact_name }}</div>
             <div><strong>Address:</strong> {{ customer.address }}</div>
@@ -16,25 +16,25 @@
             <div><strong>Postal Code:</strong> {{ customer.postal_code }}</div>
             <div><strong>Country:</strong> {{ customer.country }}</div>
         </div>
-        <div class="customer-actions">
-            <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="customer-action-btn edit-btn">
-                <i class="fas fa-pen"></i> Edit
+        <div class="button-group">
+            <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn btn-edit" title="Edit">
+                <i class="fas fa-pen"></i>
             </a>
-            <form method="POST" action="{% url 'DjTraders:CustomerStatus' pk=customer.pk %}" style="display: inline;">
+            <form method="POST" action="{% url 'DjTraders:CustomerStatus' pk=customer.pk %}" class="inline-form">
                 {% csrf_token %}
                 <input type="hidden" name="status" value="inactive">
-                <button type="submit" class="customer-action-btn archive-btn">
-                    <i class="fas fa-archive"></i> Archive
+                <button type="submit" class="action-btn btn-delete" title="Archive">
+                    <i class="fas fa-archive"></i>
                 </button>
             </form>
-            <a href="{% url 'DjTraders:Customers' %}" class="customer-action-btn return-btn">
-                <i class="fas fa-chevron-left"></i> Return
+            <a href="{% url 'DjTraders:Customers' %}" class="action-btn btn-view" title="Return">
+                <i class="fas fa-chevron-left"></i>
             </a>
         </div>
     </div>
 
-    <div class="order-history-customer">
-        <h2 class="customer-section-title">Order History</h2>
+    <div class="order-history">
+        <h2>Order History</h2>
         <table class="order-table">
             <thead>
                 <tr>

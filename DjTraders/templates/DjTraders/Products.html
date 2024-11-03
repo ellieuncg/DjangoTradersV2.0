@@ -33,8 +33,12 @@
                     </div>
                 </div>
                 <div class="button-group">
-                    <button class="search-button">Search</button>
-                    <button class="clear-search-btn">Clear</button>
+                    <button type="submit" class="action-btn btn-search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button type="button" class="action-btn btn-clear">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </form>
         </div>
@@ -67,17 +71,17 @@
                 </div>
                 <div class="card-actions">
                     <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn view-btn">
-                        <i class="fas fa-eye"></i> View
+                        <i class="fas fa-eye"></i>
                     </a>
                     <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn edit-btn">
-                        <i class="fas fa-pen"></i> Edit
+                        <i class="fas fa-pen"></i>
                     </a>
                     {% if product.status == 'active' %}
                         <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="inactive">
                             <button type="submit" class="action-btn archive-btn">
-                                <i class="fas fa-archive"></i> Archive
+                                <i class="fas fa-archive"></i>
                             </button>
                         </form>
                     {% elif product.status == 'inactive' %}
