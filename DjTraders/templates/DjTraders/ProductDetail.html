@@ -9,33 +9,17 @@
     </div>
 </div>
 
-<div class="product-details-section">
-    <h2 class="section-title">Product Details</h2>
-    
-    <div class="product-info">
-        <div>
-            <strong>Category:</strong> 
-            {{ product.category.category_name }}
-        </div>
-        <div>
-            <strong>Unit:</strong> 
-            {{ product.unit }}
-        </div>
-        <div>
-            <strong>Price:</strong> 
-            ${{ product.price }}
-        </div>
-        <div>
-            <strong>Status:</strong> 
-            {{ product.get_status_display }}
-        </div>
+<div class="product-info-grid">
+    <div class="product-info-details">
+        <div><strong>Category:</strong> {{ product.category.category_name }}</div>
+        <div><strong>Unit:</strong> {{ product.unit }}</div>
+        <div><strong>Price:</strong> ${{ product.price }}</div>
+        <div><strong>Status:</strong> {{ product.get_status_display }}</div>
     </div>
-
     <div class="product-actions">
-        <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="custom-action-btn save-btn">
+        <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="custom-action-btn edit-btn">
             <i class="fas fa-pen"></i> Edit
         </a>
-        
         <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" style="display: inline;">
             {% csrf_token %}
             <input type="hidden" name="status" value="inactive">
@@ -43,12 +27,12 @@
                 <i class="fas fa-trash"></i> Archive
             </button>
         </form>
-        
         <a href="{% url 'DjTraders:Products' %}" class="custom-action-btn return-btn">
             <i class="fas fa-chevron-left"></i> Return
         </a>
     </div>
 </div>
+
 
 <div class="order-history-product">
     <h2 class="section-title">Order History</h2>
