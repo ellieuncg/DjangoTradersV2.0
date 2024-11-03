@@ -2,68 +2,69 @@
 {% load static %}
 
 {% block content %}
-<div class="page-header header-product-detail">
-    <h1>{{ product.product_name }}</h1>
-    <div class="status-badge">
-        Status: {{ product.get_status_display }}
+<div class="product-detail-page">
+    <div class="page-header header-product-detail">
+        <h1>{{ product.product_name }}</h1>
+        <div class="status-badge">
+            Status: {{ product.get_status_display }}
+        </div>
     </div>
-</div>
 
-<div class="product-info-grid">
-    <div class="product-info-details">
-        <div><strong>Category:</strong> {{ product.category.category_name }}</div>
-        <div><strong>Unit:</strong> {{ product.unit }}</div>
-        <div><strong>Price:</strong> ${{ product.price }}</div>
-        <div><strong>Status:</strong> {{ product.get_status_display }}</div>
+    <div class="product-info-grid">
+        <div class="product-info-details">
+            <div><strong>Category:</strong> {{ product.category.category_name }}</div>
+            <div><strong>Unit:</strong> {{ product.unit }}</div>
+            <div><strong>Price:</strong> ${{ product.price }}</div>
+            <div><strong>Status:</strong> {{ product.get_status_display }}</div>
+        </div>
+        <div class="product-actions">
+            <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="custom-action-btn edit-btn">
+                <i class="fas fa-pen"></i> Edit
+            </a>
+            <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="inactive">
+                <button type="submit" class="custom-action-btn archive-btn">
+                    <i class="fas fa-trash"></i> Archive
+                </button>
+            </form>
+            <a href="{% url 'DjTraders:Products' %}" class="custom-action-btn return-btn">
+                <i class="fas fa-chevron-left"></i> Return
+            </a>
+        </div>
     </div>
-    <div class="product-actions">
-        <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="custom-action-btn edit-btn">
-            <i class="fas fa-pen"></i> Edit
-        </a>
-        <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" style="display: inline;">
-            {% csrf_token %}
-            <input type="hidden" name="status" value="inactive">
-            <button type="submit" class="custom-action-btn archive-btn">
-                <i class="fas fa-trash"></i> Archive
-            </button>
-        </form>
-        <a href="{% url 'DjTraders:Products' %}" class="custom-action-btn return-btn">
-            <i class="fas fa-chevron-left"></i> Return
-        </a>
+
+    <div class="order-history-product">
+        <h2 class="section-title">Order History</h2>
+        
+        <table class="order-table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Order Date</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detail in order_details %}
+                <tr>
+                    <td>
+                        <a href="{% url 'DjTraders:CustomerDetail' pk=detail.order.customer.pk %}" class="customer-link">
+                            {{ detail.order.customer.customer_name }}
+                        </a>
+                    </td>
+                    <td>{{ detail.order.order_date }}</td>
+                    <td>{{ detail.quantity }}</td>
+                    <td>${{ detail.total }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="no-orders">No orders found for this product.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-</div>
-
-
-<div class="order-history-product">
-    <h2 class="section-title">Order History</h2>
-    
-    <table class="order-table">
-        <thead>
-            <tr>
-                <th>Customer</th>
-                <th>Order Date</th>
-                <th>Quantity</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for detail in order_details %}
-            <tr>
-                <td>
-                    <a href="{% url 'DjTraders:CustomerDetail' pk=detail.order.customer.pk %}" class="customer-link">
-                        {{ detail.order.customer.customer_name }}
-                    </a>
-                </td>
-                <td>{{ detail.order.order_date }}</td>
-                <td>{{ detail.quantity }}</td>
-                <td>${{ detail.total }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="no-orders">No orders found for this product.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
 {% endblock %}
