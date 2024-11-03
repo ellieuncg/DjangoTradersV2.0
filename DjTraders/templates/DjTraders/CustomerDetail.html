@@ -2,60 +2,69 @@
 {% load static %}
 
 {% block content %}
-<div class="customer-form-page">
-    <div class="header-customer-form">
-        <h1 class="customer-form-title">{% if customer %}Update{% else %}New{% endif %} Customer</h1>
+<div class="customer-detail-page">
+    <div class="customer-header-section">
+        <h1>{{ customer.customer_name }}</h1>
+        <div class="customer-status-badge">Status: {{ customer.get_status_display }}</div>
     </div>
 
-    <div class="form-container-customer">
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-row-customer">
-                <label class="form-label-customer">Customer name:</label>
-                <div class="form-field-customer">
-                    <input type="text" name="customer_name" value="{{ customer.customer_name }}" required>
-                </div>
-            </div>
-            <div class="form-row-customer">
-                <label class="form-label-customer">Contact name:</label>
-                <div class="form-field-customer">
-                    <input type="text" name="contact_name" value="{{ customer.contact_name }}" required>
-                </div>
-            </div>
-            <div class="form-row-customer">
-                <label class="form-label-customer">Address:</label>
-                <div class="form-field-customer">
-                    <input type="text" name="address" value="{{ customer.address }}" required>
-                </div>
-            </div>
-            <div class="form-row-customer">
-                <label class="form-label-customer">City:</label>
-                <div class="form-field-customer">
-                    <input type="text" name="city" value="{{ customer.city }}" required>
-                </div>
-            </div>
-            <div class="form-row-customer">
-                <label class="form-label-customer">Postal code:</label>
-                <div class="form-field-customer">
-                    <input type="text" name="postal_code" value="{{ customer.postal_code }}" required>
-                </div>
-            </div>
-            <div class="form-row-customer">
-                <label class="form-label-customer">Country:</label>
-                <div class="form-field-customer">
-                    <input type="text" name="country" value="{{ customer.country }}" required>
-                </div>
-            </div>
-            
-            <div class="action-buttons">
-                <button type="submit" class="custom-action-btn save-btn">
-                    <i class="fas fa-save"></i> Save
+    <div class="customer-info-section">
+        <div class="customer-info-details">
+            <div><strong>Contact Name:</strong> {{ customer.contact_name }}</div>
+            <div><strong>Address:</strong> {{ customer.address }}</div>
+            <div><strong>City:</strong> {{ customer.city }}</div>
+            <div><strong>Postal Code:</strong> {{ customer.postal_code }}</div>
+            <div><strong>Country:</strong> {{ customer.country }}</div>
+        </div>
+        <div class="customer-actions">
+            <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="customer-action-btn edit-btn">
+                <i class="fas fa-pen"></i> Edit
+            </a>
+            <form method="POST" action="{% url 'DjTraders:CustomerStatus' pk=customer.pk %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="inactive">
+                <button type="submit" class="customer-action-btn archive-btn">
+                    <i class="fas fa-archive"></i> Archive
                 </button>
-                <a href="{% url 'DjTraders:Customers' %}" class="custom-action-btn return-btn">
-                    <i class="fas fa-chevron-left"></i> Return
-                </a>
-            </div>
-        </form>
+            </form>
+            <a href="{% url 'DjTraders:Customers' %}" class="customer-action-btn return-btn">
+                <i class="fas fa-chevron-left"></i> Return
+            </a>
+        </div>
+    </div>
+
+    <div class="order-history-customer">
+        <h2 class="customer-section-title">Order History</h2>
+        <table class="order-table">
+            <thead>
+                <tr>
+                    <th>Order Date</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in customer.orders.all %}
+                <tr>
+                    <td>{{ order.order_date }}</td>
+                    <td>
+                        {% for detail in order.orderdetails.all %}
+                            {{ detail.product.product_name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for detail in order.orderdetails.all %}
+                            {{ detail.quantity }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="no-orders">No orders found for this customer.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

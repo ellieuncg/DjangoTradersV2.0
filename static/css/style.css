@@ -152,19 +152,7 @@ h1, h2, h3, h4, h5, h6 {
     overflow: hidden;
 }
 
-.header-product-detail {
-    display: flex;
-    align-items: center; /* Center vertically */
-    justify-content: space-between; /* Spread content evenly */
-}
-
-.header-product-detail .status-badge {
-    align-self: center;
-    padding: 0.5rem 1.5rem;
-    margin-left: auto;
-}
-
-/* Subtle background pattern */
+/* Subtle background pattern for header */
 .page-header::before {
     content: '';
     position: absolute;
@@ -186,7 +174,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .page-header h1,
-.header-customer-detail h1 {
+.header-customer-detail h1,
+.header-product-detail h1 {
     font-family: var(--font-secondary);
     font-size: 2.25rem;
     margin: 0;
@@ -249,11 +238,228 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+
+/*===============================
+  Customer Details Styles
+===============================*/
+
+.customer-detail-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.header-customer-detail {
+    background: linear-gradient(
+        135deg,
+        var(--primary-color) 0%,
+        color-mix(in srgb, var(--primary-color) 85%, var(--accent-color))
+    );
+    color: var(--card-background);
+    padding: 2.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.header-customer-detail h1 {
+    font-family: var(--font-secondary);
+    font-size: 2.25rem;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+}
+
+.customer-info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.customer-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.customer-info-details div {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.customer-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.order-history-customer {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-history-customer h2.section-title {
+    font-family: var(--font-secondary);
+    font-size: 1.75rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--neutral-light);
+}
+
+.order-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1rem;
+}
+
+.order-table th {
+    background-color: var(--neutral-dark);
+    color: var(--card-background);
+    font-weight: bold;
+    padding: 1rem;
+    border-bottom: 2px solid var(--neutral-light);
+    font-size: 0.875rem;
+}
+
+.order-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--neutral-light);
+}
+
+.no-orders {
+    text-align: center;
+    padding: 1rem;
+    color: var(--neutral-dark);
+    font-weight: 500;
+}
+
+.customer-section-title {
+    font-family: var(--font-secondary);
+    font-size: 1.75rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--neutral-light);
+}
+
+/*===============================
+  Customer Actions Styles
+===============================*/
+
+.customer-info-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.customer-actions-container {
+    display: flex;
+    justify-content: flex-start;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.archive-btn, .return-btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.archive-btn {
+    background-color: var(--danger-color);
+    transition: background-color 0.2s ease;
+}
+
+.archive-btn:hover {
+    background-color: color-mix(in srgb, var(--danger-color) 85%, black);
+}
+
+.return-btn {
+    background-color: var(--accent-color);
+    transition: background-color 0.2s ease;
+}
+
+.return-btn:hover {
+    background-color: color-mix(in srgb, var(--accent-color) 85%, black);
+}
+
+.customer-action-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.customer-action-btn.archive-btn {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.customer-action-btn.archive-btn:hover {
+    background-color: color-mix(in srgb, var(--danger-color) 90%, black);
+}
+
+.customer-action-btn.return-btn {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.customer-action-btn.return-btn:hover {
+    background-color: color-mix(in srgb, var(--accent-color) 90%, black);
+}
+
+
 /*===============================
   Product Details Styles
 ===============================*/
 .product-details-page {
-    max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     padding: 0 1.5rem;
 }
@@ -1110,7 +1316,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /*===============================
-  Card Grid Styles
+  Grid and Card Styles
 ===============================*/
 .card-grid-customers,
 .card-grid-products {
@@ -1430,29 +1636,6 @@ h1, h2, h3, h4, h5, h6 {
     overflow: hidden;
 }
 
-/* Base button styles */
-.action-btn,
-.custom-action-btn,
-.action-btn-customer {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.375rem 0.75rem;  /* Reduced from 0.625rem 1.5rem */
-    font-size: 0.875rem;  /* Reduced from 0.9375rem */
-    border-radius: 8px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    color: white;
-    font-weight: 500;
-    border: none;
-    font-family: var(--font-primary);
-    letter-spacing: 0.01em;
-    min-width: 80px;  /* Reduced from 120px */
-    position: relative;
-    overflow: hidden;
-}
-
 /* Button hover and active states */
 .action-btn::after,
 .custom-action-btn::after,
@@ -1614,6 +1797,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+
 /*===============================
   Page-Specific Styles
 ===============================*/
@@ -1621,7 +1805,7 @@ h1, h2, h3, h4, h5, h6 {
 .customer-update-page,
 .product-detail-page {
     padding: 2rem;
-    max-width: 800px;
+    /* max-width: 800px; */
     margin: 0 auto;
     background-color: var(--card-background);
     border-radius: 12px;
@@ -2128,4 +2312,80 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+
+
+/*===============================
+  Customer Page Header Styles
+===============================*/
+.customer-header-section {
+    background: linear-gradient(
+        135deg,
+        var(--primary-color) 0%,
+        color-mix(in srgb, var(--primary-color) 85%, var(--accent-color))
+    );
+    color: var(--card-background);
+    padding: 2rem 2.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.05),
+        0 8px 24px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.customer-header-section h1 {
+    font-family: var(--font-secondary);
+    font-size: 2.25rem;
+    margin: 0;
+    letter-spacing: var(--heading-letter-spacing);
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.customer-status-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    margin-left: auto;
+}
+
+/* Background pattern for Customer Page Header */
+.customer-header-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.05) 75%,
+        transparent 75%
+    );
+    background-size: 64px 64px;
+    opacity: 0.4;
+}
+
+/* Responsive adjustments specifically for Customer Page Header */
+@media (max-width: 768px) {
+    .customer-header-section {
+        padding: 1.5rem 1.75rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .customer-header-section h1 {
+        font-size: 1.75rem;
+    }
 }
