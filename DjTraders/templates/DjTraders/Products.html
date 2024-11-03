@@ -6,6 +6,14 @@
     <div class="container">
         <div class="page-header">
             <h1>Our Products</h1>
+            <div class="product-header-status">
+                <select name="status" class="status-select">
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
+                </select>
+            </div>
             <a href="{% url 'DjTraders:ProductCreate' %}"><i class="fas fa-plus"></i></a>
         </div>
         
@@ -27,12 +35,6 @@
                         <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}">
                     </div>
                 </div>
-                <select name="status" class="status-select">
-                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
-                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
-                    <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
-                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
-                </select>
                 <div class="button-group">
                     <button class="search-button">Search</button>
                     <button class="clear-search-btn">Clear</button>

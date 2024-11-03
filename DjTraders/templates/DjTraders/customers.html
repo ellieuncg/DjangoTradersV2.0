@@ -6,50 +6,52 @@
     <div class="container">
         <div class="page-header">
             <h1>Our Customers</h1>
+            <div class="customer-header-status">
+                <select name="status" class="status-select">
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
+                </select>
+            </div>
             <a href="{% url 'DjTraders:CustomerCreate' %}"><i class="fas fa-plus"></i></a>
         </div>
         
         <!-- Search Bar and Filter -->
-        <form method="get" class="customer-search-container" id="customerFilterForm">
-            <div class="customer-search-field-group">
-                <div class="customer-search-field-header">
-                    <i class="fas fa-sort sort-icon" data-sort="customer"></i>
-                    <input type="text" name="customer" placeholder="Customer Name" value="{{ customer_query }}">
-                </div>
-                <div class="customer-search-field-header">
-                    <i class="fas fa-sort sort-icon" data-sort="contact"></i>
-                    <input type="text" name="contact" placeholder="Contact" value="{{ contact_query }}">
-                </div>
-                <div class="customer-search-field-header">
-                    <i class="fas fa-sort sort-icon" data-sort="city"></i>
-                    <input type="text" name="city" placeholder="City" value="{{ city_query }}">
-                </div>
-                <div class="customer-search-field-header">
-                    <i class="fas fa-sort sort-icon" data-sort="country"></i>
-                    <select name="country" class="status-select">
-                        <option value="">Select Country</option>
-                        {% for country in countries %}
-                            <option value="{{ country }}" {% if country_query == country %}selected{% endif %}>
-                                {{ country }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <button type="submit" class="search-button">Search</button>
-            <button type="button" class="action-btn archive-btn clear-search-btn">
-                <i class="fas fa-times"></i> Clear
-            </button>
-            {% if request.GET.letter %}
-            <input type="hidden" name="letter" value="{{ request.GET.letter }}">
-            {% endif %}
-            <select name="status" class="status-select">
-                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
-                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
-                <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
-                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
+<form method="get" class="customer-search-container" id="customerFilterForm">
+    <div class="customer-search-field-group">
+        <div class="customer-search-field-header">
+            <i class="fas fa-sort sort-icon" data-sort="customer"></i>
+            <input type="text" name="customer" placeholder="Customer Name" value="{{ customer_query }}">
+        </div>
+        <div class="customer-search-field-header">
+            <i class="fas fa-sort sort-icon" data-sort="contact"></i>
+            <input type="text" name="contact" placeholder="Contact" value="{{ contact_query }}">
+        </div>
+        <div class="customer-search-field-header">
+            <i class="fas fa-sort sort-icon" data-sort="city"></i>
+            <input type="text" name="city" placeholder="City" value="{{ city_query }}">
+        </div>
+        <div class="customer-search-field-header">
+            <i class="fas fa-sort sort-icon" data-sort="country"></i>
+            <select name="country" class="status-select">
+                <option value="">Select Country</option>
+                {% for country in countries %}
+                    <option value="{{ country }}" {% if country_query == country %}selected{% endif %}>
+                        {{ country }}
+                    </option>
+                {% endfor %}
             </select>
-        </form>
+        </div>
+    </div>
+    <button type="submit" class="search-button">Search</button>
+    <button type="button" class="clear-search-btn">
+        <i class="fas fa-times"></i> Clear
+    </button>
+    {% if request.GET.letter %}
+    <input type="hidden" name="letter" value="{{ request.GET.letter }}">
+    {% endif %}
+</form>
 
         <!-- Alphabet Filter -->
         <div class="alphabet-links-customers">
