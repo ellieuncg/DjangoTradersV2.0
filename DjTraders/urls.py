@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-app_name = 'DjTraders'  # This should match the primary namespace
+app_name = 'DjTraders'
 
 urlpatterns = [
     path('', views.index, name='Index'),

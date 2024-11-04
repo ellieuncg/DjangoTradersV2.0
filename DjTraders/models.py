@@ -1,5 +1,12 @@
 from django.db import models
 from django.utils import timezone
+from django.core.validators import RegexValidator
+
+# Validator to ensure fields do not contain numbers
+no_numbers_validator = RegexValidator(
+    regex=r'^[^\d]+$',
+    message="This field should not contain numbers."
+)
 
 class Category(models.Model):
     category_id = models.AutoField(primary_key=True)
@@ -16,15 +23,27 @@ class Customer(models.Model):
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         ('archived', 'Archived')
-    ]
-    
+]
+
     customer_id = models.AutoField(primary_key=True)
-    customer_name = models.CharField(max_length=255)
-    contact_name = models.CharField(max_length=255)
+    customer_name = models.CharField(
+        max_length=255,
+        validators=[no_numbers_validator]
+    )
+    contact_name = models.CharField(
+        max_length=255,
+        validators=[no_numbers_validator]
+    )
     address = models.CharField(max_length=255, default='')
-    city = models.CharField(max_length=100)
+    city = models.CharField(
+        max_length=100,
+        validators=[no_numbers_validator]
+    )
     postal_code = models.CharField(max_length=20)
-    country = models.CharField(max_length=100)
+    country = models.CharField(
+        max_length=100,
+        validators=[no_numbers_validator]
+    )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     last_activity_date = models.DateTimeField(default=timezone.now)
     archived_date = models.DateTimeField(null=True, blank=True)
@@ -49,13 +68,13 @@ class Customer(models.Model):
         self.status = 'archived'
         self.archived_date = timezone.now()
         self.save()
-        
+
     def unarchive(self):
         self.status = 'active'
         self.archived_date = None
         self.last_activity_date = timezone.now()
         self.save()
-        
+
     @property
     def days_inactive(self):
         return (timezone.now() - self.last_activity_date).days
@@ -65,7 +84,7 @@ class Product(models.Model):
         ('active', 'Active'),
         ('inactive', 'Inactive')
     ]
-    
+
     product_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')

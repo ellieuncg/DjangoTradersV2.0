@@ -68,8 +68,19 @@
     <!-- Footer -->
     <footer class="footer mt-auto py-3">
         <div class="container text-center">
-            <span class="text-muted">© {{ request.get_host }} - ISM 672</span>
-        </div>
+            <span class="text-muted">🦬 🦌 Made with ❤️ in Jackson, Wyoming 🐻  🦌</span>        </div>
     </footer>
+    <div id="debug" style="display:none;">
+        <p>Status Filter: {{ status_filter }}</p>
+        <p>Current URL: {{ request.get_full_path }}</p>
+    </div>
+    
+    {% if debug %}
+    <script>
+        console.log('Debug mode active');
+        console.log('Status Filter:', '{{ status_filter }}');
+        console.log('Current URL:', '{{ request.get_full_path }}');
+    </script>
+    {% endif %}
 </body>
 </html>

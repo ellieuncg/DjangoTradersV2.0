@@ -3,59 +3,96 @@
 
 {% block content %}
 <div class="customer-form-page">
-    <div class="header-customer-form">
-        <h1>{% if customer %}Update{% else %}New{% endif %} Customer</h1>
-    </div>
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>{% if customer %}Update{% else %}New{% endif %} Customer</h1>
+            <a href="{% url 'DjTraders:Customers' %}" class="action-btn btn-view" title="Return to Customers">
+                <i class="fas fa-chevron-left"></i> Back to Customers
+            </a>
+        </div>
 
-    <div class="form-container-customer">
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-row-customer">
-                <label class="form-label">Customer name:</label>
-                <div class="form-field">
-                    <input type="text" name="customer_name" value="{{ customer.customer_name }}" required>
+        <!-- Form Container -->
+        <div class="form-container-customer">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                
+                <!-- Customer Name -->
+                <div class="form-row-customer">
+                    <label class="form-label">Customer name:</label>
+                    <div class="form-field">
+                        {{ form.customer_name.errors }}
+                        {{ form.customer_name }}
+                    </div>
                 </div>
-            </div>
-            <div class="form-row-customer">
-                <label class="form-label">Contact name:</label>
-                <div class="form-field">
-                    <input type="text" name="contact_name" value="{{ customer.contact_name }}" required>
+                
+                <!-- Contact Name -->
+                <div class="form-row-customer">
+                    <label class="form-label">Contact name:</label>
+                    <div class="form-field">
+                        {{ form.contact_name.errors }}
+                        {{ form.contact_name }}
+                    </div>
                 </div>
-            </div>
-            <div class="form-row-customer">
-                <label class="form-label">Address:</label>
-                <div class="form-field">
-                    <input type="text" name="address" value="{{ customer.address }}" required>
+                
+                <!-- Address -->
+                <div class="form-row-customer">
+                    <label class="form-label">Address:</label>
+                    <div class="form-field">
+                        {{ form.address.errors }}
+                        {{ form.address }}
+                    </div>
                 </div>
-            </div>
-            <div class="form-row-customer">
-                <label class="form-label">City:</label>
-                <div class="form-field">
-                    <input type="text" name="city" value="{{ customer.city }}" required>
+                
+                <!-- City -->
+                <div class="form-row-customer">
+                    <label class="form-label">City:</label>
+                    <div class="form-field">
+                        {{ form.city.errors }}
+                        {{ form.city }}
+                    </div>
                 </div>
-            </div>
-            <div class="form-row-customer">
-                <label class="form-label">Postal code:</label>
-                <div class="form-field">
-                    <input type="text" name="postal_code" value="{{ customer.postal_code }}" required>
+                
+                <!-- Postal Code -->
+                <div class="form-row-customer">
+                    <label class="form-label">Postal code:</label>
+                    <div class="form-field">
+                        {{ form.postal_code.errors }}
+                        {{ form.postal_code }}
+                    </div>
                 </div>
-            </div>
-            <div class="form-row-customer">
-                <label class="form-label">Country:</label>
-                <div class="form-field">
-                    <input type="text" name="country" value="{{ customer.country }}" required>
+                
+                <!-- Country -->
+                <div class="form-row-customer">
+                    <label class="form-label">Country:</label>
+                    <div class="form-field">
+                        {{ form.country.errors }}
+                        {{ form.country }}
+                    </div>
                 </div>
-            </div>
-            
-            <div class="button-group">
-                <button type="submit" class="action-btn btn-edit" title="Save">
-                    <i class="fas fa-save"></i>
-                </button>
-                <a href="{% url 'DjTraders:Customers' %}" class="action-btn btn-view" title="Return">
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-            </div>
-        </form>
+                
+                
+                <!-- Status (if applicable) -->
+                <div class="form-row-customer">
+                    <label class="form-label">Status:</label>
+                    <div class="form-field">
+                        {{ form.status.errors }}
+                        {{ form.status }}
+                    </div>
+                </div>
+                
+                <!-- Buttons -->
+                <div class="button-group">
+                    <button type="submit" class="action-btn btn-edit" title="Save">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <a href="{% url 'DjTraders:Customers' %}" class="action-btn btn-view" title="Return">
+                        <i class="fas fa-chevron-left"></i> Return
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

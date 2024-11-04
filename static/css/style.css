@@ -1397,7 +1397,7 @@
 .card-customers.inactive,
 .card-products.inactive {
     opacity: 0.75;
-    background-color: color-mix(in srgb, var(--card-background) 97%, var(--neutral-light));
+    background-color: #e0e0e0;
 }
 
 .card-customers.inactive:hover,
@@ -1585,7 +1585,7 @@
 .card-customers.inactive,
 .card-products.inactive {
     position: relative;
-    background-color: color-mix(in srgb, var(--card-background) 97%, var(--neutral-light));
+    background-color: #e0e0e0;
     color: var(--neutral-dark);
     opacity: 0.85;
     border-color: var(--neutral-light);
@@ -2236,4 +2236,229 @@
         width: 18px;
         height: 18px;
     }
+}
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.status-select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: white;
+}
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.status-filter-header {
+    display: flex;
+    align-items: center;
+}
+
+.status-filter-form {
+    margin: 0;
+}
+
+.status-select {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: white;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;  /* Add this */
+    z-index: 10;        /* Add this */
+}
+
+.status-select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: white;
+    cursor: pointer;    /* Add this */
+    min-width: 120px;   /* Add this */
+}
+
+.status-filter-header {
+    display: flex;
+    align-items: center;
+    position: relative;  /* Add this */
+    z-index: 20;        /* Add this */
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.status-filter-header {
+    margin: 0 20px;
+    position: relative;
+    z-index: 20;
+}
+
+.status-select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+    min-width: 120px;
+    position: relative;
+    z-index: 30;
+}
+
+/* Make sure the select is clickable */
+.status-select:hover {
+    border-color: #666;
+}
+
+/* Style the select dropdown */
+.status-select option {
+    padding: 8px;
+}
+
+/* Main page header container */
+.page-header {
+    background: linear-gradient(
+        135deg,
+        var(--primary-color) 0%,
+        color-mix(in srgb, var(--primary-color) 85%, var(--accent-color))
+    );
+    color: var(--card-background);
+    padding: 2rem 2.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: flex-start;  /* Changed from space-between */
+    align-items: center;
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.05),
+        0 8px 24px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Header title styles */
+.page-header h1 {
+    font-family: var(--font-secondary);
+    font-size: 2.25rem;
+    margin: 0;
+    letter-spacing: var(--heading-letter-spacing);
+    font-weight: 600;
+    position: relative;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex-grow: 1;  /* Added to push other elements to the right */
+}
+
+/* Header controls container */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;  /* Added to push to the right */
+}
+
+/* Status filter container */
+.status-filter-header {
+    margin-right: 1rem;  /* Space between filter and add button */
+}
+
+/* Status filter form */
+.status-filter-form {
+    margin: 0;
+}
+
+/* Status select styling */
+.status-select {
+    padding: 0.625rem 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--card-background);
+    font-family: var(--font-primary);
+    font-size: var(--base-font-size);
+    min-width: 140px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    padding-right: 2.5rem;
+    backdrop-filter: blur(8px);
+}
+
+.status-select:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* Add button styling */
+.btn-add-new {
+    padding: 0.625rem;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--card-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+}
+
+.btn-add-new:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 1.5rem;
+    }
+    
+    .page-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .status-select {
+        min-width: 120px;
+        padding: 0.5rem 2rem 0.5rem 0.75rem;
+    }
+}
+.customer-link {
+    color: #B08D57;  /* This is the golden brown color from your action buttons */
+    text-decoration: none;
+}
+
+.customer-link:hover {
+    color: #67744D;  /* This is the darker green color from your palette */
+    text-decoration: underline;
 }

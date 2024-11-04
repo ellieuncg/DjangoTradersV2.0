@@ -2,69 +2,82 @@
 {% load static %}
 
 {% block content %}
-<div class="customer-detail-page">
+<div class="customer-form-page">
     <div class="page-header">
-        <h1>{{ customer.customer_name }}</h1>
-        <div class="status-badge">Status: {{ customer.get_status_display }}</div>
+        <h1>{% if customer %}Update{% else %}New{% endif %} Customer</h1>
     </div>
 
-    <div class="customer-info-grid">
-        <div class="customer-info-details">
-            <div><strong>Contact Name:</strong> {{ customer.contact_name }}</div>
-            <div><strong>Address:</strong> {{ customer.address }}</div>
-            <div><strong>City:</strong> {{ customer.city }}</div>
-            <div><strong>Postal Code:</strong> {{ customer.postal_code }}</div>
-            <div><strong>Country:</strong> {{ customer.country }}</div>
-        </div>
-        <div class="button-group">
-            <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn btn-edit" title="Edit">
-                <i class="fas fa-pen"></i>
-            </a>
-            <form method="POST" action="{% url 'DjTraders:CustomerStatus' pk=customer.pk %}" class="inline-form">
-                {% csrf_token %}
-                <input type="hidden" name="status" value="inactive">
-                <button type="submit" class="action-btn btn-delete" title="Archive">
-                    <i class="fas fa-archive"></i>
+    <div class="form-container-customer">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="form-row-customer">
+                <label class="form-label">Customer name:</label>
+                <div class="form-field">
+                    {{ form.customer_name.errors }}
+                    {{ form.customer_name }}
+                </div>
+            </div>
+
+            <div class="form-row-customer">
+                <label class="form-label">Contact name:</label>
+                <div class="form-field">
+                    {{ form.contact_name.errors }}
+                    {{ form.contact_name }}
+                </div>
+            </div>
+
+            <div class="form-row-customer">
+                <label class="form-label">Address:</label>
+                <div class="form-field">
+                    {{ form.address.errors }}
+                    {{ form.address }}
+                </div>
+            </div>
+
+            <div class="form-row-customer">
+                <label class="form-label">City:</label>
+                <div class="form-field">
+                    {{ form.city.errors }}
+                    {{ form.city }}
+                </div>
+            </div>
+
+            <div class="form-row-customer">
+                <label class="form-label">Postal code:</label>
+                <div class="form-field">
+                    {{ form.postal_code.errors }}
+                    {{ form.postal_code }}
+                </div>
+            </div>
+
+            <div class="form-row-customer">
+                <label class="form-label">Country:</label>
+                <div class="form-field">
+                    {{ form.country.errors }}
+                    {{ form.country }}
+                </div>
+            </div>
+
+            <div class="form-row-customer">
+                <label class="form-label">Status:</label>
+                <div class="form-field">
+                    {{ form.status.errors }}
+                    {{ form.status }}
+                </div>
+            </div>
+
+            <!-- Button group for Save and Return buttons -->
+            <div class="button-group">
+                <button type="submit" class="action-btn btn-edit" title="Save">
+                    <i class="fas fa-save"></i> Save
                 </button>
-            </form>
-            <a href="{% url 'DjTraders:Customers' %}" class="action-btn btn-view" title="Return">
-                <i class="fas fa-chevron-left"></i>
-            </a>
-        </div>
-    </div>
-
-    <div class="order-history">
-        <h2>Order History</h2>
-        <table class="order-table">
-            <thead>
-                <tr>
-                    <th>Order Date</th>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in customer.orders.all %}
-                <tr>
-                    <td>{{ order.order_date }}</td>
-                    <td>
-                        {% for detail in order.orderdetails.all %}
-                            {{ detail.product.product_name }}{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for detail in order.orderdetails.all %}
-                            {{ detail.quantity }}{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="no-orders">No orders found for this customer.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                <a href="{% url 'DjTraders:Customers' %}" class="action-btn btn-view" title="Return">
+                    <i class="fas fa-chevron-left"></i> Return
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

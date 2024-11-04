@@ -6,17 +6,24 @@
     <div class="container">
         <div class="page-header">
             <h1>Our Products</h1>
-            <div class="product-header-status">
-                <select name="status" class="status-select">
-                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
-                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
-                    <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
-                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
-                </select>
+            <div class="header-controls">
+                <div class="status-filter-header">
+                    <form method="GET" class="status-filter-form" id="statusFilterForm">
+                        <input type="hidden" name="category" value="{{ request.GET.category }}">
+                        <select name="status" class="status-select" onchange="this.form.submit();" data-current-status="{{ status_filter }}">
+                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                            <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
+                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
+                        </select>
+                    </form>
+                </div>
+                <a href="{% url 'DjTraders:ProductCreate' %}" class="btn-add-new">
+                    <i class="fas fa-plus"></i>
+                </a>
             </div>
-            <a href="{% url 'DjTraders:ProductCreate' %}"><i class="fas fa-plus"></i></a>
         </div>
-        
+
         <!-- Search Bar and Filter -->
         <div class="search-container-products">
             <form method="get" class="search-form">
@@ -64,9 +71,7 @@
                 <h3 class="card-title">{{ product.product_name }}</h3>
                 <div class="card-info">
                     <p><strong>Category:</strong> {{ product.category.category_name }}</p>
-                    <!-- <p><strong>Supplier:</strong> {{ product.supplier.company_name }}</p> -->
                     <p><strong>Unit Price:</strong> ${{ product.price|floatformat:2 }}</p>
-                    <p><strong>Units in Stock:</strong> {{ product.units_in_stock }}</p>
                     <p><strong>Status:</strong> {{ product.status }}</p>
                 </div>
                 <div class="card-actions">
@@ -76,23 +81,6 @@
                     <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn edit-btn">
                         <i class="fas fa-pen"></i>
                     </a>
-                    {% if product.status == 'active' %}
-                        <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
-                            {% csrf_token %}
-                            <input type="hidden" name="status" value="inactive">
-                            <button type="submit" class="action-btn archive-btn">
-                                <i class="fas fa-archive"></i>
-                            </button>
-                        </form>
-                    {% elif product.status == 'inactive' %}
-                        <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
-                            {% csrf_token %}
-                            <input type="hidden" name="status" value="active">
-                            <button type="submit" class="action-btn archive-btn">
-                                <i class="fas fa-box-open"></i> Unarchive
-                            </button>
-                        </form>
-                    {% endif %}
                 </div>
             </div>
             {% empty %}
