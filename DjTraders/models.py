@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinLengthValidator
 
 # Validator to ensure fields do not contain numbers
 no_numbers_validator = RegexValidator(
@@ -23,7 +23,7 @@ class Customer(models.Model):
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         ('archived', 'Archived')
-]
+    ]
 
     customer_id = models.AutoField(primary_key=True)
     customer_name = models.CharField(
@@ -34,10 +34,18 @@ class Customer(models.Model):
         max_length=255,
         validators=[no_numbers_validator]
     )
-    address = models.CharField(max_length=255, default='')
+    address = models.CharField(
+        max_length=255, 
+        default='',
+        validators=[
+            MinLengthValidator(3, "Address must be at least 3 characters long.")
+        ]
+    )
     city = models.CharField(
-        max_length=100,
-        validators=[no_numbers_validator]
+        max_length=100,  # Adjust max length as needed
+        validators=[no_numbers_validator],
+        blank=True,  # Optional if you want to allow null values
+        null=True
     )
     postal_code = models.CharField(max_length=20)
     country = models.CharField(

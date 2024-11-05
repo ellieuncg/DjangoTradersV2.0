@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, ListView, UpdateView
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Sum
 from .models import Customer, Product, Category, OrderDetail, Order
 from .forms import CustomerForm, ProductForm
 
@@ -30,7 +29,7 @@ class DjTradersCustomersView(ListView):
         country_query = self.request.GET.get('country', '')
         letter = self.request.GET.get('letter', '')
         status = self.request.GET.get('status', 'active')
-
+        
         # Apply filters
         if customer_query:
             queryset = queryset.filter(customer_name__icontains=customer_query)
@@ -39,37 +38,46 @@ class DjTradersCustomersView(ListView):
         if city_query:
             queryset = queryset.filter(city__icontains=city_query)
         if country_query:
-            queryset = queryset.filter(country__icontains=country_query)
+            queryset = queryset.filter(country__iexact=country_query)
         if letter:
             queryset = queryset.filter(customer_name__istartswith=letter)
         
-        # Status filter - simplified logic
+        # Status filter
         if status != 'all':
             queryset = queryset.filter(status=status)
 
         # Apply sorting
         sort_field = self.request.GET.get('sort')
         sort_direction = self.request.GET.get('direction', 'asc')
-
         if sort_field:
-            # Map frontend field names to model field names
             field_mapping = {
                 'customer': 'customer_name',
                 'contact': 'contact_name',
                 'city': 'city',
                 'country': 'country'
             }
-            
-            # Get the correct field name from mapping
             sort_field = field_mapping.get(sort_field, sort_field)
-            
-            # Apply direction
             if sort_direction == 'desc':
                 sort_field = f'-{sort_field}'
-                
             return queryset.order_by(sort_field)
 
         return queryset.order_by('customer_name')  # default sorting
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        status = self.request.GET.get('status', 'active')
+        countries = Customer.objects.values_list('country', flat=True).distinct().order_by('country')
+        
+        context.update({
+            'customer_query': self.request.GET.get('customer', ''),
+            'contact_query': self.request.GET.get('contact', ''),
+            'city_query': self.request.GET.get('city', ''),
+            'country_query': self.request.GET.get('country', ''),
+            'status_filter': status,
+            'countries': countries,
+            'current_letter': self.request.GET.get('letter', '')
+        })
+        return context
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -108,11 +116,9 @@ class DjTradersCustomerDetailView(DetailView):
             }
             order_details.append(details)
         
-        # Get sort parameters
+        # Sort order details if requested
         sort_field = self.request.GET.get('sort')
         sort_direction = self.request.GET.get('direction', 'desc')
-        
-        # Apply sorting if requested
         if sort_field:
             if sort_field == 'order_id':
                 order_details.sort(
@@ -171,22 +177,18 @@ def create_customer(request):
     return render(request, 'DjTraders/CustomerForm.html', {'form': form})
 
 def update_customer(request, pk):
-    """Update existing customer"""
     customer = get_object_or_404(Customer, pk=pk)
     if request.method == 'POST':
         form = CustomerForm(request.POST, instance=customer)
         if form.is_valid():
-            customer = form.save()
+            form.save()
             messages.success(request, 'Customer updated successfully.')
+            request.session['customer_updated'] = True  # Set session flag
             return redirect('DjTraders:CustomerDetail', pk=customer.pk)
-        else:
-            messages.error(request, 'Please correct the errors below.')
     else:
         form = CustomerForm(instance=customer)
-    return render(request, 'DjTraders/CustomerForm.html', {
-        'form': form,
-        'customer': customer
-    })
+    
+    return render(request, 'DjTraders/CustomerForm.html', {'form': form, 'customer': customer})
 
 def update_customer_status(request, pk):
     """Update customer active/inactive/archived status"""
@@ -228,20 +230,23 @@ class DjTradersProductsView(ListView):
             queryset = queryset.filter(category__category_id=category)
         if min_price:
             try:
-                queryset = queryset.filter(price__gte=float(min_price))
+                min_price = float(min_price)
+                queryset = queryset.filter(price__gte=min_price)
             except ValueError:
                 pass
         if max_price:
             try:
-                queryset = queryset.filter(price__lte=float(max_price))
+                max_price = float(max_price)
+                queryset = queryset.filter(price__lte=max_price)
             except ValueError:
                 pass
 
-        # Status filter - simplified logic
+        # Status filter
         if status != 'all':
             queryset = queryset.filter(status=status)
 
         return queryset.order_by('product_name')
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

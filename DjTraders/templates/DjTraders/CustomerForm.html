@@ -2,97 +2,129 @@
 {% load static %}
 
 {% block content %}
-<div class="customer-form-page">
+<div class="customers-page">
     <div class="container">
-        <!-- Page Header -->
         <div class="page-header">
-            <h1>{% if customer %}Update{% else %}New{% endif %} Customer</h1>
-            <a href="{% url 'DjTraders:Customers' %}" class="action-btn btn-view" title="Return to Customers">
-                <i class="fas fa-chevron-left"></i> Back to Customers
-            </a>
+            <h1>New/Update Customer</h1>
         </div>
 
-        <!-- Form Container -->
-        <div class="form-container-customer">
-            <form method="post">
-                {% csrf_token %}
-                {{ form.non_field_errors }}
-                
-                <!-- Customer Name -->
-                <div class="form-row-customer">
-                    <label class="form-label">Customer name:</label>
-                    <div class="form-field">
-                        {{ form.customer_name.errors }}
-                        {{ form.customer_name }}
-                    </div>
-                </div>
-                
-                <!-- Contact Name -->
-                <div class="form-row-customer">
-                    <label class="form-label">Contact name:</label>
-                    <div class="form-field">
-                        {{ form.contact_name.errors }}
-                        {{ form.contact_name }}
-                    </div>
-                </div>
-                
-                <!-- Address -->
-                <div class="form-row-customer">
-                    <label class="form-label">Address:</label>
-                    <div class="form-field">
-                        {{ form.address.errors }}
-                        {{ form.address }}
-                    </div>
-                </div>
-                
-                <!-- City -->
-                <div class="form-row-customer">
-                    <label class="form-label">City:</label>
-                    <div class="form-field">
-                        {{ form.city.errors }}
-                        {{ form.city }}
-                    </div>
-                </div>
-                
-                <!-- Postal Code -->
-                <div class="form-row-customer">
-                    <label class="form-label">Postal code:</label>
-                    <div class="form-field">
-                        {{ form.postal_code.errors }}
-                        {{ form.postal_code }}
-                    </div>
-                </div>
-                
-                <!-- Country -->
-                <div class="form-row-customer">
-                    <label class="form-label">Country:</label>
-                    <div class="form-field">
-                        {{ form.country.errors }}
-                        {{ form.country }}
-                    </div>
-                </div>
-                
-                
-               
-                <div class="form-row-customer">
-                    <label class="form-label">Status:</label>
-                    <div class="form-field">
-                        {{ form.status.errors }}
-                        {{ form.status }}
-                    </div>
-                </div>
-                
-                <!-- Buttons -->
-                <div class="button-group">
-                    <button type="submit" class="action-btn btn-edit" title="Save">
-                        <i class="fas fa-save"></i> Save
-                    </button>
-                    <a href="{% url 'DjTraders:Customers' %}" class="action-btn btn-view" title="Return">
-                        <i class="fas fa-chevron-left"></i> Return
-                    </a>
-                </div>
-            </form>
+        <!-- Success message block, hidden initially -->
+        <div id="successMessage" class="alert alert-success" style="display: none;">
+            Customer updated successfully.
         </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Customer name field with error handling -->
+            <div class="form-group">
+                {{ form.customer_name.label_tag }}
+                {{ form.customer_name }}
+                {% if form.customer_name.errors %}
+                    <div class="text-danger">
+                        {% for error in form.customer_name.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Contact Name -->
+            <div class="form-group">
+                {{ form.contact_name.label_tag }}
+                {{ form.contact_name }}
+                {% if form.contact_name.errors %}
+                    <div class="text-danger">
+                        {% for error in form.contact_name.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Address -->
+            <div class="form-group">
+                {{ form.address.label_tag }}
+                {{ form.address }}
+                {% if form.address.errors %}
+                    <div class="text-danger">
+                        {% for error in form.address.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- City -->
+            <div class="form-group">
+                {{ form.city.label_tag }}
+                {{ form.city }}
+                {% if form.city.errors %}
+                    <div class="text-danger">
+                        {% for error in form.city.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Postal Code -->
+            <div class="form-group">
+                {{ form.postal_code.label_tag }}
+                {{ form.postal_code }}
+                {% if form.postal_code.errors %}
+                    <div class="text-danger">
+                        {% for error in form.postal_code.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Country -->
+            <div class="form-group">
+                {{ form.country.label_tag }}
+                {{ form.country }}
+                {% if form.country.errors %}
+                    <div class="text-danger">
+                        {% for error in form.country.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Status -->
+            <div class="form-group">
+                {{ form.status.label_tag }}
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div class="text-danger">
+                        {% for error in form.status.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
     </div>
 </div>
 {% endblock %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (sessionStorage.getItem('customer_updated') === 'true') {
+            const successMessage = document.getElementById('successMessage');
+            if (successMessage) {
+                // Display the success message
+                successMessage.style.display = 'block';
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                    sessionStorage.removeItem('customer_updated'); // Clear flag
+                }, 3000); // Hide after 3 seconds
+            }
+        }
+    });
+</script>

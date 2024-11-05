@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
+from django.core.validators import RegexValidator
 from .models import Customer, Product
 
 # Validator to ensure fields do not contain numbers
@@ -10,25 +10,42 @@ no_numbers_validator = RegexValidator(
 )
 
 class CustomerForm(forms.ModelForm):
-    # Apply the no_numbers_validator to relevant fields
+    # Fields
     customer_name = forms.CharField(
         validators=[no_numbers_validator],
-        widget=forms.TextInput(attrs={'required': True})
+        widget=forms.TextInput(attrs={'required': True}),
+        label="Customer Name"
     )
     contact_name = forms.CharField(
         validators=[no_numbers_validator],
-        widget=forms.TextInput(attrs={'required': True})
+        widget=forms.TextInput(attrs={'required': True}),
+        label="Contact Name"
+    )
+    address = forms.CharField(
+        min_length=3,
+        error_messages={
+            'required': 'Address is required.',
+            'min_length': 'Address must be at least 3 characters long.'
+        },
+        widget=forms.TextInput(attrs={'required': True}),
+        label="Address"
     )
     city = forms.CharField(
         validators=[no_numbers_validator],
-        widget=forms.TextInput(attrs={'required': True})
+        widget=forms.TextInput(attrs={'required': True}),
+        label="City"
     )
-    country = forms.CharField(
-        validators=[no_numbers_validator],
-        widget=forms.TextInput(attrs={'required': True})
+    country = forms.ChoiceField(
+        choices=[
+            ('USA', 'United States'),
+            ('CAN', 'Canada'),
+            ('MEX', 'Mexico'),
+            ('GBR', 'United Kingdom'),
+            ('FRA', 'France'),
+            ('GER', 'Germany'),
+        ],
+        label="Country"
     )
-
-    # Postal code validator (assuming US ZIP code format)
     postal_code = forms.CharField(
         validators=[
             RegexValidator(
@@ -36,77 +53,78 @@ class CustomerForm(forms.ModelForm):
                 message="Enter a valid postal code."
             )
         ],
-        widget=forms.TextInput(attrs={'required': True})
+        widget=forms.TextInput(attrs={'required': True}),
+        label="Postal Code"
     )
 
     class Meta:
         model = Customer
         fields = ['customer_name', 'contact_name', 'address', 'city', 'postal_code', 'country', 'status']
-        widgets = {
-            'status': forms.Select(attrs={'class': 'form-control'})
-        }
 
-    def clean_address(self):
-        address = self.cleaned_data.get('address', '').strip()
-        if len(address) < 5:
-            raise ValidationError("Address must be at least 5 characters long.")
-        return address
+    def clean_city(self):
+        city = self.cleaned_data.get('city', '')
+        if any(char.isdigit() for char in city):
+            raise ValidationError("City should not contain numbers.")
+        if len(city.strip()) < 2:
+            raise ValidationError("City name must be at least 2 characters long.")
+        return city.strip()
+
+    def clean_postal_code(self):
+        postal_code = self.cleaned_data.get('postal_code', '')
+        if not postal_code.strip():
+            raise ValidationError("Postal code is required.")
+        if not any(char.isdigit() for char in postal_code):
+            raise ValidationError("Postal code must contain at least one number.")
+        if len(postal_code.strip()) < 5:
+            raise ValidationError("Postal code must be at least 5 characters long.")
+        return postal_code.strip()
 
     def clean(self):
         cleaned_data = super().clean()
-        # Example of cross-field validation if needed
         city = cleaned_data.get('city')
         country = cleaned_data.get('country')
         if city and country and city.lower() == country.lower():
             raise ValidationError("City and Country cannot be the same.")
         return cleaned_data
 
-class ProductForm(forms.ModelForm):
-    # Apply the no_numbers_validator to product_name and unit
-    product_name = forms.CharField(
-        validators=[no_numbers_validator],
-        widget=forms.TextInput(attrs={'required': True})
-    )
-    unit = forms.CharField(
-        validators=[no_numbers_validator],
-        widget=forms.TextInput(attrs={'required': True})
-    )
 
+class ProductForm(forms.ModelForm):
+    # Fields
+    product_name = forms.CharField(
+        widget=forms.TextInput(attrs={'required': True}),
+        label="Product Name"
+    )
     price = forms.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        validators=[
-            MinValueValidator(0.01, message="Price must be greater than zero."),
-            MaxValueValidator(10000, message="Price cannot exceed $10,000.")
+        min_value=0,
+        error_messages={
+            'required': 'Price is required.',
+            'min_value': 'Price must be a positive number.'
+        },
+        widget=forms.NumberInput(attrs={'required': True}),
+        label="Price"
+    )
+    category = forms.ChoiceField(
+        choices=[
+            ('ELECTRONICS', 'Electronics'),
+            ('FURNITURE', 'Furniture'),
+            ('CLOTHING', 'Clothing'),
+            # Add more categories as needed
         ],
-        widget=forms.NumberInput(attrs={'required': True, 'min': '0.01', 'step': '0.01'})
+        label="Category"
     )
 
     class Meta:
         model = Product
         fields = ['product_name', 'category', 'unit', 'price', 'status']
-        widgets = {
-            'status': forms.Select(attrs={'class': 'form-control'}),
-        }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        # Add any cross-field validations here if needed
-        return cleaned_data
+    def clean_product_name(self):
+        product_name = self.cleaned_data.get('product_name', '')
+        if not product_name.strip():
+            raise ValidationError("Product name is required.")
+        return product_name.strip()
 
-class CustomerForm(forms.ModelForm):
-    COUNTRY_CHOICES = [
-        ('USA', 'United States'),
-        ('CAN', 'Canada'),
-        ('MEX', 'Mexico'),
-        ('GBR', 'United Kingdom'),
-        ('FRA', 'France'),
-        ('GER', 'Germany'),
-        # Add other countries as needed
-    ]
-
-    country = forms.ChoiceField(choices=COUNTRY_CHOICES)
-
-    class Meta:
-        model = Customer
-        fields = ['customer_name', 'contact_name', 'address', 'city', 'postal_code', 'country', 'status']
+    def clean_price(self):
+        price = self.cleaned_data.get('price')
+        if price and price <= 0:
+            raise ValidationError("Price must be greater than zero.")
+        return price
