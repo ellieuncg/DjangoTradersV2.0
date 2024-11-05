@@ -37,13 +37,15 @@ $(document).ready(function() {
             newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
         }
         
-        // Get all current form values
-        const formData = new FormData(document.getElementById('customerFilterForm'));
-        
-        // Update URL parameters while preserving search form values
-        for (let [key, value] of formData.entries()) {
-            if (value) {  // Only add parameters that have values
-                params.set(key, value);
+        // Get all current form values if customer form exists
+        const customerForm = document.getElementById('customerFilterForm');
+        if (customerForm) {
+            const formData = new FormData(customerForm);
+            // Update URL parameters while preserving search form values
+            for (let [key, value] of formData.entries()) {
+                if (value) {  // Only add parameters that have values
+                    params.set(key, value);
+                }
             }
         }
         
@@ -52,9 +54,12 @@ $(document).ready(function() {
         params.set('direction', newDirection);
         
         // Preserve status filter if exists
-        const status = document.querySelector('.status-select').value;
-        if (status) {
-            params.set('status', status);
+        const statusSelect = document.querySelector('.status-select');
+        if (statusSelect) {
+            const status = statusSelect.value;
+            if (status) {
+                params.set('status', status);
+            }
         }
         
         // Preserve letter filter if exists
@@ -68,4 +73,24 @@ $(document).ready(function() {
         // Update the URL and reload page
         window.location.href = currentUrl.toString();
     });
+
+    // Initialize sort icons based on current URL parameters
+    function updateSortIcons() {
+        const params = new URLSearchParams(window.location.search);
+        const currentSort = params.get('sort');
+        const currentDirection = params.get('direction');
+
+        $('.sort-icon').each(function() {
+            const field = $(this).data('sort');
+            if (field === currentSort) {
+                $(this).removeClass('fa-sort')
+                    .addClass(currentDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
+            } else {
+                $(this).removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
+            }
+        });
+    }
+
+    // Call updateSortIcons when page loads
+    updateSortIcons();
 });

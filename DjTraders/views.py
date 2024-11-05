@@ -224,16 +224,107 @@ class DjTradersProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         product = self.get_object()
-        order_details = OrderDetail.objects.filter(product=product).order_by('-order__order_date')
+        
+        # Get sort parameters
+        sort_field = self.request.GET.get('sort', 'order__order_date')  # default sort
+        sort_direction = self.request.GET.get('direction', 'desc')  # default direction
+        
+        # Map frontend field names to model field names
+        field_mapping = {
+            'customer': 'order__customer__customer_name',
+            'order_date': 'order__order_date',  # Changed from 'date' to 'order_date'
+            'quantity': 'quantity',
+            'total': 'quantity'  # We'll handle total sorting separately
+        }
+        
+        # Get the correct field name from mapping
+        sort_field = field_mapping.get(sort_field, sort_field)
+        
+        # Create the order_by string
+        order_by = f"{'-' if sort_direction == 'desc' else ''}{sort_field}"
+        
+        # Query the order details
+        order_details = OrderDetail.objects.filter(product=product)
+        
+        # Special handling for total sorting since it's calculated
+        if sort_field == 'quantity' and 'total' in self.request.GET.get('sort', ''):
+            order_details = sorted(
+                order_details,
+                key=lambda x: x.quantity * x.product.price,
+                reverse=(sort_direction == 'desc')
+            )
+        else:
+            order_details = order_details.order_by(order_by)
+
+        # Format the details for display
         context['order_details'] = [{
             'order': detail.order,
             'quantity': detail.quantity,
             'unit_price': detail.product.price,
             'total': detail.product.price * detail.quantity,
         } for detail in order_details]
-        context['total_orders'] = order_details.count()
-        context['total_units_sold'] = order_details.aggregate(Sum('quantity'))['quantity__sum'] or 0
-        context['total_revenue'] = sum(detail.product.price * detail.quantity for detail in order_details)
+        
+        # Add sorting context
+        context['sort_field'] = self.request.GET.get('sort', 'order_date')  # Changed default from 'date' to 'order_date'
+        context['sort_direction'] = sort_direction
+        
+        # Add summary statistics
+        context['total_orders'] = len(context['order_details'])
+        context['total_units_sold'] = sum(detail['quantity'] for detail in context['order_details'])
+        context['total_revenue'] = sum(detail['total'] for detail in context['order_details'])
+        
+        return context
+        context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        
+        # Get sort parameters
+        sort_field = self.request.GET.get('sort', 'order__order_date')  # default sort
+        sort_direction = self.request.GET.get('direction', 'desc')  # default direction
+        
+        # Create the order_by string
+        order_by = f"{'-' if sort_direction == 'desc' else ''}{sort_field}"
+        
+        # Map frontend field names to model field names if needed
+        field_mapping = {
+            'customer': 'order__customer__customer_name',
+            'date': 'order__order_date',
+            'quantity': 'quantity',
+            'total': 'quantity'  # We'll handle total sorting separately since it's calculated
+        }
+        
+        # Get the correct field name from mapping
+        sort_field = field_mapping.get(sort_field, sort_field)
+        
+        # Query the order details
+        order_details = OrderDetail.objects.filter(product=product)
+        
+        # Special handling for total sorting since it's calculated
+        if sort_field == 'quantity' and sort_field == 'total':
+            order_details = sorted(
+                order_details,
+                key=lambda x: x.quantity * x.product.price,
+                reverse=(sort_direction == 'desc')
+            )
+        else:
+            order_details = order_details.order_by(order_by)
+
+        # Format the details for display
+        context['order_details'] = [{
+            'order': detail.order,
+            'quantity': detail.quantity,
+            'unit_price': detail.product.price,
+            'total': detail.product.price * detail.quantity,
+        } for detail in order_details]
+        
+        # Add sorting context
+        context['sort_field'] = self.request.GET.get('sort', 'date')
+        context['sort_direction'] = sort_direction
+        
+        # Add summary statistics
+        context['total_orders'] = len(context['order_details'])
+        context['total_units_sold'] = sum(detail['quantity'] for detail in context['order_details'])
+        context['total_revenue'] = sum(detail['total'] for detail in context['order_details'])
+        
         return context
 
 def create_product(request):

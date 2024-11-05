@@ -12,10 +12,22 @@
 
     <div class="product-info-grid">
         <div class="product-info-details">
-            <div><strong>Category:</strong> {{ product.category.category_name }}</div>
-            <div><strong>Unit:</strong> {{ product.unit }}</div>
-            <div><strong>Price:</strong> ${{ product.price }}</div>
-            <div><strong>Status:</strong> {{ product.get_status_display }}</div>
+            <div class="info-row">
+                <span class="info-label">Category:</span>
+                <span class="info-value">{{ product.category.category_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Unit:</span>
+                <span class="info-value">{{ product.unit }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Price:</span>
+                <span class="info-value">${{ product.price }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Status:</span>
+                <span class="info-value">{{ product.get_status_display }}</span>
+            </div>
         </div>
         <div class="button-group">
             <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn btn-edit" title="Edit">
@@ -40,10 +52,30 @@
         <table class="order-table">
             <thead>
                 <tr>
-                    <th>Customer</th>
-                    <th>Order Date</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
+                    <th>
+                        <div class="customer-search-field-header">
+                            <i class="fas fa-sort sort-icon {% if sort_field == 'customer' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="customer"></i>
+                            Customer
+                        </div>
+                    </th>
+                    <th>
+                        <div class="customer-search-field-header">
+                            <i class="fas fa-sort sort-icon {% if sort_field == 'order_date' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="order_date"></i>
+                            Order Date
+                        </div>
+                    </th>
+                    <th>
+                        <div class="customer-search-field-header">
+                            <i class="fas fa-sort sort-icon {% if sort_field == 'quantity' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="quantity"></i>
+                            Quantity
+                        </div>
+                    </th>
+                    <th>
+                        <div class="customer-search-field-header">
+                            <i class="fas fa-sort sort-icon {% if sort_field == 'total' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="total"></i>
+                            Total
+                        </div>
+                    </th>
                 </tr>
             </thead>
             <tbody>
