@@ -73,7 +73,6 @@ class DjTradersCustomersView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Get all search parameters
         status = self.request.GET.get('status', 'active')
         countries = Customer.objects.values_list('country', flat=True).distinct().order_by('country')
         
@@ -85,64 +84,6 @@ class DjTradersCustomersView(ListView):
             'status_filter': status,
             'countries': countries,
             'current_letter': self.request.GET.get('letter', '')
-        })
-        return context
-
-# ============================
-# Product Views
-# ============================
-
-class DjTradersProductsView(ListView):
-    """Product list view with search and filtering"""
-    model = Product
-    template_name = 'DjTraders/products.html'
-    context_object_name = 'products'
-
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        
-        # Get search parameters
-        product_query = self.request.GET.get('product', '')
-        category = self.request.GET.get('category', '')
-        min_price = self.request.GET.get('min_price', '')
-        max_price = self.request.GET.get('max_price', '')
-        status = self.request.GET.get('status', 'active')
-
-        # Apply filters
-        if product_query:
-            queryset = queryset.filter(product_name__icontains=product_query)
-        if category:
-            queryset = queryset.filter(category__category_id=category)
-        if min_price:
-            try:
-                queryset = queryset.filter(price__gte=float(min_price))
-            except ValueError:
-                pass
-        if max_price:
-            try:
-                queryset = queryset.filter(price__lte=float(max_price))
-            except ValueError:
-                pass
-
-        # Status filter - simplified logic
-        if status != 'all':
-            queryset = queryset.filter(status=status)
-
-        return queryset.order_by('product_name')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Get all search parameters
-        status = self.request.GET.get('status', 'active')
-        categories = Category.objects.all().order_by('category_name')
-        
-        context.update({
-            'categories': categories,
-            'product_query': self.request.GET.get('product', ''),
-            'min_price': self.request.GET.get('min_price', ''),
-            'max_price': self.request.GET.get('max_price', ''),
-            'selected_category': self.request.GET.get('category', ''),
-            'status_filter': status
         })
         return context
 
@@ -166,7 +107,39 @@ class DjTradersCustomerDetailView(DetailView):
                 } for detail in order.orderdetails.all()]
             }
             order_details.append(details)
-        context['orders'] = order_details
+        
+        # Get sort parameters
+        sort_field = self.request.GET.get('sort')
+        sort_direction = self.request.GET.get('direction', 'desc')
+        
+        # Apply sorting if requested
+        if sort_field:
+            if sort_field == 'order_id':
+                order_details.sort(
+                    key=lambda x: x['order_id'],
+                    reverse=(sort_direction == 'desc')
+                )
+            elif sort_field == 'order_date':
+                order_details.sort(
+                    key=lambda x: x['order_date'],
+                    reverse=(sort_direction == 'desc')
+                )
+            elif sort_field == 'product':
+                order_details.sort(
+                    key=lambda x: x['products'][0]['product'].product_name if x['products'] else '',
+                    reverse=(sort_direction == 'desc')
+                )
+            elif sort_field == 'quantity':
+                order_details.sort(
+                    key=lambda x: sum(p['quantity'] for p in x['products']),
+                    reverse=(sort_direction == 'desc')
+                )
+        
+        context.update({
+            'orders': order_details,
+            'sort_field': sort_field,
+            'sort_direction': sort_direction
+        })
         return context
 
 class CustomerArchiveView(UpdateView):
@@ -215,6 +188,76 @@ def update_customer(request, pk):
         'customer': customer
     })
 
+def update_customer_status(request, pk):
+    """Update customer active/inactive/archived status"""
+    if request.method == 'POST':
+        customer = get_object_or_404(Customer, pk=pk)
+        new_status = request.POST.get('status')
+        if new_status in ['active', 'inactive', 'archived']:
+            customer.status = new_status
+            if new_status == 'archived':
+                customer.archived_date = timezone.now()
+            customer.save()
+            messages.success(request, f'Customer status updated to {new_status}.')
+    return redirect('DjTraders:Customers')
+
+# ============================
+# Product Views
+# ============================
+
+class DjTradersProductsView(ListView):
+    """Product list view with search and filtering"""
+    model = Product
+    template_name = 'DjTraders/products.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        
+        # Get search parameters
+        product_query = self.request.GET.get('product', '')
+        category = self.request.GET.get('category', '')
+        min_price = self.request.GET.get('min_price', '')
+        max_price = self.request.GET.get('max_price', '')
+        status = self.request.GET.get('status', 'active')
+
+        # Apply filters
+        if product_query:
+            queryset = queryset.filter(product_name__icontains=product_query)
+        if category:
+            queryset = queryset.filter(category__category_id=category)
+        if min_price:
+            try:
+                queryset = queryset.filter(price__gte=float(min_price))
+            except ValueError:
+                pass
+        if max_price:
+            try:
+                queryset = queryset.filter(price__lte=float(max_price))
+            except ValueError:
+                pass
+
+        # Status filter - simplified logic
+        if status != 'all':
+            queryset = queryset.filter(status=status)
+
+        return queryset.order_by('product_name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        status = self.request.GET.get('status', 'active')
+        categories = Category.objects.all().order_by('category_name')
+        
+        context.update({
+            'categories': categories,
+            'product_query': self.request.GET.get('product', ''),
+            'min_price': self.request.GET.get('min_price', ''),
+            'max_price': self.request.GET.get('max_price', ''),
+            'selected_category': self.request.GET.get('category', ''),
+            'status_filter': status
+        })
+        return context
+
 class DjTradersProductDetailView(DetailView):
     """Product detail view"""
     model = Product
@@ -226,15 +269,15 @@ class DjTradersProductDetailView(DetailView):
         product = self.get_object()
         
         # Get sort parameters
-        sort_field = self.request.GET.get('sort', 'order__order_date')  # default sort
-        sort_direction = self.request.GET.get('direction', 'desc')  # default direction
+        sort_field = self.request.GET.get('sort', 'order__order_date')
+        sort_direction = self.request.GET.get('direction', 'desc')
         
         # Map frontend field names to model field names
         field_mapping = {
             'customer': 'order__customer__customer_name',
-            'order_date': 'order__order_date',  # Changed from 'date' to 'order_date'
+            'order_date': 'order__order_date',
             'quantity': 'quantity',
-            'total': 'quantity'  # We'll handle total sorting separately
+            'total': 'quantity'
         }
         
         # Get the correct field name from mapping
@@ -265,59 +308,7 @@ class DjTradersProductDetailView(DetailView):
         } for detail in order_details]
         
         # Add sorting context
-        context['sort_field'] = self.request.GET.get('sort', 'order_date')  # Changed default from 'date' to 'order_date'
-        context['sort_direction'] = sort_direction
-        
-        # Add summary statistics
-        context['total_orders'] = len(context['order_details'])
-        context['total_units_sold'] = sum(detail['quantity'] for detail in context['order_details'])
-        context['total_revenue'] = sum(detail['total'] for detail in context['order_details'])
-        
-        return context
-        context = super().get_context_data(**kwargs)
-        product = self.get_object()
-        
-        # Get sort parameters
-        sort_field = self.request.GET.get('sort', 'order__order_date')  # default sort
-        sort_direction = self.request.GET.get('direction', 'desc')  # default direction
-        
-        # Create the order_by string
-        order_by = f"{'-' if sort_direction == 'desc' else ''}{sort_field}"
-        
-        # Map frontend field names to model field names if needed
-        field_mapping = {
-            'customer': 'order__customer__customer_name',
-            'date': 'order__order_date',
-            'quantity': 'quantity',
-            'total': 'quantity'  # We'll handle total sorting separately since it's calculated
-        }
-        
-        # Get the correct field name from mapping
-        sort_field = field_mapping.get(sort_field, sort_field)
-        
-        # Query the order details
-        order_details = OrderDetail.objects.filter(product=product)
-        
-        # Special handling for total sorting since it's calculated
-        if sort_field == 'quantity' and sort_field == 'total':
-            order_details = sorted(
-                order_details,
-                key=lambda x: x.quantity * x.product.price,
-                reverse=(sort_direction == 'desc')
-            )
-        else:
-            order_details = order_details.order_by(order_by)
-
-        # Format the details for display
-        context['order_details'] = [{
-            'order': detail.order,
-            'quantity': detail.quantity,
-            'unit_price': detail.product.price,
-            'total': detail.product.price * detail.quantity,
-        } for detail in order_details]
-        
-        # Add sorting context
-        context['sort_field'] = self.request.GET.get('sort', 'date')
+        context['sort_field'] = self.request.GET.get('sort', 'order_date')
         context['sort_direction'] = sort_direction
         
         # Add summary statistics
@@ -371,16 +362,3 @@ def update_product_status(request, pk):
             product.save()
             messages.success(request, f'Product status updated to {new_status}.')
     return redirect('DjTraders:Products')
-
-def update_customer_status(request, pk):
-    """Update customer active/inactive/archived status"""
-    if request.method == 'POST':
-        customer = get_object_or_404(Customer, pk=pk)
-        new_status = request.POST.get('status')
-        if new_status in ['active', 'inactive', 'archived']:
-            customer.status = new_status
-            if new_status == 'archived':
-                customer.archived_date = timezone.now()
-            customer.save()
-            messages.success(request, f'Customer status updated to {new_status}.')
-    return redirect('DjTraders:Customers')
