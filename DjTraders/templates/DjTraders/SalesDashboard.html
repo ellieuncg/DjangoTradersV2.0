@@ -26,14 +26,14 @@
                 </select>
             
                 <label for="supplierFilter">Supplier</label>
-<select id="supplierFilter" name="supplier">
-    <option value="">All Suppliers</option>
-    {% for supplier in suppliers %}
-        <option value="{{ supplier.supplier_id }}" {% if supplier.supplier_id|stringformat:"s" == selected_supplier|stringformat:"s" %}selected{% endif %}>
-            {{ supplier.name }}
-        </option>
-    {% endfor %}
-</select>
+                <select id="supplierFilter" name="supplier">
+                    <option value="">All Suppliers</option>
+                    {% for supplier in suppliers %}
+                        <option value="{{ supplier.supplier_id }}" {% if supplier.supplier_id|stringformat:"s" == selected_supplier|stringformat:"s" %}selected{% endif %}>
+                            {{ supplier.name }}
+                        </option>
+                    {% endfor %}
+                </select>
             </form>
         </div>
     </div>
@@ -156,29 +156,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-$(document).ready(function() {
-    console.log('jQuery ready!');
-
-    $('#yearFilter, #categoryFilter, #supplierFilter').on('change', function() {
-        console.log('Filter changed');
-        
-        var year = $('#yearFilter').val();
-        var category = $('#categoryFilter').val();
-        var supplier = $('#supplierFilter').val();
-        
-        var url = window.location.pathname + '?year=' + year;
-        if (category) {
-            url += '&category=' + category;
-        }
-        if (supplier) {
-            url += '&supplier=' + supplier;
-        }
-        
-        console.log('Going to URL:', url);
-        window.location.href = url;
-    });
-});
-</script>
+<script src="{% static 'DjTraders/DJTraders.js' %}"></script>
 {% endblock %}
-
