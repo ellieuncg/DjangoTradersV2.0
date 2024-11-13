@@ -605,6 +605,9 @@ h1, h2, h3, h4, h5, h6 {
     background-repeat: no-repeat;
     background-position: right 0.875rem center;
     padding-right: 2.5rem;
+    z-index: 1000;
+    position: relative;
+}
 }
 
 /* Status Select Focus State */

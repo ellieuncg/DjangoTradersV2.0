@@ -7,9 +7,19 @@
     <div class="page-header">
         <h1>Product Sales Dashboard</h1>
         <div class="customer-header-status">
-            <select id="yearFilter" onchange="updateDashboard()">
+            <select id="yearFilter">
                 {% for year in available_years %}
                     <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+            
+            <select id="categoryFilter">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.category_id }}" 
+                            {% if category.category_id == selected_category %}selected{% endif %}>
+                        {{ category.category_name }}
+                    </option>
                 {% endfor %}
             </select>
         </div>
@@ -102,15 +112,6 @@
     <!-- Category Analysis -->
     <div class="card-customers">
         <h2 class="card-title">Category Sales Analysis</h2>
-        <div class="categories-wrapper-products">
-            {% for category in categories %}
-                <a href="#" 
-                   onclick="updateCategoryAnalysis('{{ category.category_id }}')"
-                   class="{% if category.category_id == selected_category %}active{% endif %}">
-                    {{ category.category_name }}
-                </a>
-            {% endfor %}
-        </div>
         <table class="order-table">
             <thead>
                 <tr>
@@ -139,18 +140,26 @@
         </table>
     </div>
 </div>
-
+{% endblock %}
 {% block extra_js %}
 <script>
-    function updateDashboard() {
-        const year = document.getElementById('yearFilter').value;
-        window.location.href = `?year=${year}`;
-    }
+$(document).ready(function() {
+    console.log('jQuery ready!');
 
-    function updateCategoryAnalysis(categoryId) {
-        const year = document.getElementById('yearFilter').value;
-        window.location.href = `?year=${year}&category=${categoryId}`;
-    }
+    $('#yearFilter, #categoryFilter').on('change', function() {
+        console.log('Filter changed');
+        
+        var year = $('#yearFilter').val();
+        var category = $('#categoryFilter').val();
+        
+        var url = window.location.pathname + '?year=' + year;
+        if (category) {
+            url += '&category=' + category;
+        }
+        
+        console.log('Going to URL:', url);
+        window.location.href = url;
+    });
+});
 </script>
-{% endblock %}
 {% endblock %}

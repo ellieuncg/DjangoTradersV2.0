@@ -41,11 +41,17 @@ def SalesDashboard(request):
     
     # Default to latest year if not specified
     selected_year = int(request.GET.get('year', available_years[0]))
+    selected_category = request.GET.get('category')
+    
+    # Base query filters
+    query_filters = {'order__order_date__year': selected_year}
+    if selected_category:
+        query_filters['product__category_id'] = selected_category
     
     # Annual Sales Overview
     annual_total = (
         OrderDetail.objects
-        .filter(order__order_date__year=selected_year)
+        .filter(**query_filters)
         .aggregate(
             orders_count=Count('order', distinct=True),
             products_sold=Sum('quantity'),
@@ -53,22 +59,10 @@ def SalesDashboard(request):
         )
     )
 
-    # Monthly Sales Data
-    monthly_sales = list(OrderDetail.objects
-        .filter(order__order_date__year=selected_year)
-        .annotate(month=ExtractMonth('order__order_date'))
-        .values('month')
-        .annotate(
-            orders=Count('order', distinct=True),
-            products=Sum('quantity'),
-            revenue=Sum(F('quantity') * F('product__price'))
-        )
-        .order_by('month'))
-
     # Calculate average revenue
     avg_revenue_query = (
         OrderDetail.objects
-        .filter(order__order_date__year=selected_year)
+        .filter(**query_filters)
         .values('product')
         .annotate(
             total_revenue=Sum(F('quantity') * F('product__price'))
@@ -77,37 +71,56 @@ def SalesDashboard(request):
     )
     avg_revenue = avg_revenue_query['avg_revenue'] or 0
 
+    # Monthly Sales Data
+    monthly_sales = list(
+        OrderDetail.objects
+        .filter(**query_filters)
+        .annotate(month=ExtractMonth('order__order_date'))
+        .values('month')
+        .annotate(
+            orders=Count('order', distinct=True),
+            products=Sum('quantity'),
+            revenue=Sum(F('quantity') * F('product__price'))
+        )
+        .order_by('month')
+    )
+
     # Top 10 Products
-    top_products = list(OrderDetail.objects
-        .filter(order__order_date__year=selected_year)
+    top_products = list(
+        OrderDetail.objects
+        .filter(**query_filters)
         .values('product__product_name')
         .annotate(
             orders_count=Count('order', distinct=True),
             revenue=Sum(F('quantity') * F('product__price'))
         )
-        .order_by('-revenue')[:10])
+        .order_by('-revenue')[:10]
+    )
 
     # Add percentage vs average
     for product in top_products:
         product['vs_average'] = ((product['revenue'] - avg_revenue) / avg_revenue * 100) if avg_revenue else 0
 
     # Bottom 10 Products
-    bottom_products = list(OrderDetail.objects
-        .filter(order__order_date__year=selected_year)
+    bottom_products = list(
+        OrderDetail.objects
+        .filter(**query_filters)
         .values('product__product_name')
         .annotate(
             orders_count=Count('order', distinct=True),
             revenue=Sum(F('quantity') * F('product__price'))
         )
-        .order_by('revenue')[:10])
+        .order_by('revenue')[:10]
+    )
 
     # Add percentage vs average
     for product in bottom_products:
         product['vs_average'] = ((product['revenue'] - avg_revenue) / avg_revenue * 100) if avg_revenue else 0
 
     # Category Analysis
-    category_analysis = list(OrderDetail.objects
-        .filter(order__order_date__year=selected_year)
+    category_analysis = list(
+        OrderDetail.objects
+        .filter(**query_filters)
         .values('product__category__category_name')
         .annotate(
             name=F('product__category__category_name'),
@@ -115,7 +128,8 @@ def SalesDashboard(request):
             orders_count=Count('order', distinct=True),
             revenue=Sum(F('quantity') * F('product__price'))
         )
-        .order_by('-revenue'))
+        .order_by('-revenue')
+    )
 
     # Calculate average per product for each category
     for category in category_analysis:
@@ -163,6 +177,7 @@ def SalesDashboard(request):
         'category_analysis': category_analysis,
         'available_years': available_years,
         'selected_year': selected_year,
+        'selected_category': selected_category,  # Added this
         'monthly_data': monthly_data,
         'category_data': category_data,
         'categories': categories,

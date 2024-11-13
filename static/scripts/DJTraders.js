@@ -1,3 +1,14 @@
+// At the very top of DJTraders.js
+console.log('DJTraders.js loading...');
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Document ready in DJTraders.js');
+    // Test accessing elements
+    const yearFilter = document.getElementById('yearFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
+    console.log('Year filter:', yearFilter);
+    console.log('Category filter:', categoryFilter);
+});
+
 // DjTraders main JavaScript file
 class DjTradersApp {
     constructor() {
@@ -6,6 +17,10 @@ class DjTradersApp {
         this.countryFilter = document.querySelector('.customer-search-field-header select[name="country"]');
         this.clearButton = document.querySelector('.btn-clear');
         this.customerForm = document.getElementById('customerFilterForm');
+        
+        // Add these new properties
+        this.yearFilter = document.getElementById('yearFilter');
+        this.categoryFilter = document.getElementById('categoryFilter');
 
         console.log('DjTraders JS initialized');
         this.init();
@@ -16,6 +31,7 @@ class DjTradersApp {
         this.setupFilterHandlers();
         this.setupSortHandlers();
         this.updateSortIcons();
+        this.setupDashboardFilters();  // Add this line
     }
 
     handleSuccessMessage() {
@@ -133,6 +149,32 @@ class DjTradersApp {
             }
         });
     }
+
+    // Add these new methods inside the class
+    setupDashboardFilters() {
+        // Setup filters
+        if (this.yearFilter) {
+            console.log('Setting up year filter');
+            this.yearFilter.addEventListener('change', () => this.filterDashboard());
+        }
+
+        if (this.categoryFilter) {
+            console.log('Setting up category filter');
+            this.categoryFilter.addEventListener('change', () => this.filterDashboard());
+        }
+    }
+
+    filterDashboard() {
+        console.log('Filtering dashboard');
+        const year = this.yearFilter?.value;
+        const category = this.categoryFilter?.value || '';
+        
+        let url = `?year=${year}`;
+        if (category) url += `&category=${category}`;
+        
+        console.log('New URL:', url);
+        window.location.href = url;
+    }
 }
 
 // Initialize when DOM is ready
@@ -140,3 +182,26 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Document ready');
     new DjTradersApp();
 });
+
+// Add this at the bottom of your DJTraders.js file, after the DjTradersApp class
+function updateDashboard() {
+    console.log('updateDashboard called');
+    const yearFilter = document.getElementById('yearFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
+    
+    if (!yearFilter || !categoryFilter) {
+        console.error('Filters not found');
+        return;
+    }
+
+    const year = yearFilter.value;
+    const category = categoryFilter.value;
+    
+    let url = window.location.pathname + `?year=${year}`;
+    if (category) {
+        url += `&category=${category}`;
+    }
+    
+    console.log('Navigating to:', url);
+    window.location.href = url;
+}
