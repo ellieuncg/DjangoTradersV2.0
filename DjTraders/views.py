@@ -2,14 +2,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, ListView, UpdateView
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models.functions import ExtractYear, ExtractMonth
-from django.db.models import Count, Sum, F, Avg, Q
+from django.db.models.functions import ExtractYear, ExtractMonth, Cast, Coalesce
+from django.db.models import (
+    Count, Sum, F, Avg, Q, ExpressionWrapper, FloatField,
+    Case, When, Value
+)
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from .models import Customer, Product, Category, OrderDetail, Order
 from .forms import CustomerForm, ProductForm
-from calendar import month_name
+import calendar
 import logging
 
 logger = logging.getLogger(__name__)
@@ -26,45 +29,143 @@ def is_employee(user):
 @user_passes_test(is_employee)
 def SalesDashboard(request):
     """Sales analysis dashboard for annual, monthly, top/bottom, and category sales."""
-    # Annual Sales Analysis
-    annual_sales = (
+    
+    # Get years from database, default to latest year
+    available_years = list(
+        Order.objects
+        .dates('order_date', 'year')
+        .values_list('order_date__year', flat=True)
+        .distinct()
+        .order_by('-order_date__year')
+    )
+    
+    # Default to latest year if not specified
+    selected_year = int(request.GET.get('year', available_years[0]))
+    
+    # Annual Sales Overview
+    annual_total = (
         OrderDetail.objects
-        .annotate(year=ExtractYear('order__order_date'))
-        .values('product__product_name', 'year')
-        .annotate(
+        .filter(order__order_date__year=selected_year)
+        .aggregate(
             orders_count=Count('order', distinct=True),
             products_sold=Sum('quantity'),
             revenue=Sum(F('quantity') * F('product__price'))
         )
-        .order_by('-year')
     )
 
-    # Top/Bottom Analysis (10 products)
-    top_products = (
-        OrderDetail.objects
-        .annotate(year=ExtractYear('order__order_date'))
-        .values('product__product_name', 'year')
+    # Monthly Sales Data
+    monthly_sales = list(OrderDetail.objects
+        .filter(order__order_date__year=selected_year)
+        .annotate(month=ExtractMonth('order__order_date'))
+        .values('month')
         .annotate(
+            orders=Count('order', distinct=True),
+            products=Sum('quantity'),
             revenue=Sum(F('quantity') * F('product__price'))
         )
-        .order_by('-revenue')[:10]
-    )
+        .order_by('month'))
 
-    bottom_products = (
+    # Calculate average revenue
+    avg_revenue_query = (
         OrderDetail.objects
-        .annotate(year=ExtractYear('order__order_date'))
-        .values('product__product_name', 'year')
+        .filter(order__order_date__year=selected_year)
+        .values('product')
         .annotate(
+            total_revenue=Sum(F('quantity') * F('product__price'))
+        )
+        .aggregate(avg_revenue=Avg('total_revenue'))
+    )
+    avg_revenue = avg_revenue_query['avg_revenue'] or 0
+
+    # Top 10 Products
+    top_products = list(OrderDetail.objects
+        .filter(order__order_date__year=selected_year)
+        .values('product__product_name')
+        .annotate(
+            orders_count=Count('order', distinct=True),
             revenue=Sum(F('quantity') * F('product__price'))
         )
-        .order_by('revenue')[:10]
-    )
+        .order_by('-revenue')[:10])
+
+    # Add percentage vs average
+    for product in top_products:
+        product['vs_average'] = ((product['revenue'] - avg_revenue) / avg_revenue * 100) if avg_revenue else 0
+
+    # Bottom 10 Products
+    bottom_products = list(OrderDetail.objects
+        .filter(order__order_date__year=selected_year)
+        .values('product__product_name')
+        .annotate(
+            orders_count=Count('order', distinct=True),
+            revenue=Sum(F('quantity') * F('product__price'))
+        )
+        .order_by('revenue')[:10])
+
+    # Add percentage vs average
+    for product in bottom_products:
+        product['vs_average'] = ((product['revenue'] - avg_revenue) / avg_revenue * 100) if avg_revenue else 0
+
+    # Category Analysis
+    category_analysis = list(OrderDetail.objects
+        .filter(order__order_date__year=selected_year)
+        .values('product__category__category_name')
+        .annotate(
+            name=F('product__category__category_name'),
+            product_count=Count('product', distinct=True),
+            orders_count=Count('order', distinct=True),
+            revenue=Sum(F('quantity') * F('product__price'))
+        )
+        .order_by('-revenue'))
+
+    # Calculate average per product for each category
+    for category in category_analysis:
+        category['avg_per_product'] = category['revenue'] / category['product_count'] if category['product_count'] else 0
+
+    # Get all categories for the filter
+    categories = Category.objects.all().order_by('category_name')
+
+    # Format data for charts
+    monthly_labels = [calendar.month_name[m['month']] for m in monthly_sales]
+    monthly_revenue = [float(m['revenue']) for m in monthly_sales]
+    monthly_orders = [m['orders'] for m in monthly_sales]
+
+    monthly_data = {
+        'labels': monthly_labels,
+        'datasets': [
+            {
+                'label': 'Revenue',
+                'data': monthly_revenue,
+                'borderColor': '#456545',
+                'fill': False
+            },
+            {
+                'label': 'Orders',
+                'data': monthly_orders,
+                'borderColor': '#B38F4A',
+                'fill': False
+            }
+        ]
+    }
+
+    category_data = {
+        'labels': [c['name'] for c in category_analysis],
+        'datasets': [{
+            'label': 'Revenue by Category',
+            'data': [float(c['revenue']) for c in category_analysis],
+            'backgroundColor': '#456545'
+        }]
+    }
 
     context = {
-        'annual_sales': annual_sales,
+        'annual_total': annual_total,
         'top_products': top_products,
         'bottom_products': bottom_products,
-        # Removed monthly_sales since it's not defined
+        'category_analysis': category_analysis,
+        'available_years': available_years,
+        'selected_year': selected_year,
+        'monthly_data': monthly_data,
+        'category_data': category_data,
+        'categories': categories,
     }
 
     return render(request, 'DjTraders/SalesDashboard.html', context)

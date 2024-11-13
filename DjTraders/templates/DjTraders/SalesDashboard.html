@@ -2,69 +2,155 @@
 {% load static %}
 
 {% block content %}
-<h1>Product Sales Dashboard</h1>
+<div class="customer-detail-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Product Sales Dashboard</h1>
+        <div class="customer-header-status">
+            <select id="yearFilter" onchange="updateDashboard()">
+                {% for year in available_years %}
+                    <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
 
-<h2>Annual Sales Analysis</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Year</th>
-            <th>Orders</th>
-            <th>Products Sold</th>
-            <th>Revenue</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for sale in annual_sales %}
-        <tr>
-            <td>{{ sale.product__product_name }}</td>
-            <td>{{ sale.year }}</td>  <!-- Changed from order__order_date__year -->
-            <td>{{ sale.orders_count }}</td>
-            <td>{{ sale.products_sold }}</td>
-            <td>${{ sale.revenue|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <!-- Annual Sales Overview -->
+    <div class="card-customers">
+        <h2 class="card-title">Annual Sales Overview</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Total Orders</h3>
+                <p>{{ annual_total.orders_count|default:0 }}</p>
+            </div>
+            <div class="metric-card">
+                <h3>Total Products Sold</h3>
+                <p>{{ annual_total.products_sold|default:0 }}</p>
+            </div>
+            <div class="metric-card">
+                <h3>Total Revenue</h3>
+                <p>${{ annual_total.revenue|default:0|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
 
-<h2>Top 10 Products by Revenue</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Year</th>
-            <th>Revenue</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for product in top_products %}
-        <tr>
-            <td>{{ product.product__product_name }}</td>
-            <td>{{ product.year }}</td>  <!-- Changed from order__order_date__year -->
-            <td>${{ product.revenue|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <!-- Product Analysis -->
+    <div class="card-grid-products">
+        <!-- Top 10 Products -->
+        <div class="card-customers">
+            <h2 class="card-title">Top 10 Products by Revenue</h2>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Orders</th>
+                        <th>Revenue</th>
+                        <th>vs Average</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in top_products %}
+                    <tr>
+                        <td>{{ product.product__product_name }}</td>
+                        <td>{{ product.orders_count }}</td>
+                        <td>${{ product.revenue|floatformat:2 }}</td>
+                        <td class="{% if product.vs_average > 0 %}status-active{% else %}status-inactive{% endif %}">
+                            {{ product.vs_average|floatformat:1 }}%
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-<h2>Bottom 10 Products by Revenue</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Year</th>
-            <th>Revenue</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for product in bottom_products %}
-        <tr>
-            <td>{{ product.product__product_name }}</td>
-            <td>{{ product.year }}</td>  <!-- Changed from product.order__order_date__year -->
-            <td>${{ product.revenue|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        <!-- Bottom 10 Products -->
+        <div class="card-customers">
+            <h2 class="card-title">Bottom 10 Products by Revenue</h2>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Orders</th>
+                        <th>Revenue</th>
+                        <th>vs Average</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in bottom_products %}
+                    <tr>
+                        <td>{{ product.product__product_name }}</td>
+                        <td>{{ product.orders_count }}</td>
+                        <td>${{ product.revenue|floatformat:2 }}</td>
+                        <td class="{% if product.vs_average > 0 %}status-active{% else %}status-inactive{% endif %}">
+                            {{ product.vs_average|floatformat:1 }}%
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Category Analysis -->
+    <div class="card-customers">
+        <h2 class="card-title">Category Sales Analysis</h2>
+        <div class="categories-wrapper-products">
+            {% for category in categories %}
+                <a href="#" 
+                   onclick="updateCategoryAnalysis('{{ category.category_id }}')"
+                   class="{% if category.category_id == selected_category %}active{% endif %}">
+                    {{ category.category_name }}
+                </a>
+            {% endfor %}
+        </div>
+        <table class="order-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Products</th>
+                    <th>Orders</th>
+                    <th>Revenue</th>
+                    <th>Average Per Product</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in category_analysis %}
+                <tr>
+                    <td>{{ category.name }}</td>
+                    <td>{{ category.product_count }}</td>
+                    <td>{{ category.orders_count }}</td>
+                    <td>${{ category.revenue|floatformat:2 }}</td>
+                    <td>${{ category.avg_per_product|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No data available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function updateDashboard() {
+        const year = document.getElementById('yearFilter').value;
+        window.location.href = `?year=${year}`;
+    }
+
+    function updateCategoryAnalysis(categoryId) {
+        const year = document.getElementById('yearFilter').value;
+        window.location.href = `?year=${year}&category=${categoryId}`;
+    }
+</script>
+{% endblock %}
 {% endblock %}
