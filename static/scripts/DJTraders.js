@@ -1,12 +1,10 @@
 // At the very top of DJTraders.js
 console.log('DJTraders.js loading...');
+
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Document ready in DJTraders.js');
-    // Test accessing elements
-    const yearFilter = document.getElementById('yearFilter');
-    const categoryFilter = document.getElementById('categoryFilter');
-    console.log('Year filter:', yearFilter);
-    console.log('Category filter:', categoryFilter);
+    new DjTradersApp();
 });
 
 // DjTraders main JavaScript file
@@ -21,6 +19,7 @@ class DjTradersApp {
         // Add these new properties
         this.yearFilter = document.getElementById('yearFilter');
         this.categoryFilter = document.getElementById('categoryFilter');
+        this.supplierFilter = document.getElementById('supplierFilter');
 
         console.log('DjTraders JS initialized');
         this.init();
@@ -150,58 +149,76 @@ class DjTradersApp {
         });
     }
 
-    // Add these new methods inside the class
     setupDashboardFilters() {
-        // Setup filters
+        // Setup year filter
         if (this.yearFilter) {
             console.log('Setting up year filter');
             this.yearFilter.addEventListener('change', () => this.filterDashboard());
         }
 
+        // Setup category filter
         if (this.categoryFilter) {
             console.log('Setting up category filter');
             this.categoryFilter.addEventListener('change', () => this.filterDashboard());
         }
+
+        // Setup supplier filter
+        if (this.supplierFilter) {
+            console.log('Setting up supplier filter');
+            this.supplierFilter.addEventListener('change', () => this.filterDashboard());
+        }
     }
 
     filterDashboard() {
-        console.log('Filtering dashboard');
-        const year = this.yearFilter?.value;
+        const year = this.yearFilter?.value || '';
         const category = this.categoryFilter?.value || '';
+        const supplier = this.supplierFilter?.value || '';
+    
+        console.log(`Filtering with - Year: ${year}, Category: ${category}, Supplier: ${supplier}`);
+    
+        const url = `/sales/dashboard/?year=${year}&category=${category}&supplier=${supplier}`;
         
-        let url = `?year=${year}`;
-        if (category) url += `&category=${category}`;
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Received filtered data:', data);
+            this.updateDashboard(data);
+        })
+        .catch(error => console.error('Error fetching filtered data:', error));
+    }
+    
+    
+
+    updateDashboard(data) {
+        console.log("Update dashboard with data:", data);
+        // You would implement the actual logic here to update the DOM
+        // based on the data received from the AJAX call.
+    }
+}
+
+$(document).ready(function() {
+    console.log('jQuery ready!');
+
+    $('#yearFilter, #categoryFilter, #supplierFilter').on('change', function() {
+        console.log('Filter changed');
         
-        console.log('New URL:', url);
+        var year = $('#yearFilter').val();
+        var category = $('#categoryFilter').val();
+        var supplier = $('#supplierFilter').val();
+        
+        var url = window.location.pathname + '?year=' + year;
+        if (category) {
+            url += '&category=' + category;
+        }
+        if (supplier) {
+            url += '&supplier=' + supplier;
+        }
+        
+        console.log('Going to URL:', url);
         window.location.href = url;
-    }
-}
-
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Document ready');
-    new DjTradersApp();
+    });
 });
-
-// Add this at the bottom of your DJTraders.js file, after the DjTradersApp class
-function updateDashboard() {
-    console.log('updateDashboard called');
-    const yearFilter = document.getElementById('yearFilter');
-    const categoryFilter = document.getElementById('categoryFilter');
-    
-    if (!yearFilter || !categoryFilter) {
-        console.error('Filters not found');
-        return;
-    }
-
-    const year = yearFilter.value;
-    const category = categoryFilter.value;
-    
-    let url = window.location.pathname + `?year=${year}`;
-    if (category) {
-        url += `&category=${category}`;
-    }
-    
-    console.log('Navigating to:', url);
-    window.location.href = url;
-}

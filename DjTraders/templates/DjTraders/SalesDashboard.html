@@ -7,21 +7,34 @@
     <div class="page-header">
         <h1>Product Sales Dashboard</h1>
         <div class="customer-header-status">
-            <select id="yearFilter">
-                {% for year in available_years %}
-                    <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
-                {% endfor %}
-            </select>
+            <form id="filterForm" method="GET" action="{% url 'DjTraders:SalesDashboard' %}">
+                <label for="yearFilter">Year</label>
+                <select id="yearFilter" name="year">
+                    {% for year in available_years %}
+                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
             
-            <select id="categoryFilter">
-                <option value="">All Categories</option>
-                {% for category in categories %}
-                    <option value="{{ category.category_id }}" 
-                            {% if category.category_id == selected_category %}selected{% endif %}>
-                        {{ category.category_name }}
-                    </option>
-                {% endfor %}
-            </select>
+                <label for="categoryFilter">Category</label>
+                <select id="categoryFilter" name="category">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.category_id }}" {% if category.category_id == selected_category %}selected{% endif %}>
+                            {{ category.category_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            
+                <label for="supplierFilter">Supplier</label>
+<select id="supplierFilter" name="supplier">
+    <option value="">All Suppliers</option>
+    {% for supplier in suppliers %}
+        <option value="{{ supplier.supplier_id }}" {% if supplier.supplier_id|stringformat:"s" == selected_supplier|stringformat:"s" %}selected{% endif %}>
+            {{ supplier.name }}
+        </option>
+    {% endfor %}
+</select>
+            </form>
         </div>
     </div>
 
@@ -141,20 +154,25 @@
     </div>
 </div>
 {% endblock %}
+
 {% block extra_js %}
 <script>
 $(document).ready(function() {
     console.log('jQuery ready!');
 
-    $('#yearFilter, #categoryFilter').on('change', function() {
+    $('#yearFilter, #categoryFilter, #supplierFilter').on('change', function() {
         console.log('Filter changed');
         
         var year = $('#yearFilter').val();
         var category = $('#categoryFilter').val();
+        var supplier = $('#supplierFilter').val();
         
         var url = window.location.pathname + '?year=' + year;
         if (category) {
             url += '&category=' + category;
+        }
+        if (supplier) {
+            url += '&supplier=' + supplier;
         }
         
         console.log('Going to URL:', url);
@@ -163,3 +181,4 @@ $(document).ready(function() {
 });
 </script>
 {% endblock %}
+

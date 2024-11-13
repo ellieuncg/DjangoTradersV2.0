@@ -9,10 +9,6 @@ no_numbers_validator = RegexValidator(
 )
 
 class Category(models.Model):
-    """
-    Represents product categories in the system.
-    Used to organize and classify products.
-    """
     category_id = models.AutoField(primary_key=True)
     category_name = models.CharField(max_length=255)
 
@@ -23,18 +19,12 @@ class Category(models.Model):
         return self.category_name
 
 class Customer(models.Model):
-    """
-    Represents customer information and status.
-    Includes contact details, location information, and activity tracking.
-    """
-    # Status choices for customer accounts
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         ('archived', 'Archived')
     ]
 
-    # Basic Information
     customer_id = models.AutoField(primary_key=True)
     customer_name = models.CharField(
         max_length=255,
@@ -44,8 +34,6 @@ class Customer(models.Model):
         max_length=255,
         validators=[no_numbers_validator]
     )
-
-    # Address Information
     address = models.CharField(
         max_length=255, 
         default='',
@@ -64,8 +52,6 @@ class Customer(models.Model):
         max_length=100,
         validators=[no_numbers_validator]
     )
-
-    # Status and Activity Tracking
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     last_activity_date = models.DateTimeField(default=timezone.now)
     archived_date = models.DateTimeField(null=True, blank=True)
@@ -78,31 +64,20 @@ class Customer(models.Model):
 
     @property
     def NumberOfOrders(self):
-        """Returns the total number of orders placed by the customer."""
         return self.orders.count()
 
     def should_be_archived(self):
-        """
-        Determines if customer should be archived based on inactivity.
-        Returns True if customer has been inactive for over a year.
-        """
         if self.status != 'archived':
             days_inactive = (timezone.now() - self.last_activity_date).days
             return days_inactive > 365
         return False
 
     def archive(self):
-        """
-        Archives the customer record and sets archived date.
-        """
         self.status = 'archived'
         self.archived_date = timezone.now()
         self.save()
 
     def unarchive(self):
-        """
-        Reactivates an archived customer and resets activity dates.
-        """
         self.status = 'active'
         self.archived_date = None
         self.last_activity_date = timezone.now()
@@ -110,26 +85,42 @@ class Customer(models.Model):
 
     @property
     def days_inactive(self):
-        """Returns the number of days since last activity."""
         return (timezone.now() - self.last_activity_date).days
 
+class Supplier(models.Model):
+    supplier_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    contact_name = models.CharField(max_length=255, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        db_table = 'suppliers'
+
+    def __str__(self):
+        return self.name
+
 class Product(models.Model):
-    """
-    Represents products available in the system.
-    Includes product details, pricing, and availability status.
-    """
-    # Status choices for product availability
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive')
     ]
 
-    # Product Information
     product_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=255)
     category = models.ForeignKey(
         Category, 
         on_delete=models.CASCADE, 
+        related_name='products'
+    )
+    supplier = models.ForeignKey(
+        Supplier,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='products'
     )
     unit = models.CharField(max_length=50)
@@ -143,10 +134,6 @@ class Product(models.Model):
         return self.product_name
 
 class Order(models.Model):
-    """
-    Represents customer orders.
-    Links customers to their ordered products through OrderDetail.
-    """
     order_id = models.AutoField(primary_key=True)
     customer = models.ForeignKey(
         Customer, 
@@ -162,10 +149,6 @@ class Order(models.Model):
         return f"Order {self.order_id} by {self.customer.customer_name}"
 
 class OrderDetail(models.Model):
-    """
-    Represents individual line items in an order.
-    Contains quantity and links to specific products in an order.
-    """
     order_detail_id = models.AutoField(primary_key=True)
     order = models.ForeignKey(
         Order, 
