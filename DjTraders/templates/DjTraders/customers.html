@@ -2,11 +2,14 @@
 {% load static %}
 
 {% block content %}
+{# Main container for the customers page #}
 <div class="customers-page">
     <div class="container">
+        {# Header section with title and main controls #}
         <div class="page-header">
             <h1>Our Customers</h1>
             <div class="header-controls">
+                {# Status filter dropdown for filtering customer visibility #}
                 <div class="status-filter-header">
                     <form method="GET" class="status-filter-form" id="statusFilterForm">
                         <input type="hidden" name="letter" value="{{ request.GET.letter }}">
@@ -18,26 +21,33 @@
                         </select>
                     </form>
                 </div>
+                {# Add new customer button #}
                 <a href="{% url 'DjTraders:CustomerCreate' %}" class="btn-add-new">
                     <i class="fas fa-plus"></i>
                 </a>
             </div>
         </div>
-        <!-- Search Bar and Filter -->
+
+        {# Advanced search and filtering form #}
         <form method="get" class="customer-search-container" id="customerFilterForm">
+            {# Search fields with sortable headers #}
             <div class="customer-search-field-group">
+                {# Customer name search field #}
                 <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon {% if request.GET.sort == 'customer' %}fa-sort-{% if request.GET.direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="customer"></i>
                     <input type="text" name="customer" placeholder="Customer Name" value="{{ customer_query }}">
                 </div>
+                {# Contact name search field #}
                 <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon {% if request.GET.sort == 'contact' %}fa-sort-{% if request.GET.direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="contact"></i>
                     <input type="text" name="contact" placeholder="Contact" value="{{ contact_query }}">
                 </div>
+                {# City search field #}
                 <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon {% if request.GET.sort == 'city' %}fa-sort-{% if request.GET.direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="city"></i>
                     <input type="text" name="city" placeholder="City" value="{{ city_query }}">
                 </div>
+                {# Country dropdown filter #}
                 <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon {% if request.GET.sort == 'country' %}fa-sort-{% if request.GET.direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="country"></i>
                     <select name="country" class="status-select">
@@ -50,6 +60,8 @@
                     </select>
                 </div>
             </div>
+
+            {# Search action buttons #}
             <div class="button-group">
                 <button type="submit" class="action-btn btn-search">
                     <i class="fas fa-search"></i>
@@ -58,6 +70,8 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
+
+            {# Hidden fields to maintain state across form submissions #}
             {% if request.GET.letter %}
             <input type="hidden" name="letter" value="{{ request.GET.letter }}">
             {% endif %}
@@ -69,11 +83,13 @@
             {% endif %}
         </form>
 
-        <!-- Alphabet Filter -->
+        {# Alphabetical filter navigation #}
         <div class="alphabet-links-customers">
             {% with current_letter=request.GET.letter|default:'All' %}
+                {# "All" option #}
                 <a href="{% url 'DjTraders:Customers' %}{% if status_filter %}?status={{ status_filter }}{% endif %}" 
                    class="{% if not current_letter or current_letter == 'All' %}active{% endif %}">All</a>
+                {# Individual letter links #}
                 {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
                     <a href="{% url 'DjTraders:Customers' %}?letter={{ letter }}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
                        class="{% if current_letter == letter %}active{% endif %}">{{ letter }}</a>
@@ -81,11 +97,12 @@
             {% endwith %}
         </div>
         
-        <!-- Customer Card Grid -->
+        {# Customer cards display grid #}
         <div class="card-grid-customers">
             {% for customer in customers %}
             <div class="card-customers {% if customer.status == 'inactive' %}inactive{% endif %}">
                 <h3 class="card-title">{{ customer.customer_name }}</h3>
+                {# Customer details section #}
                 <div class="card-info">
                     <p><strong>Contact:</strong> {{ customer.contact_name }}</p>
                     <p><strong>Address:</strong> {{ customer.address }}</p>
@@ -93,6 +110,7 @@
                     <p><strong>Country:</strong> {{ customer.country }}</p>
                     <p><strong>Status:</strong> {{ customer.get_status_display }}</p>
                 </div>
+                {# Action buttons for each customer card #}
                 <div class="card-actions">
                     <a href="{% url 'DjTraders:CustomerDetail' pk=customer.pk %}" class="action-btn btn-view" title="View">
                         <i class="fas fa-eye"></i>

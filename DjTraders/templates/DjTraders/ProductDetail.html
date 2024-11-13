@@ -2,7 +2,9 @@
 {% load static %}
 
 {% block content %}
+{# Main container for product detail page #}
 <div class="product-detail-page">
+    {# Header section with product name and status #}
     <div class="page-header header-product-detail">
         <h1>{{ product.product_name }}</h1>
         <div class="status-badge">
@@ -10,7 +12,9 @@
         </div>
     </div>
 
+    {# Product information and action buttons section #}
     <div class="product-info-grid">
+        {# Product details display #}
         <div class="product-info-details">
             <div class="info-row">
                 <span class="info-label">Category:</span>
@@ -29,10 +33,14 @@
                 <span class="info-value">{{ product.get_status_display }}</span>
             </div>
         </div>
+
+        {# Action buttons group #}
         <div class="button-group">
+            {# Edit product button #}
             <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn btn-edit" title="Edit">
                 <i class="fas fa-pen"></i>
             </a>
+            {# Archive product form #}
             <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
                 {% csrf_token %}
                 <input type="hidden" name="status" value="inactive">
@@ -40,16 +48,20 @@
                     <i class="fas fa-trash"></i>
                 </button>
             </form>
+            {# Return to products list button #}
             <a href="{% url 'DjTraders:Products' %}" class="action-btn btn-view" title="Return">
                 <i class="fas fa-chevron-left"></i>
             </a>
         </div>
     </div>
 
+    {# Order history section #}
     <div class="order-history-product">
         <h2 class="section-title">Order History</h2>
         
+        {# Order history table #}
         <table class="order-table">
+            {# Table header with sortable columns #}
             <thead>
                 <tr>
                     <th>
@@ -78,10 +90,12 @@
                     </th>
                 </tr>
             </thead>
+            {# Table body with order details #}
             <tbody>
                 {% for detail in order_details %}
                 <tr>
                     <td>
+                        {# Customer name with link to customer detail page #}
                         <a href="{% url 'DjTraders:CustomerDetail' pk=detail.order.customer.pk %}" class="customer-link">
                             {{ detail.order.customer.customer_name }}
                         </a>

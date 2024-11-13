@@ -1,9 +1,12 @@
+{# Base template inheritance - pulls in common layout elements #}
 {% extends "base.html" %}
 {% load static %}
 
+{# Page title block - displays customer name in browser tab #}
 {% block title %}{{ customer.customer_name }}{% endblock %}
 
 {% block content %}
+{# Header section with customer name and status #}
 <div class="page-header">
     <h1>{{ customer.customer_name }}</h1>
     <div class="status-badge">
@@ -12,94 +15,108 @@
 </div>
 
 <div class="customer-detail-page">
-    <!-- Customer Information Section -->
-    <h2 class="section-title">Customer Information</h2>
-    
-    <div class="customer-info-section">
-        <p><strong>Contact Name:</strong> {{ customer.contact_name }}</p>
-        <p><strong>Address:</strong> {{ customer.address }}</p>
-        <p><strong>City:</strong> {{ customer.city }}</p>
-        <p><strong>Postal Code:</strong> {{ customer.postal_code }}</p>
-        <p><strong>Country:</strong> {{ customer.country }}</p>
+    {# Customer Information Section - displays basic contact details #}
+    <section class="customer-info">
+        <h2 class="section-title">Customer Information</h2>
+        
+        <div class="customer-info-section">
+            {# Customer contact details displayed in paragraph elements #}
+            <p><strong>Contact Name:</strong> {{ customer.contact_name }}</p>
+            <p><strong>Address:</strong> {{ customer.address }}</p>
+            <p><strong>City:</strong> {{ customer.city }}</p>
+            <p><strong>Postal Code:</strong> {{ customer.postal_code }}</p>
+            <p><strong>Country:</strong> {{ customer.country }}</p>
 
-        <div class="button-group">
-            <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn btn-edit" title="Edit">
-                <i class="fas fa-pen"></i>
-            </a>
-            {% if customer.status == 'active' %}
-            <form method="POST" action="{% url 'DjTraders:CustomerStatus' pk=customer.pk %}" class="inline-form">
-                {% csrf_token %}
-                <input type="hidden" name="status" value="archived">
-                <button type="submit" class="action-btn btn-delete" title="Archive">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </form>
-            {% endif %}
-            <a href="{% url 'DjTraders:Customers' %}" class="action-btn btn-view" title="Return">
-                <i class="fas fa-chevron-left"></i>
-            </a>
+            {# Action buttons for customer management #}
+            <div class="button-group">
+                <a href="{% url 'DjTraders:CustomerDashboard' pk=customer.pk %}" class="action-btn" style="background-color: var(--primary-color); color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; margin-right: 8px;">
+                    Dashboard
+                </a>
+            
+                <a href="{% url 'DjTraders:CustomerUpdate' pk=customer.pk %}" class="action-btn" style="background-color: var(--primary-color); color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; margin-right: 8px;">
+                    Edit
+                </a>
+                
+                {% if customer.status == 'active' %}
+                <form method="POST" action="{% url 'DjTraders:CustomerStatus' pk=customer.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="archived">
+                    <button type="submit" class="action-btn" style="background-color: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                        Archive
+                    </button>
+                </form>
+                {% endif %}
+            </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Order History Section -->
-    <h2 class="section-title">Order History</h2>
-    
-    {% if orders %}
-    <table class="order-table">
-        <thead>
-            <tr>
-                <th>
-                    <div class="customer-search-field-header">
-                        Order ID
-                        <i class="fas fa-sort sort-icon {% if sort_field == 'order_id' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="order_id"></i>
-                    </div>
-                </th>
-                <th>
-                    <div class="customer-search-field-header">
-                        Order Date
-                        <i class="fas fa-sort sort-icon {% if sort_field == 'order_date' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="order_date"></i>
-                    </div>
-                </th>
-                <th>
-                    <div class="customer-search-field-header">
-                        Products
-                        <i class="fas fa-sort sort-icon {% if sort_field == 'product' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="product"></i>
-                    </div>
-                </th>
-                <th>
-                    <div class="customer-search-field-header">
-                        Quantity
-                        <i class="fas fa-sort sort-icon {% if sort_field == 'quantity' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="quantity"></i>
-                    </div>
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
-            <tr>
-                <td>{{ order.order_id }}</td>
-                <td>{{ order.order_date }}</td>
-                <td>
-                    {% for item in order.products %}
-                    <div>
-                        <a href="{% url 'DjTraders:ProductDetail' pk=item.product.pk %}" class="customer-link">
-                            {{ item.product.product_name }}
-                        </a>
-                        ({{ item.quantity }})
-                    </div>
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for item in order.products %}
-                    <div>{{ item.quantity }}</div>
-                    {% endfor %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="no-orders">No orders found for this customer.</div>
-    {% endif %}
+    {# Order History Section - displays table of customer orders #}
+    <section class="order-history">
+        <h2 class="section-title">Order History</h2>
+        
+        {% if orders %}
+        <table class="order-table">
+            <thead>
+                <tr>
+                    {# Sortable column headers with dynamic sort icons #}
+                    <th>
+                        <div class="customer-search-field-header">
+                            Order ID
+                            {# Sort icon changes based on current sort field and direction #}
+                            <i class="fas fa-sort sort-icon {% if sort_field == 'order_id' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="order_id"></i>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="customer-search-field-header">
+                            Order Date
+                            <i class="fas fa-sort sort-icon {% if sort_field == 'order_date' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="order_date"></i>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="customer-search-field-header">
+                            Products
+                            <i class="fas fa-sort sort-icon {% if sort_field == 'product' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="product"></i>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="customer-search-field-header">
+                            Quantity
+                            <i class="fas fa-sort sort-icon {% if sort_field == 'quantity' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="quantity"></i>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {# Iterate through orders and display details #}
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.order_id }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td>
+                        {# Display each product in the order with link to product detail #}
+                        {% for item in order.products %}
+                        <div>
+                            <a href="{% url 'DjTraders:ProductDetail' pk=item.product.pk %}" class="customer-link">
+                                {{ item.product.product_name }}
+                            </a>
+                            ({{ item.quantity }})
+                        </div>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {# Display quantity for each product in the order #}
+                        {% for item in order.products %}
+                        <div>{{ item.quantity }}</div>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        {# Message displayed when customer has no orders #}
+        <div class="no-orders">No orders found for this customer.</div>
+        {% endif %}
+    </section>
 </div>
 {% endblock %}

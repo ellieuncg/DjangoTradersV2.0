@@ -3,14 +3,19 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from .models import Customer, Product
 
-# Validator to ensure fields do not contain numbers
+# Custom validators
 no_numbers_validator = RegexValidator(
     regex=r'^[^\d]+$',
     message="This field should not contain numbers."
 )
 
 class CustomerForm(forms.ModelForm):
-    # Fields
+    """
+    Form for creating and updating Customer records.
+    Includes validation for names, address, and location information.
+    """
+    
+    # Personal Information Fields
     customer_name = forms.CharField(
         validators=[no_numbers_validator],
         widget=forms.TextInput(attrs={'required': True}),
@@ -21,6 +26,8 @@ class CustomerForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'required': True}),
         label="Contact Name"
     )
+    
+    # Location Fields
     address = forms.CharField(
         min_length=3,
         error_messages={
@@ -61,7 +68,13 @@ class CustomerForm(forms.ModelForm):
         model = Customer
         fields = ['customer_name', 'contact_name', 'address', 'city', 'postal_code', 'country', 'status']
 
+    # Field-level validation methods
     def clean_city(self):
+        """
+        Validates city name:
+        - Must not contain numbers
+        - Must be at least 2 characters long
+        """
         city = self.cleaned_data.get('city', '')
         if any(char.isdigit() for char in city):
             raise ValidationError("City should not contain numbers.")
@@ -70,6 +83,12 @@ class CustomerForm(forms.ModelForm):
         return city.strip()
 
     def clean_postal_code(self):
+        """
+        Validates postal code:
+        - Must not be empty
+        - Must contain at least one number
+        - Must be at least 5 characters long
+        """
         postal_code = self.cleaned_data.get('postal_code', '')
         if not postal_code.strip():
             raise ValidationError("Postal code is required.")
@@ -80,6 +99,10 @@ class CustomerForm(forms.ModelForm):
         return postal_code.strip()
 
     def clean(self):
+        """
+        Form-level validation:
+        - City and Country cannot be the same
+        """
         cleaned_data = super().clean()
         city = cleaned_data.get('city')
         country = cleaned_data.get('country')
@@ -89,7 +112,12 @@ class CustomerForm(forms.ModelForm):
 
 
 class ProductForm(forms.ModelForm):
-    # Fields
+    """
+    Form for creating and updating Product records.
+    Includes validation for product details and pricing.
+    """
+    
+    # Product Information Fields
     product_name = forms.CharField(
         widget=forms.TextInput(attrs={'required': True}),
         label="Product Name"
@@ -117,13 +145,22 @@ class ProductForm(forms.ModelForm):
         model = Product
         fields = ['product_name', 'category', 'unit', 'price', 'status']
 
+    # Field-level validation methods
     def clean_product_name(self):
+        """
+        Validates product name:
+        - Must not be empty
+        """
         product_name = self.cleaned_data.get('product_name', '')
         if not product_name.strip():
             raise ValidationError("Product name is required.")
         return product_name.strip()
 
     def clean_price(self):
+        """
+        Validates price:
+        - Must be greater than zero
+        """
         price = self.cleaned_data.get('price')
         if price and price <= 0:
             raise ValidationError("Price must be greater than zero.")

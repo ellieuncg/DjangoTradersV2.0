@@ -1,127 +1,142 @@
-console.log('DjTraders JS file loaded');
+// DjTraders main JavaScript file
+class DjTradersApp {
+    constructor() {
+        this.successMessage = document.getElementById('successMessage');
+        this.statusFilter = document.querySelector('.status-filter-header select');
+        this.countryFilter = document.querySelector('.customer-search-field-header select[name="country"]');
+        this.clearButton = document.querySelector('.btn-clear');
+        this.customerForm = document.getElementById('customerFilterForm');
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Document ready');
-
-    // Show success message if it exists
-    const successMessage = document.getElementById('successMessage');
-    if (successMessage && sessionStorage.getItem('customer_updated') === 'true') {
-        console.log("Displaying success message");  // Debug log
-        successMessage.style.display = 'block';
-        setTimeout(() => {
-            successMessage.style.display = 'none';
-            sessionStorage.removeItem('customer_updated');  // Clear session flag
-        }, 3000); // Hide after 3 seconds
-    } else {
-        console.log("Success message not displayed");  // Debug log
+        console.log('DjTraders JS initialized');
+        this.init();
     }
 
-    // Status filter change handler
-    const statusFilter = document.querySelector('.status-filter-header select');
-    if (statusFilter) {
-        statusFilter.addEventListener('change', function() {
-            console.log('Status changed');
-            this.form.submit();
+    init() {
+        this.handleSuccessMessage();
+        this.setupFilterHandlers();
+        this.setupSortHandlers();
+        this.updateSortIcons();
+    }
+
+    handleSuccessMessage() {
+        if (this.successMessage && sessionStorage.getItem('customer_updated') === 'true') {
+            console.log("Displaying success message");
+            this.successMessage.style.display = 'block';
+            setTimeout(() => {
+                this.successMessage.style.display = 'none';
+                sessionStorage.removeItem('customer_updated');
+            }, 3000);
+        } else {
+            console.log("Success message not displayed");
+        }
+    }
+
+    setupFilterHandlers() {
+        // Status filter
+        if (this.statusFilter) {
+            this.statusFilter.addEventListener('change', () => {
+                console.log('Status changed');
+                this.statusFilter.form.submit();
+            });
+        }
+
+        // Country filter
+        if (this.countryFilter) {
+            this.countryFilter.addEventListener('change', () => {
+                console.log('Country changed');
+                this.customerForm?.submit();
+            });
+        }
+
+        // Clear filter button
+        if (this.clearButton) {
+            this.clearButton.addEventListener('click', (e) => this.handleClearFilter(e));
+        }
+    }
+
+    handleClearFilter(e) {
+        e.preventDefault();
+        const currentUrl = new URL(window.location.href);
+        const status = currentUrl.searchParams.get('status') || 'active';
+        const baseUrl = window.location.pathname;
+        
+        window.location.href = `${baseUrl}?status=${status}`;
+    }
+
+    setupSortHandlers() {
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            icon.addEventListener('click', () => this.handleSort(icon));
         });
     }
 
-    // Country filter change handler
-    const countryFilter = document.querySelector('.customer-search-field-header select[name="country"]');
-    if (countryFilter) {
-        countryFilter.addEventListener('change', function() {
-            console.log('Country changed');
-            document.getElementById('customerFilterForm').submit();
-        });
+    handleSort(icon) {
+        console.log('Sort icon clicked');
+        const field = icon.getAttribute('data-sort');
+        const currentUrl = new URL(window.location.href);
+        const params = currentUrl.searchParams;
+        
+        // Get current sort field and direction
+        const currentSort = params.get('sort') || '';
+        const currentDirection = params.get('direction') || 'asc';
+        
+        // Determine new sort direction
+        const newDirection = field === currentSort && currentDirection === 'asc' ? 'desc' : 'asc';
+        
+        // Update parameters
+        this.updateSortParameters(params, field, newDirection);
+        
+        console.log('New URL:', currentUrl.toString());
+        window.location.href = currentUrl.toString();
     }
 
-    // Clear button handler
-    const clearButton = document.querySelector('.btn-clear');
-    if (clearButton) {
-        clearButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            const currentUrl = new URL(window.location.href);
-            const status = currentUrl.searchParams.get('status') || 'active';
-            const baseUrl = window.location.pathname;
-            
-            // Redirect to base URL with only status parameter
-            window.location.href = `${baseUrl}?status=${status}`;
-        });
-    }
-
-    // Sort icon click handlers
-    document.querySelectorAll('.sort-icon').forEach(icon => {
-        icon.addEventListener('click', function() {
-            console.log('Sort icon clicked');
-            const field = this.getAttribute('data-sort');
-            const currentUrl = new URL(window.location.href);
-            const params = currentUrl.searchParams;
-            
-            // Get current sort field and direction
-            let currentSort = params.get('sort') || '';
-            let currentDirection = params.get('direction') || 'asc';
-            
-            // Determine new sort direction
-            let newDirection = 'asc';
-            if (field === currentSort) {
-                newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
-            }
-            
-            // Get all current form values if customer form exists
-            const customerForm = document.getElementById('customerFilterForm');
-            if (customerForm) {
-                const formData = new FormData(customerForm);
-                // Update URL parameters while preserving search form values
-                for (let [key, value] of formData.entries()) {
-                    if (value) {  // Only add parameters that have values
-                        params.set(key, value);
-                    }
+    updateSortParameters(params, field, direction) {
+        // Add form values if customer form exists
+        if (this.customerForm) {
+            const formData = new FormData(this.customerForm);
+            for (let [key, value] of formData.entries()) {
+                if (value) {
+                    params.set(key, value);
                 }
             }
-            
-            // Add sort parameters
-            params.set('sort', field);
-            params.set('direction', newDirection);
-            
-            // Preserve status filter if exists
-            const statusSelect = document.querySelector('.status-select');
-            if (statusSelect) {
-                const status = statusSelect.value;
-                if (status) {
-                    params.set('status', status);
-                }
-            }
-            
-            // Preserve letter filter if exists
-            const letter = params.get('letter');
-            if (letter) {
-                params.set('letter', letter);
-            }
-            
-            console.log('New URL:', currentUrl.toString());
-            
-            // Update the URL and reload page
-            window.location.href = currentUrl.toString();
-        });
-    });
+        }
+        
+        // Set sort parameters
+        params.set('sort', field);
+        params.set('direction', direction);
+        
+        // Preserve status filter
+        const statusSelect = document.querySelector('.status-select');
+        if (statusSelect?.value) {
+            params.set('status', statusSelect.value);
+        }
+        
+        // Preserve letter filter
+        const letter = params.get('letter');
+        if (letter) {
+            params.set('letter', letter);
+        }
+    }
 
-    // Initialize sort icons based on current URL parameters
-    function updateSortIcons() {
+    updateSortIcons() {
         const params = new URLSearchParams(window.location.search);
         const currentSort = params.get('sort');
         const currentDirection = params.get('direction');
 
-        document.querySelectorAll('.sort-icon').forEach(function(icon) {
+        document.querySelectorAll('.sort-icon').forEach(icon => {
             const field = icon.getAttribute('data-sort');
+            icon.classList.remove('fa-sort', 'fa-sort-up', 'fa-sort-down');
+            
             if (field === currentSort) {
-                icon.classList.remove('fa-sort');
                 icon.classList.add(currentDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
             } else {
-                icon.classList.remove('fa-sort-up', 'fa-sort-down');
                 icon.classList.add('fa-sort');
             }
         });
     }
+}
 
-    // Call updateSortIcons when page loads
-    updateSortIcons();
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Document ready');
+    new DjTradersApp();
 });

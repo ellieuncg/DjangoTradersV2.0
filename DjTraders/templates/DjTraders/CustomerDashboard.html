@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ customer.customer_name }} - Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ customer.customer_name }} - Sales Dashboard</h1>
+    <div class="status-badge">
+        Status: {{ customer.status }}
+    </div>
+</div>
+
+<div class="customer-detail-page">
+    <!-- Annual Sales Analysis Section -->
+    <section class="customer-info">
+        <h2 class="section-title">Annual Sales Analysis</h2>
+        <div class="customer-info-section">
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Orders</th>
+                        <th>Products Sold</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for year in yearly_orders %}
+                    <tr>
+                        <td>{{ year.year }}</td>
+                        <td>{{ year.order_count }}</td>
+                        <td>{{ year.total_products }}</td>
+                        <td>${{ year.total_revenue|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Monthly Sales Analysis Section -->
+    <section class="order-history">
+        <h2 class="section-title">Monthly Sales Analysis</h2>
+        <table class="order-table">
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Month</th>
+                    <th>Orders</th>
+                    <th>Products Sold</th>
+                    <th>Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in monthly_sales %}
+                <tr>
+                    <td>{{ sale.year }}</td>
+                    <td>{{ sale.month_name }}</td>
+                    <td>{{ sale.order_count }}</td>
+                    <td>{{ sale.total_products }}</td>
+                    <td>${{ sale.total_revenue|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Top Products by Year Section -->
+    <section class="order-history">
+        <h2 class="section-title">Top Products by Year</h2>
+        {% for year, products in top_products_by_year.items %}
+        <h3>{{ year }}</h3>
+        <table class="order-table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Quantity Purchased</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.product__product_name }}</td>
+                    <td>{{ product.total_quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endfor %}
+    </section>
+
+    <!-- Top Categories by Year Section -->
+    <section class="order-history">
+        <h2 class="section-title">Top Categories by Year</h2>
+        {% for year, categories in top_categories_by_year.items %}
+        <h3>{{ year }}</h3>
+        <table class="order-table">
+            <thead>
+                <tr>
+                    <th>Category Name</th>
+                    <th>Quantity Purchased</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td>{{ category.product__category__category_name }}</td>
+                    <td>{{ category.total_quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endfor %}
+    </section>
+
+    <!-- Navigation Buttons -->
+    <div class="button-group">
+        <a href="{% url 'DjTraders:CustomerDetail' pk=customer.pk %}" class="action-btn btn-view" title="Back to Details">
+            <i class="fas fa-chevron-left"></i> Back to Details
+        </a>
+    </div>
+</div>
+{% endblock %}

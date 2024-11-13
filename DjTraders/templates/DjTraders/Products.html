@@ -2,11 +2,14 @@
 {% load static %}
 
 {% block content %}
+{# Main container for products page #}
 <div class="products-page">
     <div class="container">
+        {# Header section with title and main controls #}
         <div class="page-header">
             <h1>Our Products</h1>
             <div class="header-controls">
+                {# Status filter dropdown for product visibility #}
                 <div class="status-filter-header">
                     <form method="GET" class="status-filter-form" id="statusFilterForm">
                         <input type="hidden" name="category" value="{{ request.GET.category }}">
@@ -18,27 +21,31 @@
                         </select>
                     </form>
                 </div>
+                {# Add new product button #}
                 <a href="{% url 'DjTraders:ProductCreate' %}" class="btn-add-new">
                     <i class="fas fa-plus"></i>
                 </a>
             </div>
         </div>
 
-        <!-- Search Bar and Filter -->
+        {# Search and filter section #}
         <div class="search-container-products">
             <form method="get" class="search-form">
                 <div class="search-field-group">
+                    {# Product name search with sorting #}
                     <div class="search-field-header">
                         <i class="fas fa-sort sort-icon" data-sort="product"></i>
                         <input type="text" name="product" placeholder="Product Name" value="{{ product_query }}">
                     </div>
                     
+                    {# Price range filter with sorting #}
                     <div class="search-field-header">
                         <i class="fas fa-sort sort-icon" data-sort="price"></i>
                         <input type="number" name="min_price" placeholder="Min Price" value="{{ min_price }}">
                         <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}">
                     </div>
                 </div>
+                {# Search action buttons #}
                 <div class="button-group">
                     <button type="submit" class="action-btn btn-search">
                         <i class="fas fa-search"></i>
@@ -50,12 +57,14 @@
             </form>
         </div>
 
-        <!-- Category Filter -->
+        {# Category navigation filter #}
         <div class="categories-wrapper-products">
+            {# All categories option #}
             <a href="{% url 'DjTraders:Products' %}{% if request.GET.status %}?status={{ request.GET.status }}{% endif %}" 
                class="{% if not selected_category %}active{% endif %}">
                 All
             </a>
+            {# Individual category links #}
             {% for category in categories %}
                 <a href="{% url 'DjTraders:Products' %}?category={{ category.category_id }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
                    class="{% if selected_category == category.category_id|stringformat:'s' %}active{% endif %}">
@@ -64,16 +73,18 @@
             {% endfor %}
         </div>
 
-        <!-- Product Card Grid -->
+        {# Products display grid #}
         <div class="card-grid-products">
             {% for product in products %}
             <div class="card-products {% if product.status == 'inactive' %}inactive{% endif %}">
                 <h3 class="card-title">{{ product.product_name }}</h3>
+                {# Product information #}
                 <div class="card-info">
                     <p><strong>Category:</strong> {{ product.category.category_name }}</p>
                     <p><strong>Unit Price:</strong> ${{ product.price|floatformat:2 }}</p>
                     <p><strong>Status:</strong> {{ product.status }}</p>
                 </div>
+                {# Product action buttons #}
                 <div class="card-actions">
                     <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn view-btn">
                         <i class="fas fa-eye"></i>

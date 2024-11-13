@@ -8,15 +8,14 @@
             <h1>New/Update Customer</h1>
         </div>
 
-        <!-- Success message block, hidden initially -->
+        {# Success message container - hidden by default #}
         <div id="successMessage" class="alert alert-success" style="display: none;">
             Customer updated successfully.
         </div>
 
-        <form method="post">
+        <form method="post" class="customer-form">
             {% csrf_token %}
             
-            <!-- Customer name field with error handling -->
             <div class="form-group">
                 {{ form.customer_name.label_tag }}
                 {{ form.customer_name }}
@@ -29,7 +28,6 @@
                 {% endif %}
             </div>
             
-            <!-- Contact Name -->
             <div class="form-group">
                 {{ form.contact_name.label_tag }}
                 {{ form.contact_name }}
@@ -42,7 +40,6 @@
                 {% endif %}
             </div>
 
-            <!-- Address -->
             <div class="form-group">
                 {{ form.address.label_tag }}
                 {{ form.address }}
@@ -55,7 +52,6 @@
                 {% endif %}
             </div>
 
-            <!-- City -->
             <div class="form-group">
                 {{ form.city.label_tag }}
                 {{ form.city }}
@@ -68,7 +64,6 @@
                 {% endif %}
             </div>
 
-            <!-- Postal Code -->
             <div class="form-group">
                 {{ form.postal_code.label_tag }}
                 {{ form.postal_code }}
@@ -81,7 +76,6 @@
                 {% endif %}
             </div>
 
-            <!-- Country -->
             <div class="form-group">
                 {{ form.country.label_tag }}
                 {{ form.country }}
@@ -94,7 +88,6 @@
                 {% endif %}
             </div>
 
-            <!-- Status -->
             <div class="form-group">
                 {{ form.status.label_tag }}
                 {{ form.status }}
@@ -112,19 +105,3 @@
     </div>
 </div>
 {% endblock %}
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (sessionStorage.getItem('customer_updated') === 'true') {
-            const successMessage = document.getElementById('successMessage');
-            if (successMessage) {
-                // Display the success message
-                successMessage.style.display = 'block';
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                    sessionStorage.removeItem('customer_updated'); // Clear flag
-                }, 3000); // Hide after 3 seconds
-            }
-        }
-    });
-</script>

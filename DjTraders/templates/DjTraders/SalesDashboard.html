@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h1>Product Sales Dashboard</h1>
+
+<h2>Annual Sales Analysis</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Year</th>
+            <th>Orders</th>
+            <th>Products Sold</th>
+            <th>Revenue</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sale in annual_sales %}
+        <tr>
+            <td>{{ sale.product__product_name }}</td>
+            <td>{{ sale.year }}</td>  <!-- Changed from order__order_date__year -->
+            <td>{{ sale.orders_count }}</td>
+            <td>{{ sale.products_sold }}</td>
+            <td>${{ sale.revenue|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Top 10 Products by Revenue</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Year</th>
+            <th>Revenue</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in top_products %}
+        <tr>
+            <td>{{ product.product__product_name }}</td>
+            <td>{{ product.year }}</td>  <!-- Changed from order__order_date__year -->
+            <td>${{ product.revenue|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Bottom 10 Products by Revenue</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Year</th>
+            <th>Revenue</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in bottom_products %}
+        <tr>
+            <td>{{ product.product__product_name }}</td>
+            <td>{{ product.year }}</td>  <!-- Changed from product.order__order_date__year -->
+            <td>${{ product.revenue|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

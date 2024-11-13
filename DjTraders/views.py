@@ -2,12 +2,135 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, ListView, UpdateView
 from django.contrib import messages
 from django.utils import timezone
+from django.db.models.functions import ExtractYear, ExtractMonth
+from django.db.models import Count, Sum, F, Avg, Q
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import AuthenticationForm
 from .models import Customer, Product, Category, OrderDetail, Order
 from .forms import CustomerForm, ProductForm
+from calendar import month_name
+import logging
+
+logger = logging.getLogger(__name__)
 
 def index(request):
     """Home page view"""
     return render(request, 'DjTraders/index.html')
+
+# Check if the user is part of the "Employees" group
+def is_employee(user):
+    return user.groups.filter(name='Employees').exists()
+
+@login_required
+@user_passes_test(is_employee)
+def SalesDashboard(request):
+    """Sales analysis dashboard for annual, monthly, top/bottom, and category sales."""
+    # Annual Sales Analysis
+    annual_sales = (
+        OrderDetail.objects
+        .annotate(year=ExtractYear('order__order_date'))
+        .values('product__product_name', 'year')
+        .annotate(
+            orders_count=Count('order', distinct=True),
+            products_sold=Sum('quantity'),
+            revenue=Sum(F('quantity') * F('product__price'))
+        )
+        .order_by('-year')
+    )
+
+    # Top/Bottom Analysis (10 products)
+    top_products = (
+        OrderDetail.objects
+        .annotate(year=ExtractYear('order__order_date'))
+        .values('product__product_name', 'year')
+        .annotate(
+            revenue=Sum(F('quantity') * F('product__price'))
+        )
+        .order_by('-revenue')[:10]
+    )
+
+    bottom_products = (
+        OrderDetail.objects
+        .annotate(year=ExtractYear('order__order_date'))
+        .values('product__product_name', 'year')
+        .annotate(
+            revenue=Sum(F('quantity') * F('product__price'))
+        )
+        .order_by('revenue')[:10]
+    )
+
+    context = {
+        'annual_sales': annual_sales,
+        'top_products': top_products,
+        'bottom_products': bottom_products,
+        # Removed monthly_sales since it's not defined
+    }
+
+    return render(request, 'DjTraders/SalesDashboard.html', context)
+
+@login_required
+def CustomerDashboard(request, pk):
+    """Customer dashboard with annual and monthly sales, top products, and top categories."""
+    customer = get_object_or_404(Customer, pk=pk)
+    
+    yearly_orders = Order.objects.filter(customer_id=pk)\
+        .annotate(year=ExtractYear('order_date'))\
+        .values('year')\
+        .annotate(
+            order_count=Count('order_id'),
+            total_products=Sum('orderdetails__quantity'),
+            total_revenue=Sum(F('orderdetails__quantity') * F('orderdetails__product__price'))
+        )\
+        .order_by('-year')
+
+    monthly_sales = Order.objects.filter(customer_id=pk)\
+        .annotate(year=ExtractYear('order_date'), month=ExtractMonth('order_date'))\
+        .values('year', 'month')\
+        .annotate(
+            order_count=Count('order_id'),
+            total_products=Sum('orderdetails__quantity'),
+            total_revenue=Sum(F('orderdetails__quantity') * F('orderdetails__product__price'))
+        )\
+        .order_by('-year', '-month')
+    for sale in monthly_sales:
+        sale['month_name'] = month_name[sale['month']]
+
+    context = {
+        'customer': customer,
+        'yearly_orders': yearly_orders,
+        'monthly_sales': monthly_sales,
+    }
+    
+    return render(request, 'DjTraders/CustomerDashboard.html', context)
+
+def custom_login_view(request):
+    print("Login view called")  # Debug print
+    if request.method == 'POST':
+        print("POST request received")  # Debug print
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            
+            print(f"User authenticated: {user.username}")  # Debug print
+            print(f"User groups: {[group.name for group in user.groups.all()]}")  # Debug print
+            
+            if user.groups.filter(name='Employees').exists():
+                print(f"Employee group found for {user.username}")  # Debug print
+                messages.success(request, 'Successfully logged in as employee.')
+                print("About to redirect to SalesDashboard")  # Debug print
+                return redirect('DjTraders:SalesDashboard')
+            else:
+                print(f"No employee group for {user.username}")  # Debug print
+                messages.success(request, 'Successfully logged in.')
+                return redirect('DjTraders:Index')
+        else:
+            print(f"Form errors: {form.errors}")  # Debug print
+    else:
+        form = AuthenticationForm()
+        
+    return render(request, 'DjTraders/login.html', {'form': form})
 
 # ============================
 # Customer Views
@@ -22,7 +145,6 @@ class DjTradersCustomersView(ListView):
     def get_queryset(self):
         queryset = Customer.objects.all()
         
-        # Get search parameters
         customer_query = self.request.GET.get('customer', '')
         contact_query = self.request.GET.get('contact', '')
         city_query = self.request.GET.get('city', '')
@@ -30,7 +152,6 @@ class DjTradersCustomersView(ListView):
         letter = self.request.GET.get('letter', '')
         status = self.request.GET.get('status', 'active')
         
-        # Apply filters
         if customer_query:
             queryset = queryset.filter(customer_name__icontains=customer_query)
         if contact_query:
@@ -42,58 +163,10 @@ class DjTradersCustomersView(ListView):
         if letter:
             queryset = queryset.filter(customer_name__istartswith=letter)
         
-        # Status filter
         if status != 'all':
             queryset = queryset.filter(status=status)
 
-        # Apply sorting
-        sort_field = self.request.GET.get('sort')
-        sort_direction = self.request.GET.get('direction', 'asc')
-        if sort_field:
-            field_mapping = {
-                'customer': 'customer_name',
-                'contact': 'contact_name',
-                'city': 'city',
-                'country': 'country'
-            }
-            sort_field = field_mapping.get(sort_field, sort_field)
-            if sort_direction == 'desc':
-                sort_field = f'-{sort_field}'
-            return queryset.order_by(sort_field)
-
-        return queryset.order_by('customer_name')  # default sorting
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        status = self.request.GET.get('status', 'active')
-        countries = Customer.objects.values_list('country', flat=True).distinct().order_by('country')
-        
-        context.update({
-            'customer_query': self.request.GET.get('customer', ''),
-            'contact_query': self.request.GET.get('contact', ''),
-            'city_query': self.request.GET.get('city', ''),
-            'country_query': self.request.GET.get('country', ''),
-            'status_filter': status,
-            'countries': countries,
-            'current_letter': self.request.GET.get('letter', '')
-        })
-        return context
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        status = self.request.GET.get('status', 'active')
-        countries = Customer.objects.values_list('country', flat=True).distinct().order_by('country')
-        
-        context.update({
-            'customer_query': self.request.GET.get('customer', ''),
-            'contact_query': self.request.GET.get('contact', ''),
-            'city_query': self.request.GET.get('city', ''),
-            'country_query': self.request.GET.get('country', ''),
-            'status_filter': status,
-            'countries': countries,
-            'current_letter': self.request.GET.get('letter', '')
-        })
-        return context
+        return queryset.order_by('customer_name')
 
 class DjTradersCustomerDetailView(DetailView):
     """Customer detail view"""
@@ -116,30 +189,13 @@ class DjTradersCustomerDetailView(DetailView):
             }
             order_details.append(details)
         
-        # Sort order details if requested
         sort_field = self.request.GET.get('sort')
         sort_direction = self.request.GET.get('direction', 'desc')
         if sort_field:
-            if sort_field == 'order_id':
-                order_details.sort(
-                    key=lambda x: x['order_id'],
-                    reverse=(sort_direction == 'desc')
-                )
-            elif sort_field == 'order_date':
-                order_details.sort(
-                    key=lambda x: x['order_date'],
-                    reverse=(sort_direction == 'desc')
-                )
-            elif sort_field == 'product':
-                order_details.sort(
-                    key=lambda x: x['products'][0]['product'].product_name if x['products'] else '',
-                    reverse=(sort_direction == 'desc')
-                )
-            elif sort_field == 'quantity':
-                order_details.sort(
-                    key=lambda x: sum(p['quantity'] for p in x['products']),
-                    reverse=(sort_direction == 'desc')
-                )
+            order_details.sort(
+                key=lambda x: x['order_id'],
+                reverse=(sort_direction == 'desc')
+            )
         
         context.update({
             'orders': order_details,
@@ -183,15 +239,14 @@ def update_customer(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Customer updated successfully.')
-            request.session['customer_updated'] = True  # Set session flag
+            request.session['customer_updated'] = True
             return redirect('DjTraders:CustomerDetail', pk=customer.pk)
     else:
         form = CustomerForm(instance=customer)
-    
     return render(request, 'DjTraders/CustomerForm.html', {'form': form, 'customer': customer})
 
 def update_customer_status(request, pk):
-    """Update customer active/inactive/archived status"""
+    """Update customer status"""
     if request.method == 'POST':
         customer = get_object_or_404(Customer, pk=pk)
         new_status = request.POST.get('status')
@@ -215,15 +270,12 @@ class DjTradersProductsView(ListView):
 
     def get_queryset(self):
         queryset = Product.objects.all()
-        
-        # Get search parameters
         product_query = self.request.GET.get('product', '')
         category = self.request.GET.get('category', '')
         min_price = self.request.GET.get('min_price', '')
         max_price = self.request.GET.get('max_price', '')
         status = self.request.GET.get('status', 'active')
 
-        # Apply filters
         if product_query:
             queryset = queryset.filter(product_name__icontains=product_query)
         if category:
@@ -240,88 +292,16 @@ class DjTradersProductsView(ListView):
                 queryset = queryset.filter(price__lte=max_price)
             except ValueError:
                 pass
-
-        # Status filter
         if status != 'all':
             queryset = queryset.filter(status=status)
 
         return queryset.order_by('product_name')
-
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        status = self.request.GET.get('status', 'active')
-        categories = Category.objects.all().order_by('category_name')
-        
-        context.update({
-            'categories': categories,
-            'product_query': self.request.GET.get('product', ''),
-            'min_price': self.request.GET.get('min_price', ''),
-            'max_price': self.request.GET.get('max_price', ''),
-            'selected_category': self.request.GET.get('category', ''),
-            'status_filter': status
-        })
-        return context
 
 class DjTradersProductDetailView(DetailView):
     """Product detail view"""
     model = Product
     template_name = 'DjTraders/ProductDetail.html'
     context_object_name = 'product'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        product = self.get_object()
-        
-        # Get sort parameters
-        sort_field = self.request.GET.get('sort', 'order__order_date')
-        sort_direction = self.request.GET.get('direction', 'desc')
-        
-        # Map frontend field names to model field names
-        field_mapping = {
-            'customer': 'order__customer__customer_name',
-            'order_date': 'order__order_date',
-            'quantity': 'quantity',
-            'total': 'quantity'
-        }
-        
-        # Get the correct field name from mapping
-        sort_field = field_mapping.get(sort_field, sort_field)
-        
-        # Create the order_by string
-        order_by = f"{'-' if sort_direction == 'desc' else ''}{sort_field}"
-        
-        # Query the order details
-        order_details = OrderDetail.objects.filter(product=product)
-        
-        # Special handling for total sorting since it's calculated
-        if sort_field == 'quantity' and 'total' in self.request.GET.get('sort', ''):
-            order_details = sorted(
-                order_details,
-                key=lambda x: x.quantity * x.product.price,
-                reverse=(sort_direction == 'desc')
-            )
-        else:
-            order_details = order_details.order_by(order_by)
-
-        # Format the details for display
-        context['order_details'] = [{
-            'order': detail.order,
-            'quantity': detail.quantity,
-            'unit_price': detail.product.price,
-            'total': detail.product.price * detail.quantity,
-        } for detail in order_details]
-        
-        # Add sorting context
-        context['sort_field'] = self.request.GET.get('sort', 'order_date')
-        context['sort_direction'] = sort_direction
-        
-        # Add summary statistics
-        context['total_orders'] = len(context['order_details'])
-        context['total_units_sold'] = sum(detail['quantity'] for detail in context['order_details'])
-        context['total_revenue'] = sum(detail['total'] for detail in context['order_details'])
-        
-        return context
 
 def create_product(request):
     """Create new product"""
@@ -350,13 +330,10 @@ def update_product(request, pk):
             messages.error(request, 'Please correct the errors below.')
     else:
         form = ProductForm(instance=product)
-    return render(request, 'DjTraders/ProductForm.html', {
-        'form': form,
-        'product': product
-    })
+    return render(request, 'DjTraders/ProductForm.html', {'form': form, 'product': product})
 
 def update_product_status(request, pk):
-    """Update product active/inactive/archived status"""
+    """Update product status"""
     if request.method == 'POST':
         product = get_object_or_404(Product, pk=pk)
         new_status = request.POST.get('status')
