@@ -31,125 +31,63 @@
                         <p class="next-level-info">
                             Spend ${{ loyalty_info.spend_to_next|floatformat:2 }} more to reach the next level!
                         </p>
-                    {% else %}
-                        {% if customer.loyalty_level == 'PLATINUM' %}
-                            <p>Congratulations! You've reached our highest loyalty tier!</p>
-                        {% endif %}
                     {% endif %}
                 </div>
             </div>
         </section>
     </div>
 
+    <!-- Chart Containers for other tabs -->
     <div id="tab-annual" class="customer-tab-content">
         <section class="customer-info">
             <h2 class="section-title">Annual Sales Analysis</h2>
-            <table class="order-table">
-                <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>Orders</th>
-                        <th>Products Sold</th>
-                        <th>Revenue</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for year in yearly_orders %}
-                    <tr>
-                        <td>{{ year.year }}</td>
-                        <td>{{ year.order_count }}</td>
-                        <td>{{ year.total_products }}</td>
-                        <td>${{ year.total_revenue|floatformat:2 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <canvas id="annualSalesChart"></canvas>
         </section>
     </div>
-
     <div id="tab-monthly" class="customer-tab-content">
         <section class="order-history">
             <h2 class="section-title">Monthly Sales Analysis</h2>
-            <table class="order-table">
-                <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>Month</th>
-                        <th>Orders</th>
-                        <th>Products Sold</th>
-                        <th>Revenue</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for sale in monthly_sales %}
-                    <tr>
-                        <td>{{ sale.year }}</td>
-                        <td>{{ sale.month_name }}</td>
-                        <td>{{ sale.order_count }}</td>
-                        <td>{{ sale.total_products }}</td>
-                        <td>${{ sale.total_revenue|floatformat:2 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <canvas id="monthlySalesChart"></canvas>
         </section>
     </div>
-
     <div id="tab-top-products" class="customer-tab-content">
         <section class="order-history">
             <h2 class="section-title">Top Products by Year</h2>
-            {% for year, products in top_products_by_year.items %}
-            <h3 class="section-subtitle">{{ year }}</h3>
-            <table class="order-table">
-                <thead>
-                    <tr>
-                        <th>Product Name</th>
-                        <th>Quantity Purchased</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product in products %}
-                    <tr>
-                        <td>{{ product.product__product_name }}</td>
-                        <td>{{ product.total_quantity }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endfor %}
+            <canvas id="topProductsChart"></canvas>
         </section>
     </div>
-
     <div id="tab-top-categories" class="customer-tab-content">
         <section class="order-history">
             <h2 class="section-title">Top Categories by Year</h2>
-            {% for year, categories in top_categories_by_year.items %}
-            <h3 class="section-subtitle">{{ year }}</h3>
-            <table class="order-table">
-                <thead>
-                    <tr>
-                        <th>Category Name</th>
-                        <th>Quantity Purchased</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for category in categories %}
-                    <tr>
-                        <td>{{ category.product__category__category_name }}</td>
-                        <td>{{ category.total_quantity }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endfor %}
+            <canvas id="topCategoriesChart"></canvas>
         </section>
     </div>
-
-    <!-- Navigation Buttons -->
-    <div class="button-group">
-        <a href="{% url 'DjTraders:CustomerDetail' pk=customer.pk %}" class="btn-view" title="Back to Details">
-            <i class="fas fa-chevron-left"></i> Back to Details
-        </a>
-    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'scripts/DJTraders.js' %}"></script>
+
+<!-- Define JSON data in HTML template -->
+{{ yearly_orders|json_script:"yearlyOrders" }}
+{{ yearly_revenue|json_script:"yearlyRevenue" }}
+{{ monthly_sales_labels|json_script:"monthlySalesLabels" }}
+{{ monthly_sales_data|json_script:"monthlySalesData" }}
+{{ top_products_labels|json_script:"topProductsLabels" }}
+{{ top_products_data|json_script:"topProductsData" }}
+{{ top_categories_labels|json_script:"topCategoriesLabels" }}
+{{ top_categories_data|json_script:"topCategoriesData" }}
+
+<script>
+    // Retrieve data for use in JavaScript
+    const yearlyOrders = JSON.parse(document.getElementById('yearlyOrders').textContent);
+    const yearlyRevenue = JSON.parse(document.getElementById('yearlyRevenue').textContent);
+    const monthlySalesLabels = JSON.parse(document.getElementById('monthlySalesLabels').textContent);
+    const monthlySalesData = JSON.parse(document.getElementById('monthlySalesData').textContent);
+    const topProductsLabels = JSON.parse(document.getElementById('topProductsLabels').textContent);
+    const topProductsData = JSON.parse(document.getElementById('topProductsData').textContent);
+    const topCategoriesLabels = JSON.parse(document.getElementById('topCategoriesLabels').textContent);
+    const topCategoriesData = JSON.parse(document.getElementById('topCategoriesData').textContent);
+</script>
 {% endblock %}

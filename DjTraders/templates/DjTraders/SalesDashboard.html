@@ -9,32 +9,7 @@
         <h1>Product Sales Dashboard</h1>
         <div class="customer-header-status">
             <form id="filterForm" method="GET" action="{% url 'DjTraders:SalesDashboard' %}">
-                <label for="yearFilter">Year</label>
-                <select id="yearFilter" name="year">
-                    {% for year in available_years %}
-                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
-                    {% endfor %}
-                </select>
-            
-                <label for="categoryFilter">Category</label>
-                <select id="categoryFilter" name="category">
-                    <option value="">All Categories</option>
-                    {% for category in categories %}
-                        <option value="{{ category.category_id }}" {% if category.category_id == selected_category %}selected{% endif %}>
-                            {{ category.category_name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            
-                <label for="supplierFilter">Supplier</label>
-                <select id="supplierFilter" name="supplier">
-                    <option value="">All Suppliers</option>
-                    {% for supplier in suppliers %}
-                        <option value="{{ supplier.supplier_id }}" {% if supplier.supplier_id|stringformat:"s" == selected_supplier|stringformat:"s" %}selected{% endif %}>
-                            {{ supplier.name }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <!-- Filters here -->
             </form>
         </div>
     </div>
@@ -49,123 +24,40 @@
 
     <!-- Tab Content Sections -->
     <div id="tab-annual-overview" class="customer-tab-content active">
-        <div class="card-customers">
-            <h2 class="card-title">Annual Sales Overview</h2>
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <h3>Total Orders</h3>
-                    <p>{{ annual_total.orders_count|default:0 }}</p>
-                </div>
-                <div class="metric-card">
-                    <h3>Total Products Sold</h3>
-                    <p>{{ annual_total.products_sold|default:0 }}</p>
-                </div>
-                <div class="metric-card">
-                    <h3>Total Revenue</h3>
-                    <p>${{ annual_total.revenue|default:0|floatformat:2 }}</p>
-                </div>
-            </div>
-        </div>
+        <h2>Annual Sales Overview</h2>
+        <canvas id="annualSalesChart"></canvas>
     </div>
 
     <div id="tab-top-products" class="customer-tab-content">
-        <div class="card-customers">
-            <h2 class="card-title">Top 10 Products by Revenue</h2>
-            <table class="order-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Orders</th>
-                        <th>Revenue</th>
-                        <th>vs Average</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product in top_products %}
-                    <tr>
-                        <td>{{ product.product__product_name }}</td>
-                        <td>{{ product.orders_count }}</td>
-                        <td>${{ product.revenue|floatformat:2 }}</td>
-                        <td class="{% if product.vs_average > 0 %}status-active{% else %}status-inactive{% endif %}">
-                            {{ product.vs_average|floatformat:1 }}%
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center">No data available</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <h2>Top 10 Products by Revenue</h2>
+        <canvas id="topProductsChart"></canvas>
     </div>
 
     <div id="tab-bottom-products" class="customer-tab-content">
-        <div class="card-customers">
-            <h2 class="card-title">Bottom 10 Products by Revenue</h2>
-            <table class="order-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Orders</th>
-                        <th>Revenue</th>
-                        <th>vs Average</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product in bottom_products %}
-                    <tr>
-                        <td>{{ product.product__product_name }}</td>
-                        <td>{{ product.orders_count }}</td>
-                        <td>${{ product.revenue|floatformat:2 }}</td>
-                        <td class="{% if product.vs_average > 0 %}status-active{% else %}status-inactive{% endif %}">
-                            {{ product.vs_average|floatformat:1 }}%
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center">No data available</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <h2>Bottom 10 Products by Revenue</h2>
+        <canvas id="bottomProductsChart"></canvas>
     </div>
 
     <div id="tab-category-analysis" class="customer-tab-content">
-        <div class="card-customers">
-            <h2 class="card-title">Category Sales Analysis</h2>
-            <table class="order-table">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Products</th>
-                        <th>Orders</th>
-                        <th>Revenue</th>
-                        <th>Average Per Product</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for category in category_analysis %}
-                    <tr>
-                        <td>{{ category.name }}</td>
-                        <td>{{ category.product_count }}</td>
-                        <td>{{ category.orders_count }}</td>
-                        <td>${{ category.revenue|floatformat:2 }}</td>
-                        <td>${{ category.avg_per_product|floatformat:2 }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center">No data available</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <h2>Category Sales Analysis</h2>
+        <canvas id="categorySalesChart"></canvas>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'DjTraders/DJTraders.js' %}"></script>
+
+<!-- Define JSON data in HTML template for Chart.js -->
+<script>
+    const annualSalesLabels = {{ annual_sales_labels|safe }};
+    const annualSalesData = {{ annual_sales_data|safe }};
+    const topProductsLabels = {{ top_products_labels|safe }};
+    const topProductsData = {{ top_products_data|safe }};
+    const bottomProductsLabels = {{ bottom_products_labels|safe }};
+    const bottomProductsData = {{ bottom_products_data|safe }};
+    const categorySalesLabels = {{ category_sales_labels|safe }};
+    const categorySalesData = {{ category_sales_data|safe }};
+</script>
 {% endblock %}

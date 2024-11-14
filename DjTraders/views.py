@@ -13,26 +13,25 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
-from django.utils.decorators import method_decorator
 from .models import Customer, Product, Category, OrderDetail, Order, Supplier
 from .forms import CustomerForm, ProductForm
-from .recommender import ProductRecommender
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 logger = logging.getLogger(__name__)
 
+# Home Page View
 def index(request):
-    """Home page view"""
     return render(request, 'DjTraders/index.html')
 
+# Check if User is Employee
 def is_employee(user):
-    """Check if the user is part of the 'Employees' group"""
     return user.groups.filter(name='Employees').exists()
 
+# Sales Dashboard View
 @login_required
 @user_passes_test(is_employee)
 def SalesDashboard(request):
-    """Sales analysis dashboard"""
-    
     # Get available years
     years_query = Order.objects.annotate(
         year=ExtractYear('order_date')
@@ -139,10 +138,17 @@ def SalesDashboard(request):
             if category['product_count'] else 0
         )
     
-    # Get filter options
-    categories = Category.objects.all().order_by('category_name')
-    suppliers = Supplier.objects.all().order_by('name')
-    
+    # Prepare data for charts
+    annual_sales_labels = [category['name'] for category in category_analysis]
+    annual_sales_data = [category['revenue'] for category in category_analysis]
+    top_products_labels = [product['product__product_name'] for product in top_products]
+    top_products_data = [product['revenue'] for product in top_products]
+    bottom_products_labels = [product['product__product_name'] for product in bottom_products]
+    bottom_products_data = [product['revenue'] for product in bottom_products]
+    category_sales_labels = [category['name'] for category in category_analysis]
+    category_sales_data = [category['product_count'] for category in category_analysis]
+
+    # Context data
     context = {
         'annual_total': annual_total,
         'top_products': top_products,
@@ -152,41 +158,42 @@ def SalesDashboard(request):
         'selected_year': selected_year,
         'selected_category': selected_category,
         'selected_supplier': selected_supplier,
-        'categories': categories,
-        'suppliers': suppliers,
+        'categories': Category.objects.all().order_by('category_name'),
+        'suppliers': Supplier.objects.all().order_by('name'),
+        
+        # Additional data for visualizations
+        'annual_sales_labels': json.dumps(annual_sales_labels, cls=DjangoJSONEncoder),
+        'annual_sales_data': json.dumps(annual_sales_data, cls=DjangoJSONEncoder),
+        'top_products_labels': json.dumps(top_products_labels, cls=DjangoJSONEncoder),
+        'top_products_data': json.dumps(top_products_data, cls=DjangoJSONEncoder),
+        'bottom_products_labels': json.dumps(bottom_products_labels, cls=DjangoJSONEncoder),
+        'bottom_products_data': json.dumps(bottom_products_data, cls=DjangoJSONEncoder),
+        'category_sales_labels': json.dumps(category_sales_labels, cls=DjangoJSONEncoder),
+        'category_sales_data': json.dumps(category_sales_data, cls=DjangoJSONEncoder),
     }
     
     return render(request, 'DjTraders/SalesDashboard.html', context)
 
+# Custom Login View with Employee Group Check
 def custom_login_view(request):
-    """Custom login view with employee group check"""
-    logger.debug("Login view called")
     if request.method == 'POST':
-        logger.debug("POST request received")
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             
-            logger.debug(f"User authenticated: {user.username}")
-            logger.debug(f"User groups: {[group.name for group in user.groups.all()]}")
-            
             if user.groups.filter(name='Employees').exists():
-                logger.debug(f"Employee group found for {user.username}")
                 messages.success(request, 'Successfully logged in as employee.')
                 return redirect('DjTraders:SalesDashboard')
             else:
-                logger.debug(f"No employee group for {user.username}")
                 messages.success(request, 'Successfully logged in.')
                 return redirect('DjTraders:Index')
-        else:
-            logger.debug(f"Form errors: {form.errors}")
     else:
         form = AuthenticationForm()
     return render(request, 'DjTraders/login.html', {'form': form})
 
+# Customer List View with Search and Filtering
 class DjTradersCustomersView(ListView):
-    """Customer list view with search and filtering"""
     model = Customer
     template_name = 'DjTraders/customers.html'
     context_object_name = 'customers'
@@ -216,146 +223,75 @@ class DjTradersCustomersView(ListView):
 
         return queryset.order_by('customer_name')
 
+# Customer Dashboard View
 def CustomerDashboard(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
-    
-    # Update loyalty calculations first
-    if not customer.last_spend_update or \
-       customer.last_spend_update < timezone.now().date() - timezone.timedelta(days=1):
-        customer.update_annual_spend()
-    
-    # Calculate top products by year
-    products = OrderDetail.objects.filter(
-        order__customer__customer_id=pk
-    ).annotate(
-        year=ExtractYear('order__order_date')
-    ).values(
-        'year',
-        'product__product_name'
-    ).annotate(
-        total_quantity=Sum('quantity')
-    ).order_by('year', '-total_quantity')
 
-    # Organize products by year
-    top_products_by_year = {}
-    for product in products:
-        year = product['year']
-        if year not in top_products_by_year:
-            top_products_by_year[year] = []
-        if len(top_products_by_year[year]) < 5:
-            top_products_by_year[year].append(product)
-
-    # Calculate top categories by year
-    categories = OrderDetail.objects.filter(
-        order__customer__customer_id=pk
-    ).annotate(
-        year=ExtractYear('order__order_date')
-    ).values(
-        'year',
-        'product__category__category_name'
-    ).annotate(
-        total_quantity=Sum('quantity')
-    ).order_by('year', '-total_quantity')
-
-    # Organize categories by year
-    top_categories_by_year = {}
-    for category in categories:
-        year = category['year']
-        if year not in top_categories_by_year:
-            top_categories_by_year[year] = []
-        if len(top_categories_by_year[year]) < 5:
-            top_categories_by_year[year].append(category)
-
-    # Get recommendations
-    recommender = ProductRecommender(customer.customer_id)
-    recommended_products = recommender.get_recommendations(limit=5)
-    
-    # Yearly Orders Summary
-    yearly_orders = Order.objects.filter(customer__customer_id=pk)\
-        .annotate(year=ExtractYear('order_date'))\
-        .values('year')\
+    # Yearly Orders and Revenue
+    yearly_orders = list(Order.objects.filter(customer__customer_id=pk)
+        .annotate(year=ExtractYear('order_date'))
+        .values('year')
         .annotate(
             order_count=Count('order_id'),
             total_products=Sum('orderdetails__quantity'),
             total_revenue=Sum(F('orderdetails__quantity') * F('orderdetails__product__price'))
-        )\
-        .order_by('-year')
+        ).order_by('-year'))
+    yearly_revenue = [item['total_revenue'] for item in yearly_orders]
+    yearly_orders_labels = [item['year'] for item in yearly_orders]
 
-    # Monthly Sales Analysis
-    monthly_sales = Order.objects.filter(customer__customer_id=pk)\
-        .annotate(
-            year=ExtractYear('order_date'),
-            month=ExtractMonth('order_date')
-        )\
-        .values('year', 'month')\
+    # Monthly Sales (Labels and Data)
+    monthly_sales = list(Order.objects.filter(customer__customer_id=pk)
+        .annotate(year=ExtractYear('order_date'))
+        .values('year')
         .annotate(
             order_count=Count('order_id'),
             total_products=Sum('orderdetails__quantity'),
             total_revenue=Sum(F('orderdetails__quantity') * F('orderdetails__product__price'))
-        )\
-        .order_by('-year', '-month')
+        ).order_by('-year'))
+    monthly_sales_labels = [f"{sale['year']}" for sale in monthly_sales]
+    monthly_sales_data = [sale['total_revenue'] for sale in monthly_sales]
 
-    for sale in monthly_sales:
-        sale['month_name'] = calendar.month_name[sale['month']]
+    # Top Products by Year
+    top_products_by_year = OrderDetail.objects.filter(order__customer__customer_id=pk)\
+        .annotate(year=ExtractYear('order__order_date'))\
+        .values('product__product_name')\
+        .annotate(total_quantity=Sum('quantity'))\
+        .order_by('-total_quantity')[:10]
+    top_products_labels = [item['product__product_name'] for item in top_products_by_year]
+    top_products_data = [item['total_quantity'] for item in top_products_by_year]
 
-    # Loyalty Information
-    loyalty_info = {
-        'current_level': customer.get_loyalty_level_display() if customer.loyalty_level else "Not Qualified",
-        'annual_spend': customer.annual_spend,
-        'discount_percentage': customer.get_discount_percentage(),
-        'spend_to_next': customer.get_spend_to_next_level()
-    }
+    # Top Categories by Year
+    top_categories_by_year = OrderDetail.objects.filter(order__customer__customer_id=pk)\
+        .annotate(year=ExtractYear('order__order_date'))\
+        .values('product__category__category_name')\
+        .annotate(total_quantity=Sum('quantity'))\
+        .order_by('-total_quantity')[:10]
+    top_categories_labels = [item['product__category__category_name'] for item in top_categories_by_year]
+    top_categories_data = [item['total_quantity'] for item in top_categories_by_year]
 
+    # Pass all data to the context
     context = {
         'customer': customer,
-        'yearly_orders': yearly_orders,
-        'monthly_sales': monthly_sales,
-        'recommended_products': recommended_products,
-        'loyalty_info': loyalty_info,
-        'top_products_by_year': top_products_by_year,
-        'top_categories_by_year': top_categories_by_year
+        'yearly_orders': json.dumps(yearly_orders_labels, cls=DjangoJSONEncoder),
+        'yearly_revenue': json.dumps(yearly_revenue, cls=DjangoJSONEncoder),
+        'monthly_sales_labels': json.dumps(monthly_sales_labels, cls=DjangoJSONEncoder),
+        'monthly_sales_data': json.dumps(monthly_sales_data, cls=DjangoJSONEncoder),
+        'top_products_labels': json.dumps(top_products_labels, cls=DjangoJSONEncoder),
+        'top_products_data': json.dumps(top_products_data, cls=DjangoJSONEncoder),
+        'top_categories_labels': json.dumps(top_categories_labels, cls=DjangoJSONEncoder),
+        'top_categories_data': json.dumps(top_categories_data, cls=DjangoJSONEncoder),
     }
 
     return render(request, 'DjTraders/CustomerDashboard.html', context)
 
+# Customer Detail View
 class DjTradersCustomerDetailView(DetailView):
-    """Customer detail view"""
     model = Customer
     template_name = 'DjTraders/CustomerDetail.html'
     context_object_name = 'customer'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        customer = self.get_object()
-        order_details = []
-        for order in customer.orders.all().order_by('-order_date'):
-            details = {
-                'order_id': order.order_id,
-                'order_date': order.order_date,
-                'products': [{
-                    'product': detail.product,
-                    'quantity': detail.quantity,
-                } for detail in order.orderdetails.all()]
-            }
-            order_details.append(details)
-        
-        sort_field = self.request.GET.get('sort')
-        sort_direction = self.request.GET.get('direction', 'desc')
-        if sort_field:
-            order_details.sort(
-                key=lambda x: x['order_id'],
-                reverse=(sort_direction == 'desc')
-            )
-        
-        context.update({
-            'orders': order_details,
-            'sort_field': sort_field,
-            'sort_direction': sort_direction
-        })
-        return context
-
+# Archive Customer View
 class CustomerArchiveView(UpdateView):
-    """View for archiving customers"""
     model = Customer
     fields = []
     template_name = 'DjTraders/CustomerDetail.html'
@@ -368,8 +304,8 @@ class CustomerArchiveView(UpdateView):
         messages.success(self.request, f'Customer {customer.customer_name} has been archived.')
         return redirect('DjTraders:CustomerDetail', pk=customer.pk)
 
+# Create Customer View
 def create_customer(request):
-    """Create new customer"""
     if request.method == 'POST':
         form = CustomerForm(request.POST)
         if form.is_valid():
@@ -382,8 +318,8 @@ def create_customer(request):
         form = CustomerForm()
     return render(request, 'DjTraders/CustomerForm.html', {'form': form})
 
+# Update Customer View
 def update_customer(request, pk):
-    """Update existing customer"""
     customer = get_object_or_404(Customer, pk=pk)
     if request.method == 'POST':
         form = CustomerForm(request.POST, instance=customer)
@@ -396,8 +332,8 @@ def update_customer(request, pk):
         form = CustomerForm(instance=customer)
     return render(request, 'DjTraders/CustomerForm.html', {'form': form, 'customer': customer})
 
+# Update Customer Status View
 def update_customer_status(request, pk):
-    """Update customer status"""
     if request.method == 'POST':
         customer = get_object_or_404(Customer, pk=pk)
         new_status = request.POST.get('status')
@@ -451,14 +387,14 @@ class DjTradersProductsView(ListView):
         context['status_filter'] = self.request.GET.get('status', 'active')
         return context
 
+# Product Detail View
 class DjTradersProductDetailView(DetailView):
-    """Product detail view"""
     model = Product
     template_name = 'DjTraders/ProductDetail.html'
     context_object_name = 'product'
 
+# Create Product View
 def create_product(request):
-    """Create new product"""
     if request.method == 'POST':
         form = ProductForm(request.POST)
         if form.is_valid():
@@ -471,29 +407,23 @@ def create_product(request):
         form = ProductForm()
     return render(request, 'DjTraders/ProductForm.html', {'form': form})
 
-from django.shortcuts import get_object_or_404, redirect, render
-from .models import Product, Category
-
+# Update Product View
 def update_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
-        print("POST data:", request.POST)  # Debug print
         form = ProductForm(request.POST, instance=product)
         if form.is_valid():
-            try:
-                form.save()
-                return redirect('DjTraders:Products')
-            except Exception as e:
-                print("Error saving form:", str(e))  # Debug print
-                messages.error(request, f"Error saving product: {str(e)}")
+            form.save()
+            messages.success(request, 'Product updated successfully.')
+            return redirect('DjTraders:Products')
         else:
-            print("Form errors:", form.errors)  # Debug print
+            messages.error(request, 'Error saving product.')
     else:
         form = ProductForm(instance=product)
     return render(request, 'DjTraders/ProductForm.html', {'form': form})
 
+# Update Product Status View
 def update_product_status(request, pk):
-    """Update product status"""
     if request.method == 'POST':
         product = get_object_or_404(Product, pk=pk)
         new_status = request.POST.get('status')
