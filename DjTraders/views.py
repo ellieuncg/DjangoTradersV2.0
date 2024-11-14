@@ -16,6 +16,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from .models import Customer, Product, Category, OrderDetail, Order, Supplier
 from .forms import CustomerForm, ProductForm
+from .recommender import ProductRecommender
 
 logger = logging.getLogger(__name__)
 
@@ -184,13 +185,15 @@ def custom_login_view(request):
         form = AuthenticationForm()
     return render(request, 'DjTraders/login.html', {'form': form})
 
-@login_required
 def CustomerDashboard(request, pk):
-    """Customer dashboard with annual and monthly sales"""
-    customer = get_object_or_404(Customer, pk=pk)
+    customer = get_object_or_404(Customer, customer_id=pk)
+    
+    # Get recommendations
+    recommender = ProductRecommender(customer.customer_id)
+    recommended_products = recommender.get_recommendations(limit=5)
     
     # Yearly Orders Summary
-    yearly_orders = Order.objects.filter(customer_id=pk)\
+    yearly_orders = Order.objects.filter(customer__customer_id=pk)\
         .annotate(year=ExtractYear('order_date'))\
         .values('year')\
         .annotate(
@@ -201,7 +204,7 @@ def CustomerDashboard(request, pk):
         .order_by('-year')
 
     # Monthly Sales Analysis
-    monthly_sales = Order.objects.filter(customer_id=pk)\
+    monthly_sales = Order.objects.filter(customer__customer_id=pk)\
         .annotate(year=ExtractYear('order_date'), month=ExtractMonth('order_date'))\
         .values('year', 'month')\
         .annotate(
@@ -215,8 +218,8 @@ def CustomerDashboard(request, pk):
         sale['month_name'] = calendar.month_name[sale['month']]
 
     # Top Products by Year
-    top_products = OrderDetail.objects.filter(
-        order__customer_id=pk
+    products = OrderDetail.objects.filter(
+        order__customer__customer_id=pk
     ).annotate(
         year=ExtractYear('order__order_date')
     ).values(
@@ -228,16 +231,16 @@ def CustomerDashboard(request, pk):
 
     # Organize products by year
     top_products_by_year = {}
-    for product in top_products:
+    for product in products:
         year = product['year']
         if year not in top_products_by_year:
             top_products_by_year[year] = []
-        if len(top_products_by_year[year]) < 5:  # Limit to top 5 products per year
+        if len(top_products_by_year[year]) < 5:
             top_products_by_year[year].append(product)
 
     # Top Categories by Year
-    top_categories = OrderDetail.objects.filter(
-        order__customer_id=pk
+    categories = OrderDetail.objects.filter(
+        order__customer__customer_id=pk
     ).annotate(
         year=ExtractYear('order__order_date')
     ).values(
@@ -249,11 +252,11 @@ def CustomerDashboard(request, pk):
 
     # Organize categories by year
     top_categories_by_year = {}
-    for category in top_categories:
+    for category in categories:
         year = category['year']
         if year not in top_categories_by_year:
             top_categories_by_year[year] = []
-        if len(top_categories_by_year[year]) < 5:  # Limit to top 5 categories per year
+        if len(top_categories_by_year[year]) < 5:
             top_categories_by_year[year].append(category)
 
     context = {
@@ -262,10 +265,10 @@ def CustomerDashboard(request, pk):
         'monthly_sales': monthly_sales,
         'top_products_by_year': top_products_by_year,
         'top_categories_by_year': top_categories_by_year,
+        'recommended_products': recommended_products
     }
-    
-    return render(request, 'DjTraders/CustomerDashboard.html', context)
 
+    return render(request, 'DjTraders/CustomerDashboard.html', context)
 # Customer Views
 class DjTradersCustomersView(ListView):
     """Customer list view with search and filtering"""
