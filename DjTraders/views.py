@@ -185,91 +185,6 @@ def custom_login_view(request):
         form = AuthenticationForm()
     return render(request, 'DjTraders/login.html', {'form': form})
 
-def CustomerDashboard(request, pk):
-    customer = get_object_or_404(Customer, customer_id=pk)
-    
-    # Get recommendations
-    recommender = ProductRecommender(customer.customer_id)
-    recommended_products = recommender.get_recommendations(limit=5)
-    
-    # Yearly Orders Summary
-    yearly_orders = Order.objects.filter(customer__customer_id=pk)\
-        .annotate(year=ExtractYear('order_date'))\
-        .values('year')\
-        .annotate(
-            order_count=Count('order_id'),
-            total_products=Sum('orderdetails__quantity'),
-            total_revenue=Sum(F('orderdetails__quantity') * F('orderdetails__product__price'))
-        )\
-        .order_by('-year')
-
-    # Monthly Sales Analysis
-    monthly_sales = Order.objects.filter(customer__customer_id=pk)\
-        .annotate(year=ExtractYear('order_date'), month=ExtractMonth('order_date'))\
-        .values('year', 'month')\
-        .annotate(
-            order_count=Count('order_id'),
-            total_products=Sum('orderdetails__quantity'),
-            total_revenue=Sum(F('orderdetails__quantity') * F('orderdetails__product__price'))
-        )\
-        .order_by('-year', '-month')
-
-    for sale in monthly_sales:
-        sale['month_name'] = calendar.month_name[sale['month']]
-
-    # Top Products by Year
-    products = OrderDetail.objects.filter(
-        order__customer__customer_id=pk
-    ).annotate(
-        year=ExtractYear('order__order_date')
-    ).values(
-        'year',
-        'product__product_name'
-    ).annotate(
-        total_quantity=Sum('quantity')
-    ).order_by('year', '-total_quantity')
-
-    # Organize products by year
-    top_products_by_year = {}
-    for product in products:
-        year = product['year']
-        if year not in top_products_by_year:
-            top_products_by_year[year] = []
-        if len(top_products_by_year[year]) < 5:
-            top_products_by_year[year].append(product)
-
-    # Top Categories by Year
-    categories = OrderDetail.objects.filter(
-        order__customer__customer_id=pk
-    ).annotate(
-        year=ExtractYear('order__order_date')
-    ).values(
-        'year',
-        'product__category__category_name'
-    ).annotate(
-        total_quantity=Sum('quantity')
-    ).order_by('year', '-total_quantity')
-
-    # Organize categories by year
-    top_categories_by_year = {}
-    for category in categories:
-        year = category['year']
-        if year not in top_categories_by_year:
-            top_categories_by_year[year] = []
-        if len(top_categories_by_year[year]) < 5:
-            top_categories_by_year[year].append(category)
-
-    context = {
-        'customer': customer,
-        'yearly_orders': yearly_orders,
-        'monthly_sales': monthly_sales,
-        'top_products_by_year': top_products_by_year,
-        'top_categories_by_year': top_categories_by_year,
-        'recommended_products': recommended_products
-    }
-
-    return render(request, 'DjTraders/CustomerDashboard.html', context)
-# Customer Views
 class DjTradersCustomersView(ListView):
     """Customer list view with search and filtering"""
     model = Customer
@@ -300,6 +215,108 @@ class DjTradersCustomersView(ListView):
             queryset = queryset.filter(status=status)
 
         return queryset.order_by('customer_name')
+
+def CustomerDashboard(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    
+    # Update loyalty calculations first
+    if not customer.last_spend_update or \
+       customer.last_spend_update < timezone.now().date() - timezone.timedelta(days=1):
+        customer.update_annual_spend()
+    
+    # Calculate top products by year
+    products = OrderDetail.objects.filter(
+        order__customer__customer_id=pk
+    ).annotate(
+        year=ExtractYear('order__order_date')
+    ).values(
+        'year',
+        'product__product_name'
+    ).annotate(
+        total_quantity=Sum('quantity')
+    ).order_by('year', '-total_quantity')
+
+    # Organize products by year
+    top_products_by_year = {}
+    for product in products:
+        year = product['year']
+        if year not in top_products_by_year:
+            top_products_by_year[year] = []
+        if len(top_products_by_year[year]) < 5:
+            top_products_by_year[year].append(product)
+
+    # Calculate top categories by year
+    categories = OrderDetail.objects.filter(
+        order__customer__customer_id=pk
+    ).annotate(
+        year=ExtractYear('order__order_date')
+    ).values(
+        'year',
+        'product__category__category_name'
+    ).annotate(
+        total_quantity=Sum('quantity')
+    ).order_by('year', '-total_quantity')
+
+    # Organize categories by year
+    top_categories_by_year = {}
+    for category in categories:
+        year = category['year']
+        if year not in top_categories_by_year:
+            top_categories_by_year[year] = []
+        if len(top_categories_by_year[year]) < 5:
+            top_categories_by_year[year].append(category)
+
+    # Get recommendations
+    recommender = ProductRecommender(customer.customer_id)
+    recommended_products = recommender.get_recommendations(limit=5)
+    
+    # Yearly Orders Summary
+    yearly_orders = Order.objects.filter(customer__customer_id=pk)\
+        .annotate(year=ExtractYear('order_date'))\
+        .values('year')\
+        .annotate(
+            order_count=Count('order_id'),
+            total_products=Sum('orderdetails__quantity'),
+            total_revenue=Sum(F('orderdetails__quantity') * F('orderdetails__product__price'))
+        )\
+        .order_by('-year')
+
+    # Monthly Sales Analysis
+    monthly_sales = Order.objects.filter(customer__customer_id=pk)\
+        .annotate(
+            year=ExtractYear('order_date'),
+            month=ExtractMonth('order_date')
+        )\
+        .values('year', 'month')\
+        .annotate(
+            order_count=Count('order_id'),
+            total_products=Sum('orderdetails__quantity'),
+            total_revenue=Sum(F('orderdetails__quantity') * F('orderdetails__product__price'))
+        )\
+        .order_by('-year', '-month')
+
+    for sale in monthly_sales:
+        sale['month_name'] = calendar.month_name[sale['month']]
+
+    # Loyalty Information
+    loyalty_info = {
+        'current_level': customer.get_loyalty_level_display() if customer.loyalty_level else "Not Qualified",
+        'annual_spend': customer.annual_spend,
+        'discount_percentage': customer.get_discount_percentage(),
+        'spend_to_next': customer.get_spend_to_next_level()
+    }
+
+    context = {
+        'customer': customer,
+        'yearly_orders': yearly_orders,
+        'monthly_sales': monthly_sales,
+        'recommended_products': recommended_products,
+        'loyalty_info': loyalty_info,
+        'top_products_by_year': top_products_by_year,
+        'top_categories_by_year': top_categories_by_year
+    }
+
+    return render(request, 'DjTraders/CustomerDashboard.html', context)
 
 class DjTradersCustomerDetailView(DetailView):
     """Customer detail view"""

@@ -36,6 +36,41 @@
     </div>
 </section>
 
+<section class="loyalty-program">
+    <h2 class="section-title">Loyalty Program Status</h2>
+    <div class="loyalty-info">
+        <div class="current-status">
+            <h3>Current Level: {{ loyalty_info.current_level|default:"Not Qualified" }}</h3>
+            <p>Annual Spend: ${{ loyalty_info.annual_spend|floatformat:2 }}</p>
+            <p>Current Discount: {{ loyalty_info.discount_percentage }}%</p>
+        </div>
+        {% if loyalty_info.spend_to_next %}
+        <div class="next-level">
+            <p>Spend ${{ loyalty_info.spend_to_next|floatformat:2 }} more to reach the next level!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+-->
+<section class="loyalty-program">
+    <h2 class="section-title">Loyalty Program Status</h2>
+    <div class="loyalty-info">
+        <div class="current-status">
+            <h3>Current Level: {{ loyalty_info.current_level|default:"Not Qualified" }}</h3>
+            <p>Annual Spend: ${{ loyalty_info.annual_spend|floatformat:2 }}</p>
+            <p>Current Discount: {{ loyalty_info.discount_percentage }}%</p>
+            {% if loyalty_info.spend_to_next %}
+                <p class="next-level-info">
+                    Spend ${{ loyalty_info.spend_to_next|floatformat:2 }} more to reach the next level!
+                </p>
+            {% else %}
+                {% if customer.loyalty_level == 'PLATINUM' %}
+                    <p>Congratulations! You've reached our highest loyalty tier!</p>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</section>
 <div class="customer-detail-page">
     <!-- Annual Sales Analysis Section -->
     <section class="customer-info">
