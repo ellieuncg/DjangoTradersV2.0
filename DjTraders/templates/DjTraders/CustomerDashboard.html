@@ -4,78 +4,46 @@
 {% block title %}{{ customer.customer_name }} - Dashboard{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1>{{ customer.customer_name }} - Sales Dashboard</h1>
- <!--    <div class="status-badge">
-        Status: {{ customer.status }}
+<div class="customer-dashboard">
+    <div class="page-header">
+        <h1>{{ customer.customer_name }} Dashboard</h1>
     </div>
-</div>
 
-<section class="customer-recommendations">
-    <h2 class="section-title">Recommended Products</h2>
-    <div class="recommendation-grid">
-        {% for item in recommended_products %}
-        <div class="recommendation-card">
-            <div class="recommendation-header">
-                <h3 class="recommendation-title">{{ item.product.product_name }}</h3>
-                <span class="recommendation-price">${{ item.product.price|floatformat:2 }}</span>
-            </div>
-            <p class="recommendation-category">{{ item.product.category.category_name }}</p>
-            <div class="recommendation-tags">
-                {% for reason in item.reasons %}
-                <span class="recommendation-tag">{{ reason }}</span>
-                {% endfor %}
-            </div>
-            <a href="{% url 'DjTraders:ProductDetail' pk=item.product.product_id %}" class="action-btn view-btn">
-                View Product
-            </a>
-        </div>
-        {% empty %}
-        <p class="recommendation-empty">No recommendations available at this time.</p>
-        {% endfor %}
+    <!-- Tabs Navigation -->
+    <div class="customer-dashboard-tabs">
+        <button class="customer-tab-button active" data-tab="tab-loyalty">Loyalty Program Status</button>
+        <button class="customer-tab-button" data-tab="tab-annual">Annual Sales Analysis</button>
+        <button class="customer-tab-button" data-tab="tab-monthly">Monthly Sales Analysis</button>
+        <button class="customer-tab-button" data-tab="tab-top-products">Top Products by Year</button>
+        <button class="customer-tab-button" data-tab="tab-top-categories">Top Categories by Year</button>
     </div>
-</section>
 
-<section class="loyalty-program">
-    <h2 class="section-title">Loyalty Program Status</h2>
-    <div class="loyalty-info">
-        <div class="current-status">
-            <h3>Current Level: {{ loyalty_info.current_level|default:"Not Qualified" }}</h3>
-            <p>Annual Spend: ${{ loyalty_info.annual_spend|floatformat:2 }}</p>
-            <p>Current Discount: {{ loyalty_info.discount_percentage }}%</p>
-        </div>
-        {% if loyalty_info.spend_to_next %}
-        <div class="next-level">
-            <p>Spend ${{ loyalty_info.spend_to_next|floatformat:2 }} more to reach the next level!</p>
-        </div>
-        {% endif %}
+    <!-- Tab Content Sections -->
+    <div id="tab-loyalty" class="customer-tab-content active">
+        <section class="loyalty-program">
+            <h2 class="section-title">Loyalty Program Status</h2>
+            <div class="loyalty-info">
+                <div class="current-status">
+                    <h3>Current Level: {{ loyalty_info.current_level|default:"Not Qualified" }}</h3>
+                    <p>Annual Spend: ${{ loyalty_info.annual_spend|floatformat:2 }}</p>
+                    <p>Current Discount: {{ loyalty_info.discount_percentage }}%</p>
+                    {% if loyalty_info.spend_to_next %}
+                        <p class="next-level-info">
+                            Spend ${{ loyalty_info.spend_to_next|floatformat:2 }} more to reach the next level!
+                        </p>
+                    {% else %}
+                        {% if customer.loyalty_level == 'PLATINUM' %}
+                            <p>Congratulations! You've reached our highest loyalty tier!</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </section>
     </div>
-</section>
--->
-<section class="loyalty-program">
-    <h2 class="section-title">Loyalty Program Status</h2>
-    <div class="loyalty-info">
-        <div class="current-status">
-            <h3>Current Level: {{ loyalty_info.current_level|default:"Not Qualified" }}</h3>
-            <p>Annual Spend: ${{ loyalty_info.annual_spend|floatformat:2 }}</p>
-            <p>Current Discount: {{ loyalty_info.discount_percentage }}%</p>
-            {% if loyalty_info.spend_to_next %}
-                <p class="next-level-info">
-                    Spend ${{ loyalty_info.spend_to_next|floatformat:2 }} more to reach the next level!
-                </p>
-            {% else %}
-                {% if customer.loyalty_level == 'PLATINUM' %}
-                    <p>Congratulations! You've reached our highest loyalty tier!</p>
-                {% endif %}
-            {% endif %}
-        </div>
-    </div>
-</section>
-<div class="customer-detail-page">
-    <!-- Annual Sales Analysis Section -->
-    <section class="customer-info">
-        <h2 class="section-title">Annual Sales Analysis</h2>
-        <div class="customer-info-section">
+
+    <div id="tab-annual" class="customer-tab-content">
+        <section class="customer-info">
+            <h2 class="section-title">Annual Sales Analysis</h2>
             <table class="order-table">
                 <thead>
                     <tr>
@@ -96,89 +64,92 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-    </section>
+        </section>
+    </div>
 
-    <!-- Monthly Sales Analysis Section -->
-    <section class="order-history">
-        <h2 class="section-title">Monthly Sales Analysis</h2>
-        <table class="order-table">
-            <thead>
-                <tr>
-                    <th>Year</th>
-                    <th>Month</th>
-                    <th>Orders</th>
-                    <th>Products Sold</th>
-                    <th>Revenue</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for sale in monthly_sales %}
-                <tr>
-                    <td>{{ sale.year }}</td>
-                    <td>{{ sale.month_name }}</td>
-                    <td>{{ sale.order_count }}</td>
-                    <td>{{ sale.total_products }}</td>
-                    <td>${{ sale.total_revenue|floatformat:2 }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </section>
+    <div id="tab-monthly" class="customer-tab-content">
+        <section class="order-history">
+            <h2 class="section-title">Monthly Sales Analysis</h2>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Month</th>
+                        <th>Orders</th>
+                        <th>Products Sold</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in monthly_sales %}
+                    <tr>
+                        <td>{{ sale.year }}</td>
+                        <td>{{ sale.month_name }}</td>
+                        <td>{{ sale.order_count }}</td>
+                        <td>{{ sale.total_products }}</td>
+                        <td>${{ sale.total_revenue|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
 
-    <!-- Top Products by Year Section -->
-    <section class="order-history">
-        <h2 class="section-title">Top Products by Year</h2>
-        {% for year, products in top_products_by_year.items %}
-        <h3>{{ year }}</h3>
-        <table class="order-table">
-            <thead>
-                <tr>
-                    <th>Product Name</th>
-                    <th>Quantity Purchased</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
-                <tr>
-                    <td>{{ product.product__product_name }}</td>
-                    <td>{{ product.total_quantity }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endfor %}
-    </section>
+    <div id="tab-top-products" class="customer-tab-content">
+        <section class="order-history">
+            <h2 class="section-title">Top Products by Year</h2>
+            {% for year, products in top_products_by_year.items %}
+            <h3 class="section-subtitle">{{ year }}</h3>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Quantity Purchased</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.product__product_name }}</td>
+                        <td>{{ product.total_quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endfor %}
+        </section>
+    </div>
 
-    <!-- Top Categories by Year Section -->
-    <section class="order-history">
-        <h2 class="section-title">Top Categories by Year</h2>
-        {% for year, categories in top_categories_by_year.items %}
-        <h3>{{ year }}</h3>
-        <table class="order-table">
-            <thead>
-                <tr>
-                    <th>Category Name</th>
-                    <th>Quantity Purchased</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for category in categories %}
-                <tr>
-                    <td>{{ category.product__category__category_name }}</td>
-                    <td>{{ category.total_quantity }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endfor %}
-    </section>
+    <div id="tab-top-categories" class="customer-tab-content">
+        <section class="order-history">
+            <h2 class="section-title">Top Categories by Year</h2>
+            {% for year, categories in top_categories_by_year.items %}
+            <h3 class="section-subtitle">{{ year }}</h3>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Quantity Purchased</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>{{ category.product__category__category_name }}</td>
+                        <td>{{ category.total_quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endfor %}
+        </section>
+    </div>
 
     <!-- Navigation Buttons -->
     <div class="button-group">
-        <a href="{% url 'DjTraders:CustomerDetail' pk=customer.pk %}" class="action-btn btn-view" title="Back to Details">
+        <a href="{% url 'DjTraders:CustomerDetail' pk=customer.pk %}" class="btn-view" title="Back to Details">
             <i class="fas fa-chevron-left"></i> Back to Details
         </a>
     </div>
-</div> -->
+</div>
 {% endblock %}

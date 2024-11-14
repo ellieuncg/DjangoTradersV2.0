@@ -410,9 +410,7 @@ def update_customer_status(request, pk):
     return redirect('DjTraders:Customers')
 
 # Product Views
-# Product Views
 class DjTradersProductsView(ListView):
-    """Product list view with search and filtering"""
     model = Product
     template_name = 'DjTraders/products.html'
     context_object_name = 'products'
@@ -446,6 +444,13 @@ class DjTradersProductsView(ListView):
 
         return queryset.order_by('product_name')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all().order_by('category_name')
+        context['selected_category'] = self.request.GET.get('category', '')
+        context['status_filter'] = self.request.GET.get('status', 'active')
+        return context
+
 class DjTradersProductDetailView(DetailView):
     """Product detail view"""
     model = Product
@@ -466,20 +471,26 @@ def create_product(request):
         form = ProductForm()
     return render(request, 'DjTraders/ProductForm.html', {'form': form})
 
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import Product, Category
+
 def update_product(request, pk):
-    """Update existing product"""
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
+        print("POST data:", request.POST)  # Debug print
         form = ProductForm(request.POST, instance=product)
         if form.is_valid():
-            product = form.save()
-            messages.success(request, 'Product updated successfully.')
-            return redirect('DjTraders:ProductDetail', pk=product.pk)
+            try:
+                form.save()
+                return redirect('DjTraders:Products')
+            except Exception as e:
+                print("Error saving form:", str(e))  # Debug print
+                messages.error(request, f"Error saving product: {str(e)}")
         else:
-            messages.error(request, 'Please correct the errors below.')
+            print("Form errors:", form.errors)  # Debug print
     else:
         form = ProductForm(instance=product)
-    return render(request, 'DjTraders/ProductForm.html', {'form': form, 'product': product})
+    return render(request, 'DjTraders/ProductForm.html', {'form': form})
 
 def update_product_status(request, pk):
     """Update product status"""

@@ -2,25 +2,24 @@
 {% load static %}
 
 {% block content %}
-{# Main landing page container #}
 <div class="index-page">
     <div class="container">
-        {# Header section with main title and tagline #}
+        <!-- Header section with main title and tagline -->
         <div class="page-header header-index">
             <h1>Welcome to Django Traders</h1>
             <p>Your comprehensive trading management system</p>
         </div>
 
-        {# Hero image section #}
+        <!-- Hero image section -->
         <div class="index-image">
             <img src="{% static 'images/NotesLogo.jpg' %}" 
                  alt="Django Traders Hero" 
                  class="main-image">
         </div>
 
-        {# Navigation grid for main system features #}
+        <!-- Navigation grid for main system features -->
         <div class="index-category-grid">
-            {# Customers section navigation card #}
+            <!-- Customers section navigation card -->
             <a href="{% url 'DjTraders:Customers' %}" class="index-category-box">
                 <div class="index-icon">
                     <i class="fas fa-users"></i>
@@ -29,7 +28,7 @@
                 <p>Manage your customer database</p>
             </a>
 
-            {# Products section navigation card #}
+            <!-- Products section navigation card -->
             <a href="{% url 'DjTraders:Products' %}" class="index-category-box">
                 <div class="index-icon">
                     <i class="fas fa-box"></i>

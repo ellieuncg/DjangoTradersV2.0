@@ -4,6 +4,7 @@ console.log('DJTraders.js loading...');
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Document ready in DJTraders.js');
     new DjTradersApp();
+    setupCustomerDashboardTabs(); // Call the function to set up tabs
 });
 
 class DjTradersApp {
@@ -152,3 +153,36 @@ class DjTradersApp {
         });
     }
 }
+
+// Tab setup for the customer dashboard
+function setupCustomerDashboardTabs() {
+    const tabButtons = document.querySelectorAll('.customer-tab-button');
+    const tabContents = document.querySelectorAll('.customer-tab-content');
+
+    console.log('Setting up tab buttons...');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            console.log(`Clicked tab: ${button.dataset.tab}`);
+            
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Add active class to the clicked button and corresponding content
+            button.classList.add('active');
+            const content = document.getElementById(button.dataset.tab);
+            if (content) {
+                content.classList.add('active');
+                console.log(`Activating content: ${button.dataset.tab}`);
+            } else {
+                console.log(`Content for ${button.dataset.tab} not found`);
+            }
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Document ready in DJTraders.js');
+    new DjTradersApp();
+    setupCustomerDashboardTabs(); // Call the function to set up tabs
+});

@@ -215,3 +215,4 @@ class OrderDetail(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.product_name} in Order {self.order.order_id}"
+

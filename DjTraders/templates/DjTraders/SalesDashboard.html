@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block title %}Product Sales Dashboard{% endblock %}
+
 {% block content %}
-<div class="customer-detail-page">
-    <!-- Page Header -->
+<div class="customer-dashboard">
     <div class="page-header">
         <h1>Product Sales Dashboard</h1>
         <div class="customer-header-status">
@@ -38,28 +39,36 @@
         </div>
     </div>
 
-    <!-- Annual Sales Overview -->
-    <div class="card-customers">
-        <h2 class="card-title">Annual Sales Overview</h2>
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <h3>Total Orders</h3>
-                <p>{{ annual_total.orders_count|default:0 }}</p>
-            </div>
-            <div class="metric-card">
-                <h3>Total Products Sold</h3>
-                <p>{{ annual_total.products_sold|default:0 }}</p>
-            </div>
-            <div class="metric-card">
-                <h3>Total Revenue</h3>
-                <p>${{ annual_total.revenue|default:0|floatformat:2 }}</p>
+    <!-- Tabs Navigation -->
+    <div class="customer-dashboard-tabs">
+        <button class="customer-tab-button active" data-tab="tab-annual-overview">Annual Sales Overview</button>
+        <button class="customer-tab-button" data-tab="tab-top-products">Top 10 Products</button>
+        <button class="customer-tab-button" data-tab="tab-bottom-products">Bottom 10 Products</button>
+        <button class="customer-tab-button" data-tab="tab-category-analysis">Category Sales Analysis</button>
+    </div>
+
+    <!-- Tab Content Sections -->
+    <div id="tab-annual-overview" class="customer-tab-content active">
+        <div class="card-customers">
+            <h2 class="card-title">Annual Sales Overview</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total Orders</h3>
+                    <p>{{ annual_total.orders_count|default:0 }}</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Total Products Sold</h3>
+                    <p>{{ annual_total.products_sold|default:0 }}</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Total Revenue</h3>
+                    <p>${{ annual_total.revenue|default:0|floatformat:2 }}</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Product Analysis -->
-    <div class="card-grid-products">
-        <!-- Top 10 Products -->
+    <div id="tab-top-products" class="customer-tab-content">
         <div class="card-customers">
             <h2 class="card-title">Top 10 Products by Revenue</h2>
             <table class="order-table">
@@ -89,8 +98,9 @@
                 </tbody>
             </table>
         </div>
+    </div>
 
-        <!-- Bottom 10 Products -->
+    <div id="tab-bottom-products" class="customer-tab-content">
         <div class="card-customers">
             <h2 class="card-title">Bottom 10 Products by Revenue</h2>
             <table class="order-table">
@@ -122,35 +132,36 @@
         </div>
     </div>
 
-    <!-- Category Analysis -->
-    <div class="card-customers">
-        <h2 class="card-title">Category Sales Analysis</h2>
-        <table class="order-table">
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Products</th>
-                    <th>Orders</th>
-                    <th>Revenue</th>
-                    <th>Average Per Product</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for category in category_analysis %}
-                <tr>
-                    <td>{{ category.name }}</td>
-                    <td>{{ category.product_count }}</td>
-                    <td>{{ category.orders_count }}</td>
-                    <td>${{ category.revenue|floatformat:2 }}</td>
-                    <td>${{ category.avg_per_product|floatformat:2 }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">No data available</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div id="tab-category-analysis" class="customer-tab-content">
+        <div class="card-customers">
+            <h2 class="card-title">Category Sales Analysis</h2>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Products</th>
+                        <th>Orders</th>
+                        <th>Revenue</th>
+                        <th>Average Per Product</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in category_analysis %}
+                    <tr>
+                        <td>{{ category.name }}</td>
+                        <td>{{ category.product_count }}</td>
+                        <td>{{ category.orders_count }}</td>
+                        <td>${{ category.revenue|floatformat:2 }}</td>
+                        <td>${{ category.avg_per_product|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

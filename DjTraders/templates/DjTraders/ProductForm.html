@@ -5,11 +5,19 @@
 {# Header section - dynamically shows "New" or "Update" based on whether editing existing product #}
 <div class="page-header header-product-form">
     <h1>{% if form.instance.pk %}Update{% else %}New{% endif %} Product</h1>
+    <div class="header-controls">
+        <button type="submit" form="productForm" class="action-btn btn-edit" title="Save">
+            <i class="fas fa-save"></i>
+        </button>
+        <a href="{% url 'DjTraders:Products' %}" class="action-btn btn-view" title="Return">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+    </div>
 </div>
 
 {# Main form container #}
 <div class="form-container form-container-product">
-    <form method="post" class="detail-form">
+    <form method="post" class="detail-form" id="productForm">
         {% csrf_token %}
         
         {# Product Name Field #}
@@ -58,18 +66,6 @@
                     <div class="error-message">{{ form.price.errors|join:", " }}</div>
                 {% endif %}
             </div>
-        </div>
-
-        {# Form Action Buttons #}
-        <div class="button-group">
-            {# Save button #}
-            <button type="submit" class="action-btn btn-edit" title="Save">
-                <i class="fas fa-save"></i>
-            </button>
-            {# Return to products list button #}
-            <a href="{% url 'DjTraders:Products' %}" class="action-btn btn-view" title="Return">
-                <i class="fas fa-chevron-left"></i>
-            </a>
         </div>
     </form>
 </div>
