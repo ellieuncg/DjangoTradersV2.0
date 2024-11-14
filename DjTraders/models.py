@@ -9,6 +9,21 @@ no_numbers_validator = RegexValidator(
     message="This field should not contain numbers."
 )
 
+class Company(models.Model):
+    company_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'companies'
+
+    def __str__(self):
+        return self.name
+
 class Category(models.Model):
     category_id = models.AutoField(primary_key=True)
     category_name = models.CharField(max_length=255)
@@ -51,6 +66,9 @@ class Customer(models.Model):
     last_activity_date = models.DateTimeField(default=timezone.now)
     archived_date = models.DateTimeField(null=True, blank=True)
     
+    # New field to link Customer to a Company
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='customers')
+
     # Loyalty fields
     loyalty_level = models.CharField(max_length=10, choices=LOYALTY_LEVELS, null=True, blank=True)
     annual_spend = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -129,11 +147,7 @@ class Customer(models.Model):
             self.DIAMOND: 10000,
             self.PLATINUM: None
         }
-        
-        next_threshold = thresholds.get(self.loyalty_level)
-        if next_threshold:
-            return max(0, next_threshold - self.annual_spend)
-        return None
+
     
 class Supplier(models.Model):
     supplier_id = models.AutoField(primary_key=True)
@@ -174,12 +188,16 @@ class Product(models.Model):
     unit = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='active')
+    
+    # New field to link Product to a Company
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='products')
 
     class Meta:
         db_table = 'products'
 
     def __str__(self):
         return self.product_name
+
 
 class Order(models.Model):
     order_id = models.AutoField(primary_key=True)

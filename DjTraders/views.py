@@ -17,6 +17,8 @@ from .models import Customer, Product, Category, OrderDetail, Order, Supplier
 from .forms import CustomerForm, ProductForm
 from django.core.serializers.json import DjangoJSONEncoder
 import json
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +31,10 @@ def is_employee(user):
     return user.groups.filter(name='Employees').exists()
 
 # Sales Dashboard View
+@login_required
+@user_passes_test(is_employee)
+
+
 @login_required
 @user_passes_test(is_employee)
 def SalesDashboard(request):
@@ -174,6 +180,7 @@ def SalesDashboard(request):
     
     return render(request, 'DjTraders/SalesDashboard.html', context)
 
+
 # Custom Login View with Employee Group Check
 def custom_login_view(request):
     if request.method == 'POST':
@@ -224,10 +231,15 @@ class DjTradersCustomersView(ListView):
         return queryset.order_by('customer_name')
 
 # Customer Dashboard View
+@login_required
 def CustomerDashboard(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
 
-    # Yearly Orders and Revenue
+    # Check if the logged-in user matches the customer associated with this dashboard
+    if request.user != customer.user:
+        raise PermissionDenied("You do not have permission to access this dashboard.")
+
+    # Original view code starts here
     yearly_orders = list(Order.objects.filter(customer__customer_id=pk)
         .annotate(year=ExtractYear('order_date'))
         .values('year')
@@ -239,7 +251,6 @@ def CustomerDashboard(request, pk):
     yearly_revenue = [item['total_revenue'] for item in yearly_orders]
     yearly_orders_labels = [item['year'] for item in yearly_orders]
 
-    # Monthly Sales (Labels and Data)
     monthly_sales = list(Order.objects.filter(customer__customer_id=pk)
         .annotate(year=ExtractYear('order_date'))
         .values('year')
@@ -251,7 +262,6 @@ def CustomerDashboard(request, pk):
     monthly_sales_labels = [f"{sale['year']}" for sale in monthly_sales]
     monthly_sales_data = [sale['total_revenue'] for sale in monthly_sales]
 
-    # Top Products by Year
     top_products_by_year = OrderDetail.objects.filter(order__customer__customer_id=pk)\
         .annotate(year=ExtractYear('order__order_date'))\
         .values('product__product_name')\
@@ -260,7 +270,6 @@ def CustomerDashboard(request, pk):
     top_products_labels = [item['product__product_name'] for item in top_products_by_year]
     top_products_data = [item['total_quantity'] for item in top_products_by_year]
 
-    # Top Categories by Year
     top_categories_by_year = OrderDetail.objects.filter(order__customer__customer_id=pk)\
         .annotate(year=ExtractYear('order__order_date'))\
         .values('product__category__category_name')\
@@ -269,7 +278,6 @@ def CustomerDashboard(request, pk):
     top_categories_labels = [item['product__category__category_name'] for item in top_categories_by_year]
     top_categories_data = [item['total_quantity'] for item in top_categories_by_year]
 
-    # Pass all data to the context
     context = {
         'customer': customer,
         'yearly_orders': json.dumps(yearly_orders_labels, cls=DjangoJSONEncoder),
@@ -283,6 +291,7 @@ def CustomerDashboard(request, pk):
     }
 
     return render(request, 'DjTraders/CustomerDashboard.html', context)
+
 
 # Customer Detail View
 class DjTradersCustomerDetailView(DetailView):

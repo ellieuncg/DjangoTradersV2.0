@@ -3,11 +3,15 @@
 
 {% block title %}Product Sales Dashboard{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'DjTraders/dashboard.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="customer-dashboard">
     <div class="page-header">
         <h1>Product Sales Dashboard</h1>
-        <div class="customer-header-status">
+        <div class="filter-section">
             <form id="filterForm" method="GET" action="{% url 'DjTraders:SalesDashboard' %}">
                 <!-- Filters here -->
             </form>
@@ -25,22 +29,30 @@
     <!-- Tab Content Sections -->
     <div id="tab-annual-overview" class="customer-tab-content active">
         <h2>Annual Sales Overview</h2>
-        <canvas id="annualSalesChart"></canvas>
+        <div class="chart-container">
+            <canvas id="annualSalesChart"></canvas>
+        </div>
     </div>
 
     <div id="tab-top-products" class="customer-tab-content">
         <h2>Top 10 Products by Revenue</h2>
-        <canvas id="topProductsChart"></canvas>
+        <div class="chart-container">
+            <canvas id="topProductsChart"></canvas>
+        </div>
     </div>
 
     <div id="tab-bottom-products" class="customer-tab-content">
         <h2>Bottom 10 Products by Revenue</h2>
-        <canvas id="bottomProductsChart"></canvas>
+        <div class="chart-container">
+            <canvas id="bottomProductsChart"></canvas>
+        </div>
     </div>
 
     <div id="tab-category-analysis" class="customer-tab-content">
         <h2>Category Sales Analysis</h2>
-        <canvas id="categorySalesChart"></canvas>
+        <div class="chart-container">
+            <canvas id="categorySalesChart"></canvas>
+        </div>
     </div>
 </div>
 {% endblock %}

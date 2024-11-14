@@ -3,6 +3,8 @@ console.log('DJTraders.js loading...');
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Document ready in DJTraders.js');
     setupCustomerDashboardTabs();
+    // Initialize the first tab's chart by default
+    initializeChartForTab('tab-annual-overview');
 });
 
 const chartInstances = {};
@@ -42,16 +44,28 @@ function initializeChartForTab(tabId) {
         chartInstances[tabId] = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: yearlyOrders,
+                labels: annualSalesLabels,
                 datasets: [{
                     label: 'Revenue',
-                    data: yearlyRevenue,
+                    data: annualSalesData,
                     backgroundColor: 'rgba(82, 103, 84, 0.6)',
                     borderColor: 'rgba(82, 103, 84, 1)',
                     borderWidth: 1
                 }]
             },
-            options: { scales: { y: { beginAtZero: true } } }
+            options: {
+                responsive: true,
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    } 
+                }
+            }
         });
     } else if (tabId === 'tab-top-products') {
         ctx = document.getElementById('topProductsChart').getContext('2d');
@@ -67,7 +81,19 @@ function initializeChartForTab(tabId) {
                     borderWidth: 1
                 }]
             },
-            options: { scales: { y: { beginAtZero: true } } }
+            options: {
+                responsive: true,
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    } 
+                }
+            }
         });
     } else if (tabId === 'tab-bottom-products') {
         ctx = document.getElementById('bottomProductsChart').getContext('2d');
@@ -83,22 +109,38 @@ function initializeChartForTab(tabId) {
                     borderWidth: 1
                 }]
             },
-            options: { scales: { y: { beginAtZero: true } } }
+            options: {
+                responsive: true,
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    } 
+                }
+            }
         });
     } else if (tabId === 'tab-category-analysis') {
         ctx = document.getElementById('categorySalesChart').getContext('2d');
         chartInstances[tabId] = new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: topCategoriesLabels,
+                labels: categorySalesLabels,
                 datasets: [{
-                    label: 'Quantity Purchased',
-                    data: topCategoriesData,
+                    label: 'Sales by Category',
+                    data: categorySalesData,
                     backgroundColor: [
                         'rgba(82, 103, 84, 0.6)',
                         'rgba(179, 207, 157, 0.6)',
                         'rgba(179, 157, 157, 0.6)',
-                        'rgba(157, 179, 207, 0.6)'
+                        'rgba(157, 179, 207, 0.6)',
+                        'rgba(157, 167, 207, 0.6)',
+                        'rgba(167, 157, 207, 0.6)',
+                        'rgba(207, 157, 167, 0.6)',
+                        'rgba(207, 167, 157, 0.6)'
                     ],
                     borderColor: 'rgba(255, 255, 255, 1)',
                     borderWidth: 1
@@ -106,7 +148,21 @@ function initializeChartForTab(tabId) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += '$' + context.raw.toLocaleString();
+                                return label;
+                            }
+                        }
+                    }
+                }
             }
         });
     }

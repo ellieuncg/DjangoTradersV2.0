@@ -445,103 +445,50 @@ select.form-control {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
+    background-color: var(--background-color);
 }
 
 .customer-dashboard .page-header {
     text-align: center;
-    padding: 1.5rem 0;
-    color: var(--primary-color);
-}
-
-.customer-dashboard .order-table {
-    width: 100%;
-    border-collapse: collapse;
     margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 85%, var(--accent-color)));
+    color: var(--card-background);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
-.customer-dashboard .order-table th, 
-.customer-dashboard .order-table td {
-    padding: 0.75rem;
-    text-align: left;
-    border: 1px solid var(--neutral-light);
+.customer-dashboard .page-header h1 {
+    color: var(--card-background);
+    margin: 0;
+    font-size: 2rem;
 }
 
-.customer-dashboard .order-table th {
-    background-color: var(--background-color);
-    font-weight: 500;
-}
-
-.customer-dashboard .order-table td {
-    background-color: var(--card-background);
-}
-
-.customer-dashboard .section-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-}
-
-.customer-dashboard .section-subtitle {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: var(--secondary-color);
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.customer-dashboard .button-group {
+/* Filter Form Styling */
+#filterForm {
     display: flex;
     justify-content: center;
-    margin-top: 2rem;
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
-.customer-dashboard .button-group .btn-view {
-    background-color: var(--primary-color);
-    color: var(--card-background);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    text-decoration: none;
-    display: inline-flex;
+.filter-group {
+    display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.customer-dashboard .btn-view:hover {
-    background-color: #354d3e;
-}
-
-/* Customer Dashboard Tabs Styling */
-.customer-dashboard-tabs {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.customer-tab-button {
-    padding: 0.75rem 1.5rem;
-    background-color: var(--neutral-light);
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    color: var(--primary-color);
-    transition: background-color 0.3s ease;
-}
-
-.customer-tab-button.active,
-.customer-tab-button:hover {
-    background-color: var(--primary-color);
+.filter-group label {
     color: var(--card-background);
+    font-weight: 500;
 }
 
-.customer-tab-content {
-    display: none;
-}
-
-.customer-tab-content.active {
-    display: block;
+.filter-group select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--card-background);
 }
 
 /* Tabs Container Styling */
@@ -550,41 +497,126 @@ select.form-control {
     justify-content: center;
     gap: 1rem;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
+    padding: 0 1rem;
 }
 
 /* Individual Tab Button Styling */
-.customer-dashboard .customer-tab-button {
+.customer-tab-button {
     padding: 0.75rem 1.5rem;
     background-color: var(--neutral-light);
-    border: 1px solid var(--neutral-dark);
+    border: 1px solid var(--neutral-light);
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
     color: var(--primary-color);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: all 0.2s ease;
+    min-width: 160px;
+    text-align: center;
 }
 
-.customer-dashboard .customer-tab-button.active,
-.customer-dashboard .customer-tab-button:hover {
+.customer-tab-button:hover {
     background-color: var(--primary-color);
     color: var(--card-background);
-    border: 1px solid var(--primary-color);
+    border-color: var(--primary-color);
 }
 
-/* Tab Content Styling */
-.customer-dashboard .customer-tab-content {
+.customer-tab-button.active {
+    background-color: var(--primary-color);
+    color: var(--card-background);
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab Content Container Styling */
+.customer-tab-content {
     display: none;
-    padding: 2rem;
-    border-radius: 8px;
     background-color: var(--card-background);
+    border-radius: 12px;
+    padding: 2rem;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    margin: 0 1rem;
+    min-height: 500px;
 }
 
-.customer-dashboard .customer-tab-content.active {
+.customer-tab-content.active {
     display: block;
 }
 
+/* Chart Container Styling */
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+    margin: 1rem auto;
+}
 
+.customer-tab-content h2 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Table Styling in Dashboard */
+.customer-dashboard .order-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+}
+
+.customer-dashboard .order-table th,
+.customer-dashboard .order-table td {
+    padding: 1rem;
+    text-align: left;
+    border: 1px solid var(--neutral-light);
+}
+
+.customer-dashboard .order-table th {
+    background-color: var(--background-color);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.customer-dashboard .order-table td {
+    background-color: var(--card-background);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .customer-dashboard {
+        padding: 1rem;
+    }
+
+    .customer-tab-button {
+        min-width: 140px;
+        padding: 0.6rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .customer-tab-content {
+        padding: 1rem;
+        margin: 0;
+    }
+
+    .chart-container {
+        height: 300px;
+    }
+
+    #filterForm {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group select {
+        width: 100%;
+    }
+}
 /* ==========================================================================
    Products Page
 ========================================================================== */
