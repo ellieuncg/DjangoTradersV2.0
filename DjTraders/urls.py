@@ -1,6 +1,10 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views  # Import the views module
+import logging
+
+logger = logging.getLogger(__name__)
+logger.info("Views imported: %s", dir(views))
 
 app_name = 'DjTraders'
 
@@ -20,7 +24,10 @@ urlpatterns = [
     path('customers/<int:pk>/', views.DjTradersCustomerDetailView.as_view(), name='CustomerDetail'),
     path('customers/create/', views.create_customer, name='CustomerCreate'),
     path('customers/<int:pk>/update/', views.update_customer, name='CustomerUpdate'),
-    path('DjTraders/customers/<int:pk>/archive/', views.archive_customer, name='CustomerArchive'),
+    path('customers/<int:pk>/archive/', views.archive_customer, name='CustomerArchive'),
+
+    # Customer Dashboard URL
+    path('customers/<int:pk>/dashboard/', views.CustomerDashboard, name='CustomerDashboard'),
 
     # Product Management URLs
     path('products/', views.DjTradersProductsView.as_view(), name='Products'),

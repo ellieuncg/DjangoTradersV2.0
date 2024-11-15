@@ -991,17 +991,88 @@ select.form-control {
     margin: 0.25rem 0;
 }
 
-.customers-page .card-actions .action-btn {
-    background-color: var(--primary-color);
-    color: white;
+/* Customer Card Actions - Button Styling */
+.customers-page .card-actions {
+    display: flex;
+    gap: 0.75rem; /* Increased spacing between buttons */
+    margin-top: 0.75rem;
+}
+
+.customers-page .card-actions .action-btn,
+.customers-page .card-actions .btn-edit,
+.customers-page .card-actions .btn-archive {
+    border: none; /* Remove button borders */
     padding: 0.5rem;
     border-radius: 6px;
     font-size: 0.875rem;
+    color: white;
 }
 
+/* Archive Button Specific Styling */
+.customers-page .card-actions .btn-archive {
+    background-color: var(--highlight-warm);
+    color: var(--card-background);
+}
+
+.customers-page .card-actions .btn-archive:hover {
+    background-color: var(--highlight-warm-hover);
+}
+
+/* Edit Button */
 .customers-page .card-actions .btn-edit {
     background-color: var(--secondary-color);
 }
+
+/* View Button */
+.customers-page .card-actions .action-btn {
+    background-color: var(--primary-color);
+}
+
+.customers-page .card-actions .action-btn:hover,
+.customers-page .card-actions .btn-edit:hover,
+.customers-page .card-actions .btn-archive:hover {
+    filter: brightness(90%); /* Consistent hover effect */
+}
+
+/* Specific Button Styling for Search and Clear Buttons in Customers Page */
+.customers-page .button-group .action-btn.btn-search {
+    background-color: var(--accent-color) !important;
+    color: var(--card-background) !important;
+    border: none !important;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.customers-page .button-group .action-btn.btn-clear {
+    background-color: var(--enhanced-desert-rose) !important;
+    color: var(--card-background) !important;
+    border: none !important;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover Effects for Search and Clear Buttons */
+.customers-page .button-group .btn-search:hover {
+    background-color: color-mix(in srgb, var(--accent-color) 80%, black) !important;
+}
+
+.customers-page .button-group .btn-clear:hover {
+    background-color: var(--enhanced-desert-rose-hover) !important;
+}
+
+
 /* ==========================================================================
    Sales Dashboard
 ========================================================================== */
