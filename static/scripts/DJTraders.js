@@ -101,8 +101,106 @@ function initializeChartForTab(tabId) {
         } else {
             console.warn("annualSalesChart element not found");
         }
+    } else if (tabId === 'tab-top-products') {
+        const chartElement = document.getElementById('topProductsChart');
+        if (chartElement) {
+            ctx = chartElement.getContext('2d');
+            chartInstances[tabId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: topProductsLabels,
+                    datasets: [{
+                        label: 'Top Products Revenue',
+                        data: topProductsData,
+                        backgroundColor: 'rgba(103, 82, 84, 0.6)',
+                        borderColor: 'rgba(103, 82, 84, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn("topProductsChart element not found");
+        }
+    } else if (tabId === 'tab-bottom-products') {
+        const chartElement = document.getElementById('bottomProductsChart');
+        if (chartElement) {
+            ctx = chartElement.getContext('2d');
+            chartInstances[tabId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: bottomProductsLabels,
+                    datasets: [{
+                        label: 'Bottom Products Revenue',
+                        data: bottomProductsData,
+                        backgroundColor: 'rgba(84, 103, 82, 0.6)',
+                        borderColor: 'rgba(84, 103, 82, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn("bottomProductsChart element not found");
+        }
+    } else if (tabId === 'tab-category-analysis') {
+        const chartElement = document.getElementById('categorySalesChart');
+        if (chartElement) {
+            ctx = chartElement.getContext('2d');
+            chartInstances[tabId] = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: categorySalesLabels,
+                    datasets: [{
+                        label: 'Category Sales',
+                        data: categorySalesData,
+                        backgroundColor: [
+                            'rgba(82, 103, 84, 0.6)',
+                            'rgba(103, 82, 84, 0.6)',
+                            'rgba(84, 103, 82, 0.6)',
+                            'rgba(123, 82, 84, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(82, 103, 84, 1)',
+                            'rgba(103, 82, 84, 1)',
+                            'rgba(84, 103, 82, 1)',
+                            'rgba(123, 82, 84, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        } else {
+            console.warn("categorySalesChart element not found");
+        }
     }
-    // Repeat similar checks for 'topProductsChart', 'bottomProductsChart', and 'categorySalesChart'
 }
 
 function destroyChart(tabId) {
@@ -110,4 +208,44 @@ function destroyChart(tabId) {
         chartInstances[tabId].destroy();
         delete chartInstances[tabId];
     }
+}
+
+function archiveRecord(type, id) {
+    const url = `/DjTraders/customers/${id}/archive/`;
+    const csrfToken = getCookie('csrftoken');
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = '/DjTraders/accounts/login/';
+            return;
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.status === 'archived') window.location.reload();
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// CSRF token helper function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }

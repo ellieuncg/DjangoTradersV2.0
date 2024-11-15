@@ -74,13 +74,18 @@
                     <p><strong>Status:</strong> {{ product.status }}</p>
                 </div>
                 <div class="card-actions">
-                    <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn btn-view">
+                    <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn btn-view" title="View">
                         <i class="fas fa-eye"></i>
                     </a>
-                    <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn btn-edit">
+                    <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn btn-edit" title="Edit">
                         <i class="fas fa-pen"></i>
                     </a>
+                    <!-- Place this in your product card HTML -->
+<button class="action-btn btn-archive" onclick="archiveRecord('product', {{ product.id }})">Archive</button>
+
+                    </button>
                 </div>
+                
             </div>
             {% empty %}
             <p>No products found.</p>

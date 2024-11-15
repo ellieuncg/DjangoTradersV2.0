@@ -11,6 +11,8 @@
     --neutral-light: #EAE8E5;
     --neutral-dark: #2F403C;
     --text-color: #252525;
+    --highlight-warm: #D98A6E;
+    --highlight-warm-hover: #C96E52;
 
     /* Status Colors */
     --success-color: #147A4C;
@@ -112,6 +114,22 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 2rem;
 }
 
+/* Inactive and Archived Card Styles for Products */
+.products-page .card-products.inactive,
+.customers-page .card-customers.inactive {
+    background-color: color-mix(in srgb, var(--accent-color) 85%, white) !important;
+    color: var(--neutral-dark) !important;
+    border: 1px solid color-mix(in srgb, var(--accent-color) 75%, var(--neutral-light)) !important;
+}
+
+.products-page .card-products.archived,
+.customers-page .card-customers.archived {
+    background-color: color-mix(in srgb, var(--highlight-warm) 85%, white) !important;
+    color: var(--neutral-dark) !important;
+    border: 1px solid color-mix(in srgb, var(--highlight-warm) 75%, var(--neutral-light)) !important;
+}
+
+
 /* Footer */
 .footer {
     text-align: center;
@@ -122,84 +140,52 @@ h1, h2, h3, h4, h5, h6 {
     background: linear-gradient(to bottom, transparent, var(--background-color) 80%);
 }
 
-/* ==========================================================================
-   Buttons and Action Styles
-========================================================================== */
-.action-btn, .btn-edit, .custom-action-btn {
+/* Button Styling */
+.button-base {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem;
     font-size: 0.875rem;
     border-radius: 6px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    color: white;
     font-weight: 500;
-    border: none;
+    cursor: pointer;
+    border: none; /* Remove borders */
+    transition: background-color 0.3s ease;
     font-family: var(--font-primary);
+    text-decoration: none;
 }
 
 .action-btn {
+    @extend .button-base;
     background-color: var(--primary-color);
+    color: var(--card-background);
 }
 
 .btn-edit {
+    @extend .button-base;
     background-color: var(--secondary-color);
+    color: var(--card-background);
 }
 
+.btn-archive {
+    @extend .button-base;
+    background-color: var(--highlight-warm) !important;
+    color: white !important;
+    padding: 0.5rem;
+}
+
+/* Hover Effects */
 .action-btn:hover {
-    background-color: #354d3e;
+    background-color: color-mix(in srgb, var(--primary-color) 80%, black);
 }
 
 .btn-edit:hover {
-    background-color: #9c7c3c;
+    background-color: color-mix(in srgb, var(--secondary-color) 80%, black);
 }
 
-.btn-clear {
-    color: var(--danger-color);
-    transition: color 0.2s ease;
+.btn-archive:hover {
+    background-color: var(--highlight-warm-hover) !important;
 }
-
-.btn-clear:hover {
-    color: color-mix(in srgb, var(--danger-color) 80%, black);
-}
-
-.btn,
-.btn-submit,
-.btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    border-radius: 6px;
-    font-family: var(--font-primary);
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    transition: background-color 0.3s ease;
-    background-color: var(--primary-color);
-    color: var(--card-background);
-    min-width: 78px;
-    min-height: 37px;
-}
-
-.btn:hover,
-.btn-submit:hover,
-.btn-primary:hover {
-    background-color: #354d3e;
-}
-
-.btn-secondary {
-    background-color: var(--secondary-color);
-}
-
-.btn-secondary:hover {
-    background-color: #9c7c3c;
-}
-
 
 /* ==========================================================================
    Form Styles
@@ -274,6 +260,7 @@ select.form-control {
 .form-row select {
     background-color: var(--background-color);
 }
+
 
 /* ==========================================================================
    Index Page Styling
@@ -722,6 +709,19 @@ select.form-control {
     gap: 0.5rem;
     align-items: center;
     flex-shrink: 0;
+}
+
+.products-page .button-group .btn-clear {
+    background-color: var(--danger-color);
+    color: var(--card-background);
+    border-radius: 6px;
+    padding: 0.5rem;
+    transition: background-color 0.3s ease;
+}
+
+.products-page .button-group .btn-clear:hover {
+    background-color: #c9252f;
+    color: var(--card-background);
 }
 
 /* Categories Navigation */
