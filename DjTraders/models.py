@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.validators import RegexValidator, MinLengthValidator
 from django.db.models import Sum, F, ExpressionWrapper, DecimalField
+from django.contrib.auth.models import User
 
 # Custom validators
 no_numbers_validator = RegexValidator(
@@ -35,6 +36,8 @@ class Category(models.Model):
         return self.category_name
 
 class Customer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
@@ -67,7 +70,7 @@ class Customer(models.Model):
     archived_date = models.DateTimeField(null=True, blank=True)
     
     # New field to link Customer to a Company
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='customers')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='customers', null=True, blank=True)
 
     # Loyalty fields
     loyalty_level = models.CharField(max_length=10, choices=LOYALTY_LEVELS, null=True, blank=True)
@@ -190,7 +193,7 @@ class Product(models.Model):
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='active')
     
     # New field to link Product to a Company
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='products')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='products', null=True, blank=True)
 
     class Meta:
         db_table = 'products'

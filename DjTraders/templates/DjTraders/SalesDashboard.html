@@ -13,7 +13,14 @@
         <h1>Product Sales Dashboard</h1>
         <div class="filter-section">
             <form id="filterForm" method="GET" action="{% url 'DjTraders:SalesDashboard' %}">
-                <!-- Filters here -->
+                <div class="filter-group">
+                    <label>Year:</label>
+                    <select name="year" class="year-select">
+                        {% for year in available_years %}
+                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </form>
         </div>
     </div>
@@ -32,12 +39,54 @@
         <div class="chart-container">
             <canvas id="annualSalesChart"></canvas>
         </div>
+        <div class="sales-data-table-container">
+            <table class="sales-data-table">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Revenue</th>
+                        <th>Growth (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in annual_sales_table_data %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>${{ item.revenue|floatformat:2 }}</td>
+                        <td>{{ item.growth|floatformat:1 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div id="tab-top-products" class="customer-tab-content">
         <h2>Top 10 Products by Revenue</h2>
         <div class="chart-container">
             <canvas id="topProductsChart"></canvas>
+        </div>
+        <div class="sales-data-table-container">
+            <table class="sales-data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Revenue</th>
+                        <th>Units Sold</th>
+                        <th>% of Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in top_products_table_data %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>${{ product.revenue|floatformat:2 }}</td>
+                        <td>{{ product.units }}</td>
+                        <td>{{ product.percentage|floatformat:1 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -46,12 +95,56 @@
         <div class="chart-container">
             <canvas id="bottomProductsChart"></canvas>
         </div>
+        <div class="sales-data-table-container">
+            <table class="sales-data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Revenue</th>
+                        <th>Units Sold</th>
+                        <th>% of Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in bottom_products_table_data %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>${{ product.revenue|floatformat:2 }}</td>
+                        <td>{{ product.units }}</td>
+                        <td>{{ product.percentage|floatformat:1 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div id="tab-category-analysis" class="customer-tab-content">
         <h2>Category Sales Analysis</h2>
         <div class="chart-container">
             <canvas id="categorySalesChart"></canvas>
+        </div>
+        <div class="sales-data-table-container">
+            <table class="sales-data-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Revenue</th>
+                        <th>Units Sold</th>
+                        <th>% of Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in category_sales_table_data %}
+                    <tr>
+                        <td>{{ category.name }}</td>
+                        <td>${{ category.revenue|floatformat:2 }}</td>
+                        <td>{{ category.units }}</td>
+                        <td>{{ category.percentage|floatformat:1 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -72,4 +165,9 @@
     const categorySalesLabels = {{ category_sales_labels|safe }};
     const categorySalesData = {{ category_sales_data|safe }};
 </script>
+<script>
+    document.querySelector('.year-select').addEventListener('change', function() {
+        this.form.submit();
+    });
+    </script>
 {% endblock %}

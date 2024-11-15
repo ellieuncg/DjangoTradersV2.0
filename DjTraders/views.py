@@ -34,9 +34,6 @@ def is_employee(user):
 @login_required
 @user_passes_test(is_employee)
 
-
-@login_required
-@user_passes_test(is_employee)
 def SalesDashboard(request):
     # Get available years
     years_query = Order.objects.annotate(
@@ -178,6 +175,50 @@ def SalesDashboard(request):
         'category_sales_data': json.dumps(category_sales_data, cls=DjangoJSONEncoder),
     }
     
+    # Prepare table data for each tab
+    annual_sales_table_data = []
+    for category in category_analysis:
+        annual_sales_table_data.append({
+            'name': category['name'],
+            'revenue': category['revenue'],
+            'growth': ((category['revenue'] - category.get('prev_revenue', 0)) / category.get('prev_revenue', 1) * 100 
+                      if category.get('prev_revenue', 0) else 0)
+        })
+
+    top_products_table_data = []
+    for product in top_products:
+        top_products_table_data.append({
+            'name': product['product__product_name'],
+            'revenue': product['revenue'],
+            'units': product['orders_count'],
+            'percentage': (product['revenue'] / annual_total['revenue'] * 100 if annual_total['revenue'] else 0)
+        })
+
+    bottom_products_table_data = []
+    for product in bottom_products:
+        bottom_products_table_data.append({
+            'name': product['product__product_name'],
+            'revenue': product['revenue'],
+            'units': product['orders_count'],
+            'percentage': (product['revenue'] / annual_total['revenue'] * 100 if annual_total['revenue'] else 0)
+        })
+
+    category_sales_table_data = []
+    for category in category_analysis:
+        category_sales_table_data.append({
+            'name': category['name'],
+            'revenue': category['revenue'],
+            'units': category['orders_count'],
+            'percentage': (category['revenue'] / annual_total['revenue'] * 100 if annual_total['revenue'] else 0)
+        })
+
+    context.update({
+        'annual_sales_table_data': annual_sales_table_data,
+        'top_products_table_data': top_products_table_data,
+        'bottom_products_table_data': bottom_products_table_data,
+        'category_sales_table_data': category_sales_table_data,
+    })
+    
     return render(request, 'DjTraders/SalesDashboard.html', context)
 
 
@@ -234,12 +275,14 @@ class DjTradersCustomersView(ListView):
 @login_required
 def CustomerDashboard(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
-
-    # Check if the logged-in user matches the customer associated with this dashboard
-    if request.user != customer.user:
-        raise PermissionDenied("You do not have permission to access this dashboard.")
-
-    # Original view code starts here
+    
+    # Check if user is a customer and viewing their own dashboard
+    if hasattr(request.user, 'customer'):
+        if request.user.customer.pk != pk:
+            raise PermissionDenied("You can only view your own dashboard.")
+    else:
+        raise PermissionDenied("Only customers can access dashboards.")
+    
     yearly_orders = list(Order.objects.filter(customer__customer_id=pk)
         .annotate(year=ExtractYear('order_date'))
         .values('year')

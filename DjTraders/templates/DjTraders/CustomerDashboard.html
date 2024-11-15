@@ -1,93 +1,88 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ customer.customer_name }} - Dashboard{% endblock %}
+{% block title %}Product Sales Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'DjTraders/dashboard.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="customer-dashboard">
     <div class="page-header">
-        <h1>{{ customer.customer_name }} Dashboard</h1>
+        <h1>Product Sales Dashboard</h1>
+        <div class="filter-section">
+            <form id="filterForm" method="GET" action="{% url 'DjTraders:SalesDashboard' %}">
+                <div class="filter-group">
+                    <label>Year:</label>
+                    <select name="year" class="year-select">
+                        {% for year in available_years %}
+                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Tabs Navigation -->
     <div class="customer-dashboard-tabs">
-        <button class="customer-tab-button active" data-tab="tab-loyalty">Loyalty Program Status</button>
-        <button class="customer-tab-button" data-tab="tab-annual">Annual Sales Analysis</button>
-        <button class="customer-tab-button" data-tab="tab-monthly">Monthly Sales Analysis</button>
-        <button class="customer-tab-button" data-tab="tab-top-products">Top Products by Year</button>
-        <button class="customer-tab-button" data-tab="tab-top-categories">Top Categories by Year</button>
+        <button class="customer-tab-button active" data-tab="tab-annual-overview">Annual Sales Overview</button>
+        <button class="customer-tab-button" data-tab="tab-top-products">Top 10 Products</button>
+        <button class="customer-tab-button" data-tab="tab-bottom-products">Bottom 10 Products</button>
+        <button class="customer-tab-button" data-tab="tab-category-analysis">Category Sales Analysis</button>
     </div>
 
     <!-- Tab Content Sections -->
-    <div id="tab-loyalty" class="customer-tab-content active">
-        <section class="loyalty-program">
-            <h2 class="section-title">Loyalty Program Status</h2>
-            <div class="loyalty-info">
-                <div class="current-status">
-                    <h3>Current Level: {{ loyalty_info.current_level|default:"Not Qualified" }}</h3>
-                    <p>Annual Spend: ${{ loyalty_info.annual_spend|floatformat:2 }}</p>
-                    <p>Current Discount: {{ loyalty_info.discount_percentage }}%</p>
-                    {% if loyalty_info.spend_to_next %}
-                        <p class="next-level-info">
-                            Spend ${{ loyalty_info.spend_to_next|floatformat:2 }} more to reach the next level!
-                        </p>
-                    {% endif %}
-                </div>
-            </div>
-        </section>
+    <div id="tab-annual-overview" class="customer-tab-content active">
+        <h2>Annual Sales Overview</h2>
+        <canvas id="annualSalesChart"></canvas>
     </div>
 
-    <!-- Chart Containers for other tabs -->
-    <div id="tab-annual" class="customer-tab-content">
-        <section class="customer-info">
-            <h2 class="section-title">Annual Sales Analysis</h2>
-            <canvas id="annualSalesChart"></canvas>
-        </section>
-    </div>
-    <div id="tab-monthly" class="customer-tab-content">
-        <section class="order-history">
-            <h2 class="section-title">Monthly Sales Analysis</h2>
-            <canvas id="monthlySalesChart"></canvas>
-        </section>
-    </div>
     <div id="tab-top-products" class="customer-tab-content">
-        <section class="order-history">
-            <h2 class="section-title">Top Products by Year</h2>
-            <canvas id="topProductsChart"></canvas>
-        </section>
+        <h2>Top 10 Products by Revenue</h2>
+        <canvas id="topProductsChart"></canvas>
     </div>
-    <div id="tab-top-categories" class="customer-tab-content">
-        <section class="order-history">
-            <h2 class="section-title">Top Categories by Year</h2>
-            <canvas id="topCategoriesChart"></canvas>
-        </section>
+
+    <div id="tab-bottom-products" class="customer-tab-content">
+        <h2>Bottom 10 Products by Revenue</h2>
+        <canvas id="bottomProductsChart"></canvas>
+    </div>
+
+    <div id="tab-category-analysis" class="customer-tab-content">
+        <h2>Category Sales Analysis</h2>
+        <canvas id="categorySalesChart"></canvas>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{% static 'scripts/DJTraders.js' %}"></script>
+<script src="{% static 'DjTraders/DJTraders.js' %}"></script>
 
 <!-- Define JSON data in HTML template -->
-{{ yearly_orders|json_script:"yearlyOrders" }}
-{{ yearly_revenue|json_script:"yearlyRevenue" }}
-{{ monthly_sales_labels|json_script:"monthlySalesLabels" }}
-{{ monthly_sales_data|json_script:"monthlySalesData" }}
+{{ annual_sales_labels|json_script:"annualSalesLabels" }}
+{{ annual_sales_data|json_script:"annualSalesData" }}
 {{ top_products_labels|json_script:"topProductsLabels" }}
 {{ top_products_data|json_script:"topProductsData" }}
-{{ top_categories_labels|json_script:"topCategoriesLabels" }}
-{{ top_categories_data|json_script:"topCategoriesData" }}
+{{ bottom_products_labels|json_script:"bottomProductsLabels" }}
+{{ bottom_products_data|json_script:"bottomProductsData" }}
+{{ category_sales_labels|json_script:"categorySalesLabels" }}
+{{ category_sales_data|json_script:"categorySalesData" }}
 
 <script>
     // Retrieve data for use in JavaScript
-    const yearlyOrders = JSON.parse(document.getElementById('yearlyOrders').textContent);
-    const yearlyRevenue = JSON.parse(document.getElementById('yearlyRevenue').textContent);
-    const monthlySalesLabels = JSON.parse(document.getElementById('monthlySalesLabels').textContent);
-    const monthlySalesData = JSON.parse(document.getElementById('monthlySalesData').textContent);
+    const annualSalesLabels = JSON.parse(document.getElementById('annualSalesLabels').textContent);
+    const annualSalesData = JSON.parse(document.getElementById('annualSalesData').textContent);
     const topProductsLabels = JSON.parse(document.getElementById('topProductsLabels').textContent);
     const topProductsData = JSON.parse(document.getElementById('topProductsData').textContent);
-    const topCategoriesLabels = JSON.parse(document.getElementById('topCategoriesLabels').textContent);
-    const topCategoriesData = JSON.parse(document.getElementById('topCategoriesData').textContent);
+    const bottomProductsLabels = JSON.parse(document.getElementById('bottomProductsLabels').textContent);
+    const bottomProductsData = JSON.parse(document.getElementById('bottomProductsData').textContent);
+    const categorySalesLabels = JSON.parse(document.getElementById('categorySalesLabels').textContent);
+    const categorySalesData = JSON.parse(document.getElementById('categorySalesData').textContent);
+
+    document.querySelector('.year-select').addEventListener('change', function() {
+        this.form.submit();
+    });
 </script>
 {% endblock %}

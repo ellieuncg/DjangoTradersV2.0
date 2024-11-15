@@ -987,6 +987,104 @@ select.form-control {
 .customers-page .card-actions .btn-edit {
     background-color: var(--secondary-color);
 }
+/* ==========================================================================
+   Sales Dashboard
+========================================================================== */
+
+/* Sales Dashboard Table Styles */
+.sales-data-table-container {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: var(--card-background);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sales-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    font-size: 0.9375rem;
+}
+
+.sales-data-table thead {
+    background-color: var(--background-color);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.sales-data-table th {
+    padding: 1rem;
+    text-align: left;
+    color: var(--primary-color);
+    font-weight: 600;
+    white-space: nowrap;
+    background-color: var(--neutral-light);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.sales-data-table td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid var(--neutral-light);
+}
+
+.sales-data-table tbody tr:hover {
+    background-color: color-mix(in srgb, var(--primary-color) 5%, transparent);
+}
+
+.sales-data-table td:not(:first-child) {
+    text-align: right;
+}
+
+/* Header Filter Styles */
+.filter-section {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    color: var(--card-background);
+    font-weight: 500;
+}
+
+.year-select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--card-background);
+    min-width: 100px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sales-data-table-container {
+        padding: 1rem;
+        margin-top: 1rem;
+        overflow-x: auto;
+    }
+    
+    .sales-data-table {
+        font-size: 0.875rem;
+    }
+    
+    .sales-data-table th,
+    .sales-data-table td {
+        padding: 0.75rem;
+    }
+}
+
+/* ==========================================================================
+   Customer Dashboard
+========================================================================== */
+
+
 
 /* ==========================================================================
    Responsive Adjustments
