@@ -50,12 +50,14 @@
                 {# Country dropdown filter #}
                 <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon {% if request.GET.sort == 'country' %}fa-sort-{% if request.GET.direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="country"></i>
-                    <select name="country" class="status-select">
+                    <select name="country" id="country" class="form-select">
                         <option value="">Select Country</option>
                         {% for country in countries %}
-                            <option value="{{ country }}" {% if country_query == country %}selected{% endif %}>
-                                {{ country }}
-                            </option>
+                            {% if country %}
+                                <option value="{{ country }}" {% if country == request.GET.country %}selected{% endif %}>
+                                    {{ country }}
+                                </option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                 </div>

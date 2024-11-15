@@ -1,24 +1,19 @@
-import logging
-import calendar
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, ListView, UpdateView
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models.functions import ExtractYear, ExtractMonth
-from django.db.models import (
-    Count, Sum, F, Avg, Q, ExpressionWrapper, FloatField,
-    DecimalField, Case, When, Value
-)
+from django.db.models import Count, Sum, F, Avg, ExpressionWrapper, FloatField, DecimalField
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.decorators import login_required
+
 from .models import Customer, Product, Category, OrderDetail, Order, Supplier
 from .forms import CustomerForm, ProductForm
-from django.core.serializers.json import DjangoJSONEncoder
 import json
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.serializers.json import DjangoJSONEncoder
+
 
 logger = logging.getLogger(__name__)
 
@@ -245,6 +240,11 @@ class DjTradersCustomersView(ListView):
     model = Customer
     template_name = 'DjTraders/customers.html'
     context_object_name = 'customers'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['countries'] = Customer.objects.values_list('country', flat=True).distinct().order_by('country')
+        return context
 
     def get_queryset(self):
         queryset = Customer.objects.all()

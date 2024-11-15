@@ -1,10 +1,45 @@
-console.log('DJTraders.js loading...');
+console.log("DJTraders.js is loaded and running");
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Document ready in DJTraders.js');
     setupCustomerDashboardTabs();
-    // Initialize the first tab's chart by default
     initializeChartForTab('tab-annual-overview');
+
+    const filterForm = document.getElementById('customerFilterForm');
+    console.log('Filter form found:', filterForm); // Debug log
+
+    if (filterForm) {
+        const clearButton = filterForm.querySelector('.btn-clear');
+        const inputs = filterForm.querySelectorAll('input[type="text"], select');
+        const countrySelect = document.getElementById('country');
+        console.log('Country select found:', countrySelect); // Debug log
+
+        if (clearButton) {
+            clearButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("Clear button clicked");  // Debug log
+                inputs.forEach(input => {
+                    if (input.type === 'text' || input.tagName === 'SELECT') {
+                        input.value = '';
+                    }
+                });
+                const letterInput = filterForm.querySelector('input[name="letter"]');
+                if (letterInput) {
+                    letterInput.remove();
+                }
+                filterForm.submit();
+            });
+        }
+
+        if (countrySelect) {
+            countrySelect.addEventListener('change', () => {
+                console.log('Country changed to:', countrySelect.value); // Debug log
+                filterForm.submit();
+            });
+        }
+    } else {
+        console.error('Customer filter form not found!');
+    }
 });
 
 const chartInstances = {};
@@ -15,20 +50,14 @@ function setupCustomerDashboardTabs() {
 
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
-            // Remove active class from all buttons and contents
             tabButtons.forEach(btn => btn.classList.remove('active'));
             tabContents.forEach(content => content.classList.remove('active'));
 
-            // Add active class to the clicked button and corresponding content
             button.classList.add('active');
             const content = document.getElementById(button.dataset.tab);
             if (content) {
                 content.classList.add('active');
-
-                // Destroy any existing chart for this tab before initializing
                 destroyChart(button.dataset.tab);
-
-                // Initialize the chart for the active tab
                 initializeChartForTab(button.dataset.tab);
             }
         });
@@ -40,132 +69,40 @@ function initializeChartForTab(tabId) {
     let ctx;
 
     if (tabId === 'tab-annual-overview') {
-        ctx = document.getElementById('annualSalesChart').getContext('2d');
-        chartInstances[tabId] = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: annualSalesLabels,
-                datasets: [{
-                    label: 'Revenue',
-                    data: annualSalesData,
-                    backgroundColor: 'rgba(82, 103, 84, 0.6)',
-                    borderColor: 'rgba(82, 103, 84, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: { 
-                    y: { 
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    } 
-                }
-            }
-        });
-    } else if (tabId === 'tab-top-products') {
-        ctx = document.getElementById('topProductsChart').getContext('2d');
-        chartInstances[tabId] = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: topProductsLabels,
-                datasets: [{
-                    label: 'Revenue',
-                    data: topProductsData,
-                    backgroundColor: 'rgba(179, 157, 157, 0.6)',
-                    borderColor: 'rgba(82, 103, 84, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: { 
-                    y: { 
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    } 
-                }
-            }
-        });
-    } else if (tabId === 'tab-bottom-products') {
-        ctx = document.getElementById('bottomProductsChart').getContext('2d');
-        chartInstances[tabId] = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: bottomProductsLabels,
-                datasets: [{
-                    label: 'Revenue',
-                    data: bottomProductsData,
-                    backgroundColor: 'rgba(157, 179, 207, 0.6)',
-                    borderColor: 'rgba(82, 103, 84, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: { 
-                    y: { 
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    } 
-                }
-            }
-        });
-    } else if (tabId === 'tab-category-analysis') {
-        ctx = document.getElementById('categorySalesChart').getContext('2d');
-        chartInstances[tabId] = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: categorySalesLabels,
-                datasets: [{
-                    label: 'Sales by Category',
-                    data: categorySalesData,
-                    backgroundColor: [
-                        'rgba(82, 103, 84, 0.6)',
-                        'rgba(179, 207, 157, 0.6)',
-                        'rgba(179, 157, 157, 0.6)',
-                        'rgba(157, 179, 207, 0.6)',
-                        'rgba(157, 167, 207, 0.6)',
-                        'rgba(167, 157, 207, 0.6)',
-                        'rgba(207, 157, 167, 0.6)',
-                        'rgba(207, 167, 157, 0.6)'
-                    ],
-                    borderColor: 'rgba(255, 255, 255, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
+        const chartElement = document.getElementById('annualSalesChart');
+        if (chartElement) {
+            ctx = chartElement.getContext('2d');
+            chartInstances[tabId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: annualSalesLabels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: annualSalesData,
+                        backgroundColor: 'rgba(82, 103, 84, 0.6)',
+                        borderColor: 'rgba(82, 103, 84, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { 
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
                                 }
-                                label += '$' + context.raw.toLocaleString();
-                                return label;
                             }
-                        }
+                        } 
                     }
                 }
-            }
-        });
+            });
+        } else {
+            console.warn("annualSalesChart element not found");
+        }
     }
+    // Repeat similar checks for 'topProductsChart', 'bottomProductsChart', and 'categorySalesChart'
 }
 
 function destroyChart(tabId) {

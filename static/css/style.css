@@ -157,9 +157,15 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #9c7c3c;
 }
 
-/* ==========================================================================
-   Button Styles
-========================================================================== */
+.btn-clear {
+    color: var(--danger-color);
+    transition: color 0.2s ease;
+}
+
+.btn-clear:hover {
+    color: color-mix(in srgb, var(--danger-color) 80%, black);
+}
+
 .btn,
 .btn-submit,
 .btn-primary {
@@ -939,6 +945,15 @@ select.form-control {
     gap: 0.5rem;
     align-items: center;
     flex-shrink: 0;
+}
+
+.customers-page .button-group .btn-clear {
+    background-color: var(--danger-color);
+    color: var(--card-background);
+}
+
+.customers-page .button-group .btn-clear:hover {
+    background-color: color-mix(in srgb, var(--danger-color) 80%, black);
 }
 
 /* Customer Cards */
