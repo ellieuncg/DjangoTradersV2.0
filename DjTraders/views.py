@@ -1,3 +1,6 @@
+import logging  # For logging functionality
+from django.db.models.functions import ExtractYear  # For date extraction in queries
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, ListView, UpdateView
 from django.contrib import messages
@@ -7,7 +10,6 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import PermissionDenied
-from django.contrib.auth.decorators import login_required
 
 from .models import Customer, Product, Category, OrderDetail, Order, Supplier
 from .forms import CustomerForm, ProductForm
