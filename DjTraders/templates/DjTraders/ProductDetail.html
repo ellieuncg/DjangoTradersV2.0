@@ -2,101 +2,67 @@
 {% load static %}
 
 {% block content %}
-{# Main container for product detail page #}
 <div class="product-detail-page">
-    {# Header section with product name and status #}
-    <div class="page-header header-product-detail">
+    <div class="product-detail__header">
         <h1>{{ product.product_name }}</h1>
-        <div class="status-badge">
+        <div class="product-detail__status">
             Status: {{ product.get_status_display }}
         </div>
     </div>
 
-    {# Product information and action buttons section #}
-    <div class="product-info-grid">
-        {# Product details display #}
-        <div class="product-info-details">
-            <div class="info-row">
-                <span class="info-label">Category:</span>
-                <span class="info-value">{{ product.category.category_name }}</span>
+    <div class="product-detail__info">
+        <div class="product-detail__info-list">
+            <div class="product-detail__info-item">
+                <span class="product-detail__label">Category:</span>
+                <span class="product-detail__value">{{ product.category.category_name }}</span>
             </div>
-            <div class="info-row">
-                <span class="info-label">Unit:</span>
-                <span class="info-value">{{ product.unit }}</span>
+            <div class="product-detail__info-item">
+                <span class="product-detail__label">Unit:</span>
+                <span class="product-detail__value">{{ product.unit }}</span>
             </div>
-            <div class="info-row">
-                <span class="info-label">Price:</span>
-                <span class="info-value">${{ product.price }}</span>
+            <div class="product-detail__info-item">
+                <span class="product-detail__label">Price:</span>
+                <span class="product-detail__value">${{ product.price }}</span>
             </div>
-            <div class="info-row">
-                <span class="info-label">Status:</span>
-                <span class="info-value">{{ product.get_status_display }}</span>
+            <div class="product-detail__info-item">
+                <span class="product-detail__label">Status:</span>
+                <span class="product-detail__value">{{ product.get_status_display }}</span>
             </div>
         </div>
 
-        {# Action buttons group #}
-        <div class="button-group">
-            {# Edit product button #}
-            <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn btn-edit" title="Edit">
+        <div class="product-detail__actions">
+            <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="product-detail__btn product-detail__btn--edit" title="Edit">
                 <i class="fas fa-pen"></i>
             </a>
-            {# Archive product form #}
-            <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}" class="inline-form">
+            <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}">
                 {% csrf_token %}
                 <input type="hidden" name="status" value="inactive">
-                <button type="submit" class="action-btn btn-delete" title="Archive">
+                <button type="submit" class="product-detail__btn product-detail__btn--delete" title="Archive">
                     <i class="fas fa-trash"></i>
                 </button>
             </form>
-            {# Return to products list button #}
-            <a href="{% url 'DjTraders:Products' %}" class="action-btn btn-view" title="Return">
+            <a href="{% url 'DjTraders:Products' %}" class="product-detail__btn product-detail__btn--return" title="Return">
                 <i class="fas fa-chevron-left"></i>
             </a>
         </div>
     </div>
 
-    {# Order history section #}
-    <div class="order-history-product">
-        <h2 class="section-title">Order History</h2>
-        
-        {# Order history table #}
-        <table class="order-table">
-            {# Table header with sortable columns #}
+    <div class="product-detail__orders">
+        <h2 class="product-detail__orders-title">Order History</h2>
+        <table class="product-detail__table">
             <thead>
                 <tr>
-                    <th>
-                        <div class="customer-search-field-header">
-                            <i class="fas fa-sort sort-icon {% if sort_field == 'customer' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="customer"></i>
-                            Customer
-                        </div>
-                    </th>
-                    <th>
-                        <div class="customer-search-field-header">
-                            <i class="fas fa-sort sort-icon {% if sort_field == 'order_date' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="order_date"></i>
-                            Order Date
-                        </div>
-                    </th>
-                    <th>
-                        <div class="customer-search-field-header">
-                            <i class="fas fa-sort sort-icon {% if sort_field == 'quantity' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="quantity"></i>
-                            Quantity
-                        </div>
-                    </th>
-                    <th>
-                        <div class="customer-search-field-header">
-                            <i class="fas fa-sort sort-icon {% if sort_field == 'total' %}fa-sort-{% if sort_direction == 'asc' %}up{% else %}down{% endif %}{% endif %}" data-sort="total"></i>
-                            Total
-                        </div>
-                    </th>
+                    <th>Customer</th>
+                    <th>Order Date</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
                 </tr>
             </thead>
-            {# Table body with order details #}
             <tbody>
                 {% for detail in order_details %}
                 <tr>
                     <td>
-                        {# Customer name with link to customer detail page #}
-                        <a href="{% url 'DjTraders:CustomerDetail' pk=detail.order.customer.pk %}" class="customer-link">
+                        <a href="{% url 'DjTraders:CustomerDetail' pk=detail.order.customer.pk %}">
                             {{ detail.order.customer.customer_name }}
                         </a>
                     </td>
@@ -106,7 +72,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="no-orders">No orders found for this product.</td>
+                    <td colspan="4" class="product-detail__table-empty">No orders found for this product.</td>
                 </tr>
                 {% endfor %}
             </tbody>

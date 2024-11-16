@@ -25,6 +25,7 @@ urlpatterns = [
     path('customers/create/', views.create_customer, name='CustomerCreate'),
     path('customers/<int:pk>/update/', views.update_customer, name='CustomerUpdate'),
     path('customers/<int:pk>/archive/', views.archive_customer, name='CustomerArchive'),
+    path('customers/<int:pk>/status/', views.update_customer_status, name='CustomerStatus'),  # Added this line
 
     # Customer Dashboard URL
     path('customers/<int:pk>/dashboard/', views.CustomerDashboard, name='CustomerDashboard'),
@@ -35,4 +36,5 @@ urlpatterns = [
     path('products/create/', views.create_product, name='ProductCreate'),
     path('products/<int:pk>/update/', views.update_product, name='ProductUpdate'),
     path('products/<int:pk>/archive/', views.archive_product, name='ProductArchive'),
+    path('products/<int:pk>/status/', views.update_product_status, name='ProductStatus'),
 ]

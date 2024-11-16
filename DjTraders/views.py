@@ -27,6 +27,201 @@ def index(request):
 def is_employee(user):
     return user.groups.filter(name='Employees').exists()
 
+# Custom Login View
+def custom_login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            if user.groups.filter(name='Employees').exists():
+                return redirect('DjTraders:SalesDashboard')
+            return redirect('DjTraders:Index')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'DjTraders/login.html', {'form': form})
+
+# Product Views
+class DjTradersProductsView(ListView):
+    model = Product
+    template_name = 'DjTraders/products.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        product_query = self.request.GET.get('product', '')
+        category = self.request.GET.get('category', '')
+        min_price = self.request.GET.get('min_price', '')
+        max_price = self.request.GET.get('max_price', '')
+        status = self.request.GET.get('status', 'active')
+
+        if product_query:
+            queryset = queryset.filter(product_name__icontains=product_query)
+        if category:
+            queryset = queryset.filter(category__category_id=category)
+        if min_price:
+            try:
+                min_price = float(min_price)
+                queryset = queryset.filter(price__gte=min_price)
+            except ValueError:
+                pass
+        if max_price:
+            try:
+                max_price = float(max_price)
+                queryset = queryset.filter(price__lte=max_price)
+            except ValueError:
+                pass
+        if status != 'all':
+            queryset = queryset.filter(status=status)
+
+        return queryset.order_by('product_name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all().order_by('category_name')
+        context['selected_category'] = self.request.GET.get('category', '')
+        context['status_filter'] = self.request.GET.get('status', 'active')
+        return context
+
+class DjTradersProductDetailView(DetailView):
+    model = Product
+    template_name = 'DjTraders/ProductDetail.html'
+    context_object_name = 'product'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get order details for this product and annotate with total
+        order_details = OrderDetail.objects.filter(
+            product=self.object
+        ).select_related(
+            'order',
+            'order__customer'
+        ).annotate(
+            total=F('quantity') * F('product__price')
+        ).order_by('-order__order_date')
+
+        context['order_details'] = order_details
+        return context
+
+def create_product(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            product = form.save()
+            messages.success(request, 'Product created successfully.')
+            return redirect('DjTraders:ProductDetail', pk=product.pk)
+    else:
+        form = ProductForm()
+    return render(request, 'DjTraders/ProductForm.html', {'form': form})
+
+def update_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Product updated successfully.')
+            return redirect('DjTraders:Products')
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'DjTraders/ProductForm.html', {'form': form})
+
+@login_required
+def archive_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    product.status = 'archived'
+    product.save()
+    return JsonResponse({'status': 'archived', 'message': f'{product.product_name} archived successfully.'})
+
+def update_product_status(request, pk):
+    if request.method == 'POST':
+        product = get_object_or_404(Product, pk=pk)
+        new_status = request.POST.get('status')
+        if new_status in ['active', 'inactive', 'archived']:
+            product.status = new_status
+            product.save()
+            messages.success(request, f'Product status updated to {new_status}.')
+    return redirect('DjTraders:Products')
+
+# Customer Views
+class DjTradersCustomersView(ListView):
+    model = Customer
+    template_name = 'DjTraders/customers.html'
+    context_object_name = 'customers'
+
+    def get_queryset(self):
+        queryset = Customer.objects.all()
+        customer_query = self.request.GET.get('customer', '')
+        contact_query = self.request.GET.get('contact', '')
+        city_query = self.request.GET.get('city', '')
+        country_query = self.request.GET.get('country', '')
+        letter = self.request.GET.get('letter', '')
+        status = self.request.GET.get('status', 'active')
+
+        if customer_query:
+            queryset = queryset.filter(customer_name__icontains=customer_query)
+        if contact_query:
+            queryset = queryset.filter(contact_name__icontains=contact_query)
+        if city_query:
+            queryset = queryset.filter(city__icontains=city_query)
+        if country_query:
+            queryset = queryset.filter(country__iexact=country_query)
+        if letter:
+            queryset = queryset.filter(customer_name__istartswith=letter)
+        if status != 'all':
+            queryset = queryset.filter(status=status)
+
+        return queryset.order_by('customer_name')
+
+class DjTradersCustomerDetailView(DetailView):
+    model = Customer
+    template_name = 'DjTraders/CustomerDetail.html'
+    context_object_name = 'customer'
+
+def create_customer(request):
+    if request.method == 'POST':
+        form = CustomerForm(request.POST)
+        if form.is_valid():
+            customer = form.save()
+            messages.success(request, 'Customer created successfully.')
+            return redirect('DjTraders:CustomerDetail', pk=customer.pk)
+    else:
+        form = CustomerForm()
+    return render(request, 'DjTraders/CustomerForm.html', {'form': form})
+
+def update_customer(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, instance=customer)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Customer updated successfully.')
+            return redirect('DjTraders:CustomerDetail', pk=customer.pk)
+    else:
+        form = CustomerForm(instance=customer)
+    return render(request, 'DjTraders/CustomerForm.html', {'form': form})
+
+@login_required
+def archive_customer(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    customer.status = 'archived'
+    customer.archived_date = timezone.now()
+    customer.save()
+    return JsonResponse({'status': 'archived', 'message': f'{customer.customer_name} archived successfully.'})
+
+def update_customer_status(request, pk):
+    if request.method == 'POST':
+        customer = get_object_or_404(Customer, pk=pk)
+        new_status = request.POST.get('status')
+        if new_status in ['active', 'inactive', 'archived']:
+            customer.status = new_status
+            if new_status == 'archived':
+                customer.archived_date = timezone.now()
+            customer.save()
+            messages.success(request, f'Customer status updated to {new_status}.')
+    return redirect('DjTraders:Customers')
+
 # Sales Dashboard View
 @login_required
 @user_passes_test(is_employee)
@@ -177,98 +372,6 @@ def SalesDashboard(request):
 
     return render(request, 'DjTraders/SalesDashboard.html', context)
 
-# Custom Login View
-def custom_login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            if user.groups.filter(name='Employees').exists():
-                return redirect('DjTraders:SalesDashboard')
-            return redirect('DjTraders:Index')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'DjTraders/login.html', {'form': form})
-
-# Customer Views
-class DjTradersCustomersView(ListView):
-    model = Customer
-    template_name = 'DjTraders/customers.html'
-    context_object_name = 'customers'
-
-    def get_queryset(self):
-        queryset = Customer.objects.all()
-        customer_query = self.request.GET.get('customer', '')
-        contact_query = self.request.GET.get('contact', '')
-        city_query = self.request.GET.get('city', '')
-        country_query = self.request.GET.get('country', '')
-        letter = self.request.GET.get('letter', '')
-        status = self.request.GET.get('status', 'active')
-
-        if customer_query:
-            queryset = queryset.filter(customer_name__icontains=customer_query)
-        if contact_query:
-            queryset = queryset.filter(contact_name__icontains=contact_query)
-        if city_query:
-            queryset = queryset.filter(city__icontains=city_query)
-        if country_query:
-            queryset = queryset.filter(country__iexact=country_query)
-        if letter:
-            queryset = queryset.filter(customer_name__istartswith=letter)
-        if status != 'all':
-            queryset = queryset.filter(status=status)
-
-        return queryset.order_by('customer_name')
-
-class DjTradersCustomerDetailView(DetailView):
-    model = Customer
-    template_name = 'DjTraders/CustomerDetail.html'
-    context_object_name = 'customer'
-
-def create_customer(request):
-    if request.method == 'POST':
-        form = CustomerForm(request.POST)
-        if form.is_valid():
-            customer = form.save()
-            messages.success(request, 'Customer created successfully.')
-            return redirect('DjTraders:CustomerDetail', pk=customer.pk)
-    else:
-        form = CustomerForm()
-    return render(request, 'DjTraders/CustomerForm.html', {'form': form})
-
-def update_customer(request, pk):
-    customer = get_object_or_404(Customer, pk=pk)
-    if request.method == 'POST':
-        form = CustomerForm(request.POST, instance=customer)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Customer updated successfully.')
-            return redirect('DjTraders:CustomerDetail', pk=customer.pk)
-    else:
-        form = CustomerForm(instance=customer)
-    return render(request, 'DjTraders/CustomerForm.html', {'form': form})
-
-@login_required
-def archive_customer(request, pk):
-    customer = get_object_or_404(Customer, pk=pk)
-    customer.status = 'archived'
-    customer.archived_date = timezone.now()
-    customer.save()
-    return JsonResponse({'status': 'archived', 'message': f'{customer.customer_name} archived successfully.'})
-
-def update_customer_status(request, pk):
-    if request.method == 'POST':
-        customer = get_object_or_404(Customer, pk=pk)
-        new_status = request.POST.get('status')
-        if new_status in ['active', 'inactive', 'archived']:
-            customer.status = new_status
-            if new_status == 'archived':
-                customer.archived_date = timezone.now()
-            customer.save()
-            messages.success(request, f'Customer status updated to {new_status}.')
-    return redirect('DjTraders:Customers')
-
 # Customer Dashboard
 def CustomerDashboard(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
@@ -347,88 +450,3 @@ def CustomerDashboard(request, pk):
     }
 
     return render(request, 'DjTraders/CustomerDashboard.html', context)
-class DjTradersProductDetailView(DetailView):
-    model = Product
-    template_name = 'DjTraders/ProductDetail.html'
-    context_object_name = 'product'
-
-def create_product(request):
-    if request.method == 'POST':
-        form = ProductForm(request.POST)
-        if form.is_valid():
-            product = form.save()
-            messages.success(request, 'Product created successfully.')
-            return redirect('DjTraders:ProductDetail', pk=product.pk)
-    else:
-        form = ProductForm()
-    return render(request, 'DjTraders/ProductForm.html', {'form': form})
-
-def update_product(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    if request.method == 'POST':
-        form = ProductForm(request.POST, instance=product)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Product updated successfully.')
-            return redirect('DjTraders:Products')
-    else:
-        form = ProductForm(instance=product)
-    return render(request, 'DjTraders/ProductForm.html', {'form': form})
-
-@login_required
-def archive_product(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    product.status = 'archived'
-    product.save()
-    return JsonResponse({'status': 'archived', 'message': f'{product.product_name} archived successfully.'})
-
-def update_product_status(request, pk):
-    if request.method == 'POST':
-        product = get_object_or_404(Product, pk=pk)
-        new_status = request.POST.get('status')
-        if new_status in ['active', 'inactive', 'archived']:
-            product.status = new_status
-            product.save()
-            messages.success(request, f'Product status updated to {new_status}.')
-    return redirect('DjTraders:Products')
-
-class DjTradersProductsView(ListView):
-    model = Product
-    template_name = 'DjTraders/products.html'
-    context_object_name = 'products'
-
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        product_query = self.request.GET.get('product', '')
-        category = self.request.GET.get('category', '')
-        min_price = self.request.GET.get('min_price', '')
-        max_price = self.request.GET.get('max_price', '')
-        status = self.request.GET.get('status', 'active')
-
-        if product_query:
-            queryset = queryset.filter(product_name__icontains=product_query)
-        if category:
-            queryset = queryset.filter(category__category_id=category)
-        if min_price:
-            try:
-                min_price = float(min_price)
-                queryset = queryset.filter(price__gte=min_price)
-            except ValueError:
-                pass
-        if max_price:
-            try:
-                max_price = float(max_price)
-                queryset = queryset.filter(price__lte=max_price)
-            except ValueError:
-                pass
-        if status != 'all':
-            queryset = queryset.filter(status=status)
-
-        return queryset.order_by('product_name')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all().order_by('category_name')
-        context['selected_category'] = self.request.GET.get('category', '')
-        context['status_filter'] = self.request.GET.get('status', 'active')
-        return context

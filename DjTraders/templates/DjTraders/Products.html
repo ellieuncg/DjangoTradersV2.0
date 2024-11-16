@@ -25,32 +25,27 @@
         </div>
 
         <div class="search-container-products">
-            <form method="get" class="search-form" id="productFilterForm">
-                <div class="search-field-group">
-                    <div class="search-field">
-                        <i class="fas fa-sort sort-icon" data-sort="product"></i>
-                        <input type="text" name="product" placeholder="Product Name" value="{{ product_query }}">
-                    </div>
-                    <div class="search-field">
-                        <i class="fas fa-dollar-sign sort-icon" data-sort="price"></i>
-                        <input type="number" name="min_price" placeholder="Min Price" value="{{ min_price }}">
-                    </div>
-                    <div class="search-field">
-                        <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}">
-                    </div>
+            <div class="search-field-group">
+                <div class="search-field-header">
+                    <i class="fas fa-sort sort-icon"></i>
+                    <input type="text" name="product" placeholder="Product Name" value="{{ product_query }}">
                 </div>
-                <div class="button-group">
-                    <button type="submit" class="action-btn btn-search">
-                        <i class="fas fa-search"></i>
-                    </button>
-                    <button type="button" class="action-btn btn-clear">
-                        <i class="fas fa-times"></i>
-                    </button>
+                <div class="search-field-header">
+                    <i class="fas fa-dollar-sign sort-icon"></i>
+                    <input type="number" name="min_price" placeholder="Min Price" value="{{ min_price }}">
                 </div>
-                {% if request.GET.category %}
-                <input type="hidden" name="category" value="{{ request.GET.category }}">
-                {% endif %}
-            </form>
+                <div class="search-field-header">
+                    <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}">
+                </div>
+            </div>
+            <div class="button-group">
+                <button type="submit" class="btn-search">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button type="button" class="btn-clear">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
 
         <div class="categories-wrapper-products">
@@ -81,7 +76,9 @@
                         <i class="fas fa-pen"></i>
                     </a>
                     <!-- Place this in your product card HTML -->
-<button class="action-btn btn-archive" onclick="archiveRecord('product', {{ product.id }})">Archive</button>
+                    <button class="btn-archive" onclick="archiveRecord('product', {{ product.id }})">
+                        <i class="fas fa-archive"></i>
+                    </button>
 
                     </button>
                 </div>
