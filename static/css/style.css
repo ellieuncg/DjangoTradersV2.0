@@ -104,7 +104,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .products-page .page-header,
 .customers-page .page-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 85%, var(--accent-color)));
+    background: linear-gradient(135deg, var(--primary-color) 0%, #375a56); 
 }
 
 .products-page .page-header h1,
@@ -114,19 +114,25 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 2rem;
 }
 
-/* Inactive and Archived Card Styles for Products */
-.products-page .card-products.inactive,
-.customers-page .card-customers.inactive {
-    background-color: color-mix(in srgb, var(--accent-color) 85%, white) !important;
-    color: var(--neutral-dark) !important;
-    border: 1px solid color-mix(in srgb, var(--accent-color) 75%, var(--neutral-light)) !important;
+/* Active - Lighter Green */
+.customers-page .card-grid-customers .card-customers.active {
+    background-color: #a3b5a4; 
+    color: var(--text-color) !important;
+    border: 1px solid #c0d4b9; 
 }
 
-.products-page .card-products.archived,
-.customers-page .card-customers.archived {
-    background-color: color-mix(in srgb, var(--highlight-warm) 85%, white) !important;
-    color: var(--neutral-dark) !important;
-    border: 1px solid color-mix(in srgb, var(--highlight-warm) 75%, var(--neutral-light)) !important;
+/* Inactive - Neutral Light Green */
+.customers-page .card-grid-customers .card-customers.inactive {
+    background-color: #d2c7b2; 
+    color: var(--text-color) !important;
+    border: 1px solid #d6ccb9; 
+}
+
+/* Archived - Lighter Orange */
+.customers-page .card-grid-customers .card-customers.archived {
+    background-color: #f3b89c; 
+    color: var(--text-color) !important;
+    border: 1px solid #eab396; 
 }
 
 
@@ -155,38 +161,84 @@ h1, h2, h3, h4, h5, h6 {
     text-decoration: none;
 }
 
-.action-btn {
-    @extend .button-base;
-    background-color: var(--primary-color);
-    color: var(--card-background);
-}
-
 .btn-edit {
-    @extend .button-base;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+    font-family: var(--font-primary);
+    text-decoration: none;
     background-color: var(--secondary-color);
     color: var(--card-background);
 }
 
 .btn-archive {
-    @extend .button-base;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+    font-family: var(--font-primary);
+    text-decoration: none;
     background-color: var(--highlight-warm) !important;
     color: white !important;
     padding: 0.5rem;
 }
 
+
 /* Hover Effects */
 .action-btn:hover {
-    background-color: color-mix(in srgb, var(--primary-color) 80%, black);
+    background-color: #324f46;
 }
 
 .btn-edit:hover {
-    background-color: color-mix(in srgb, var(--secondary-color) 80%, black);
+    background-color: #a67e36; 
 }
 
 .btn-archive:hover {
-    background-color: var(--highlight-warm-hover) !important;
+    background-color: var(--highlight-warm-hover) !important; 
 }
 
+/* ==========================================================================
+   Chart Styles
+========================================================================== */
+/* Chart Container Styling - Single Definition */
+.customer-dashboard .chart-container {
+    position: relative !important;
+    height: 400px !important;
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin: 1rem auto !important;
+    border: 1px solid var(--neutral-light);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow: hidden !important;
+}
+
+/* Direct canvas control */
+.customer-dashboard .chart-container canvas {
+    height: 400px !important;
+    max-height: 400px !important;
+    width: 100% !important;
+}
+
+/* Mobile adjustments for charts */
+@media (max-width: 768px) {
+    .customer-dashboard .chart-container,
+    .customer-dashboard .chart-container canvas {
+        height: 300px !important;
+        max-height: 300px !important;
+    }
+}
 /* ==========================================================================
    Form Styles
 ========================================================================== */
@@ -430,6 +482,13 @@ select.form-control {
     margin-bottom: 2rem;
 }
 
+/* Data Table Container */
+.data-table {
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 1200px;
+}
+
 /* ==========================================================================
    Customer Dashboard Specific Styles
 ========================================================================== */
@@ -445,7 +504,7 @@ select.form-control {
     text-align: center;
     margin-bottom: 2rem;
     padding: 2rem;
-    background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 85%, var(--accent-color)));
+    background: linear-gradient(135deg, var(--primary-color) 0%, #375a56); 
     color: var(--card-background);
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.1);
@@ -530,18 +589,12 @@ select.form-control {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     margin: 0 1rem;
     min-height: 500px;
+    max-height: 800px;  /* Maximum height for the tab content */
+    overflow-y: auto;  /* Allow scrolling if content is too long */
 }
 
 .customer-tab-content.active {
     display: block;
-}
-
-/* Chart Container Styling */
-.chart-container {
-    position: relative;
-    height: 400px;
-    width: 100%;
-    margin: 1rem auto;
 }
 
 .customer-tab-content h2 {
@@ -575,6 +628,74 @@ select.form-control {
     background-color: var(--card-background);
 }
 
+/* Customer Dashboard Loyalty Section */
+.customer-dashboard .card-grid-loyalty {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.customer-dashboard .status-card {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.customer-dashboard .status-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.customer-dashboard .status-content h3 {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    margin-bottom: 0.25rem;
+}
+
+.customer-dashboard .status-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.customer-dashboard .level-card {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+}
+
+.customer-dashboard .level-card .status-icon,
+.customer-dashboard .level-card .status-content h3,
+.customer-dashboard .level-card .status-value {
+    color: white;
+}
+
+.customer-dashboard .progress-container {
+    background: var(--neutral-light);
+    border-radius: 0.5rem;
+    height: 0.5rem;
+    margin: 1.5rem 0 0.5rem 0;
+    overflow: hidden;
+}
+
+.customer-dashboard .progress-bar {
+    background: var(--primary-color);
+    height: 100%;
+    border-radius: 0.5rem;
+    transition: width 0.3s ease;
+}
+
+.customer-dashboard .progress-text {
+    text-align: center;
+    color: var(--text-color);
+    font-size: 0.875rem;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     .customer-dashboard {
@@ -593,7 +714,7 @@ select.form-control {
     }
 
     .chart-container {
-        height: 300px;
+        height: 300px !important;
     }
 
     #filterForm {
@@ -608,6 +729,35 @@ select.form-control {
 
     .filter-group select {
         width: 100%;
+    }
+}
+
+/* Transaction History Table Styles */
+.customer-dashboard .transaction-table-container {
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+.customer-dashboard .transaction-history .data-table td {
+    vertical-align: top;
+    padding: 1rem;
+}
+
+.customer-dashboard .transaction-history .text-center {
+    text-align: center;
+}
+
+.customer-dashboard .back-button-container {
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .customer-dashboard .transaction-history .data-table {
+        font-size: 0.875rem;
+    }
+    
+    .customer-dashboard .transaction-history .data-table td {
+        padding: 0.75rem;
     }
 }
 
@@ -809,6 +959,43 @@ select.form-control {
     background-color: var(--highlight-warm);
 }
 
+/* Products Page Card Styles */
+.products-page .card-products {
+    background: var(--card-background);
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    padding: 1.25rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.products-page .card-products:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Products Page Status Styles */
+/* Active - Lighter Green */
+.products-page .card-grid-products .card-products.active {
+    background-color: #a3b5a4; 
+    color: var(--text-color) !important;
+    border: 1px solid #c0d4b9;
+}
+
+/* Inactive - Neutral Light Green */
+.products-page .card-grid-products .card-products.inactive {
+    background-color: #d2c7b2; 
+    color: var(--text-color) !important;
+    border: 1px solid #d6ccb9;
+}
+
+/* Archived - Lighter Orange */
+.products-page .card-grid-products .card-products.archived {
+    background-color: #f3b89c; 
+    color: var(--text-color) !important;
+    border: 1px solid #eab396; 
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .products-page .search-field-group {
@@ -831,9 +1018,6 @@ select.form-control {
    Product Detail Page
 ========================================================================== */
 
-/* ==========================================================================
-   Product Detail Page - Specific Styles Only
-========================================================================== */
 .product-detail-page {
     background-color: var(--card-background);
     border-radius: 10px;
@@ -845,7 +1029,7 @@ select.form-control {
 
 /* Product Detail Header */
 .product-detail__header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 85%, var(--accent-color)));
+    background: linear-gradient(135deg, var(--primary-color) 0%, #375a56); 
     color: var(--card-background);
     padding: 2rem;
     border-radius: 10px;
@@ -980,7 +1164,7 @@ select.form-control {
 }
 
 .product-detail__table tr:hover {
-    background-color: color-mix(in srgb, var(--primary-color) 5%, transparent);
+    background-color: #375a56; 
 }
 
 .product-detail__table-empty {
@@ -1107,9 +1291,10 @@ select.form-control {
 }
 
 .customers-page .btn-add-new:hover {
-    background-color: color-mix(in srgb, var(--secondary-color) 80%, black);
+    background-color: #986b2e; 
     transform: translateY(-2px);
 }
+
 
 /* Search and Filter */
 .customers-page .customer-search-container {
@@ -1188,11 +1373,11 @@ select.form-control {
 }
 
 .customers-page .button-group .btn-search:hover {
-    background-color: color-mix(in srgb, var(--accent-color) 80%, black);
+    background-color: #1b4f4b;
 }
 
 .customers-page .button-group .btn-clear:hover {
-    background-color: color-mix(in srgb, var(--danger-color) 80%, black);
+    background-color: #b02432; 
 }
 
 /* Customer Cards */
@@ -1267,16 +1452,32 @@ select.form-control {
 }
 
 .customers-page .card-actions .action-btn:hover {
-    background-color: color-mix(in srgb, var(--primary-color) 80%, black);
+    background-color: #324f46; 
 }
 
 .customers-page .card-actions .btn-edit:hover {
-    background-color: color-mix(in srgb, var(--secondary-color) 80%, black);
+    background-color: #a67e36; 
 }
 
 .customers-page .card-actions .btn-archive:hover {
     background-color: var(--highlight-warm-hover);
 }
+
+/* Customers Page Card Styles */
+.customers-page .card-customers {
+    background: var(--card-background);
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    padding: 1.25rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.customers-page .card-customers:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
 
 /* Responsive Adjustments for Customers Page */
 @media (max-width: 768px) {
@@ -1300,146 +1501,241 @@ select.form-control {
         padding: 1rem;
     }
 }
+
+/* ==========================================================================
+   Customer Dashboard Loyalty Program Styles
+========================================================================== */
+.customer-dashboard .loyalty-program {
+    margin-top: 2rem;
+}
+
+.customer-dashboard .loyalty-tiers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.customer-dashboard .loyalty-tier {
+    background-color: var(--background-color);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--neutral-light);
+    transition: transform 0.2s ease;
+}
+
+.customer-dashboard .loyalty-tier.active {
+    border-color: var(--primary-color);
+    background-color: #5e7465; 
+}
+
+.customer-dashboard .tier-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.customer-dashboard .tier-header h3 {
+    color: var(--primary-color);
+    margin: 0;
+    font-size: 1rem;
+}
+
+.customer-dashboard .tier-threshold {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.customer-dashboard .tier-benefits {
+    font-size: 0.875rem;
+    color: var(--text-color);
+}
+
+.customer-dashboard .loyalty-progress {
+    position: relative;
+    background: var(--neutral-light);
+    border-radius: 0.5rem;
+    height: 0.5rem;
+    margin: 2rem 0 0.5rem 0;
+    overflow: visible;
+}
+
+.customer-dashboard .progress-markers {
+    position: absolute;
+    top: -1.5rem;
+    width: 100%;
+    height: 100%;
+}
+
+.customer-dashboard .progress-marker {
+    position: absolute;
+    transform: translateX(-50%);
+}
+
+.customer-dashboard .marker-label {
+    font-size: 0.75rem;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+.customer-dashboard .previous-spend,
+.customer-dashboard .time-remaining {
+    font-size: 0.75rem;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-top: 0.25rem;
+}
+
+.customer-dashboard .loyalty-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.customer-dashboard .loyalty-actions .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .customer-dashboard .loyalty-tiers {
+        grid-template-columns: 1fr;
+    }
+    
+    .customer-dashboard .marker-label {
+        font-size: 0.675rem;
+    }
+}
+
 /* ==========================================================================
    Sales Dashboard
 ========================================================================== */
-
-/* Sales Dashboard Table Styles */
-.sales-data-table-container {
-    margin-top: 2rem;
-    padding: 1.5rem;
-    background-color: var(--card-background);
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.sales-data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1.5rem;
-    font-size: 0.9375rem;
-}
-
-.sales-data-table thead {
+/* Main Layout */
+.sales-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
     background-color: var(--background-color);
-    border-bottom: 2px solid var(--primary-color);
 }
 
-.sales-data-table th {
-    padding: 1rem;
-    text-align: left;
-    color: var(--primary-color);
+/* Header Styles */
+.sales-dashboard .page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #375a56); 
+    color: var(--card-background);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.sales-dashboard .product-name-title {
+    color: var(--card-background);
+    margin: 1rem 0;
+    font-size: 1.75rem;
     font-weight: 600;
-    white-space: nowrap;
-    background-color: var(--neutral-light);
-    border-bottom: 2px solid var(--primary-color);
 }
 
-.sales-data-table td {
-    padding: 0.875rem 1rem;
-    border-bottom: 1px solid var(--neutral-light);
-}
-
-.sales-data-table tbody tr:hover {
-    background-color: color-mix(in srgb, var(--primary-color) 5%, transparent);
-}
-
-.sales-data-table td:not(:first-child) {
-    text-align: right;
-}
-
-/* Header Filter Styles */
-.filter-section {
+/* Filter Styles */
+.sales-dashboard .filter-section {
     display: flex;
     justify-content: center;
-    margin-top: 1rem;
+    gap: 1rem;
+    margin: 1rem 0;
 }
 
-.filter-group {
+.sales-dashboard .filter-group {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.filter-group label {
+.sales-dashboard .filter-group label {
     color: var(--card-background);
     font-weight: 500;
 }
 
-.year-select {
-    padding: 0.5rem;
+.sales-dashboard .year-select,
+.sales-dashboard .product-select {
+    padding: 0.5rem 1rem;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background-color: rgba(255, 255, 255, 0.1);
     color: var(--card-background);
-    min-width: 100px;
+    min-width: 120px;
 }
 
-/* Responsive adjustments */
+/* Chart Styles */
+.sales-dashboard .chart-container {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    height: 400px;
+    width: 100%;
+}
+
+/* Table Styles */
+.sales-dashboard .sales-data-table-container {
+    margin: 1rem;
+    background-color: var(--neutral-light);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.sales-dashboard .sales-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-background);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.sales-dashboard .sales-data-table thead {
+    background-color: var(--neutral-light);
+}
+
+.sales-dashboard .sales-data-table th,
+.sales-dashboard .sales-data-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--neutral-light);
+}
+
+.sales-dashboard .sales-data-table th {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.sales-dashboard .sales-data-table tbody tr:nth-child(even) {
+    background-color: var(--background-color);
+}
+
+.sales-dashboard .sales-data-table tbody tr:hover {
+    background-color: #d6ebda; 
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-    .sales-data-table-container {
+    .sales-dashboard {
         padding: 1rem;
-        margin-top: 1rem;
+    }
+
+    .sales-dashboard .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sales-dashboard .chart-container {
+        height: 300px;
+    }
+
+    .sales-dashboard .sales-data-table-container {
+        margin: 1rem 0;
         overflow-x: auto;
-    }
-    
-    .sales-data-table {
-        font-size: 0.875rem;
-    }
-    
-    .sales-data-table th,
-    .sales-data-table td {
-        padding: 0.75rem;
-    }
-}
-
-/* ==========================================================================
-   Customer Dashboard
-========================================================================== */
-
-
-
-/* ==========================================================================
-   Responsive Adjustments
-========================================================================== */
-@media (max-width: 768px) {
-    /* Products Page */
-    .products-page .search-container-products {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .products-page .search-field-group {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .products-page .button-group {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .products-page .card-grid-products {
-        grid-template-columns: 1fr;
-    }
-
-    /* Customers Page */
-    .customers-page .customer-search-container {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .customers-page .customer-search-field-group {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .customers-page .button-group {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .customers-page .card-grid-customers {
-        grid-template-columns: 1fr;
     }
 }

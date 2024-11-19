@@ -6,23 +6,32 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('DjTraders', '0003_product_supplier'),
+        ("DjTraders", "0003_product_supplier"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customer',
-            name='annual_spend',
+            model_name="customer",
+            name="annual_spend",
             field=models.DecimalField(decimal_places=2, default=0, max_digits=10),
         ),
         migrations.AddField(
-            model_name='customer',
-            name='last_spend_update',
+            model_name="customer",
+            name="last_spend_update",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='customer',
-            name='loyalty_level',
-            field=models.CharField(blank=True, choices=[('GOLD', 'Gold'), ('DIAMOND', 'Diamond'), ('PLATINUM', 'Platinum')], max_length=10, null=True),
+            model_name="customer",
+            name="loyalty_level",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("GOLD", "Gold"),
+                    ("DIAMOND", "Diamond"),
+                    ("PLATINUM", "Platinum"),
+                ],
+                max_length=10,
+                null=True,
+            ),
         ),
     ]

@@ -10,89 +10,200 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Category',
+            name="Category",
             fields=[
-                ('category_id', models.AutoField(primary_key=True, serialize=False)),
-                ('category_name', models.CharField(max_length=255)),
+                ("category_id", models.AutoField(primary_key=True, serialize=False)),
+                ("category_name", models.CharField(max_length=255)),
             ],
             options={
-                'db_table': 'categories',
+                "db_table": "categories",
             },
         ),
         migrations.CreateModel(
-            name='Customer',
+            name="Customer",
             fields=[
-                ('customer_id', models.AutoField(primary_key=True, serialize=False)),
-                ('customer_name', models.CharField(max_length=255, validators=[django.core.validators.RegexValidator(message='This field should not contain numbers.', regex='^[^\\d]+$')])),
-                ('contact_name', models.CharField(max_length=255, validators=[django.core.validators.RegexValidator(message='This field should not contain numbers.', regex='^[^\\d]+$')])),
-                ('address', models.CharField(default='', max_length=255, validators=[django.core.validators.MinLengthValidator(3, 'Address must be at least 3 characters long.')])),
-                ('city', models.CharField(blank=True, max_length=100, null=True, validators=[django.core.validators.RegexValidator(message='This field should not contain numbers.', regex='^[^\\d]+$')])),
-                ('postal_code', models.CharField(max_length=20)),
-                ('country', models.CharField(max_length=100, validators=[django.core.validators.RegexValidator(message='This field should not contain numbers.', regex='^[^\\d]+$')])),
-                ('status', models.CharField(choices=[('active', 'Active'), ('inactive', 'Inactive'), ('archived', 'Archived')], default='active', max_length=10)),
-                ('last_activity_date', models.DateTimeField(default=django.utils.timezone.now)),
-                ('archived_date', models.DateTimeField(blank=True, null=True)),
+                ("customer_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "customer_name",
+                    models.CharField(
+                        max_length=255,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="This field should not contain numbers.",
+                                regex="^[^\\d]+$",
+                            )
+                        ],
+                    ),
+                ),
+                (
+                    "contact_name",
+                    models.CharField(
+                        max_length=255,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="This field should not contain numbers.",
+                                regex="^[^\\d]+$",
+                            )
+                        ],
+                    ),
+                ),
+                (
+                    "address",
+                    models.CharField(
+                        default="",
+                        max_length=255,
+                        validators=[
+                            django.core.validators.MinLengthValidator(
+                                3, "Address must be at least 3 characters long."
+                            )
+                        ],
+                    ),
+                ),
+                (
+                    "city",
+                    models.CharField(
+                        blank=True,
+                        max_length=100,
+                        null=True,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="This field should not contain numbers.",
+                                regex="^[^\\d]+$",
+                            )
+                        ],
+                    ),
+                ),
+                ("postal_code", models.CharField(max_length=20)),
+                (
+                    "country",
+                    models.CharField(
+                        max_length=100,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="This field should not contain numbers.",
+                                regex="^[^\\d]+$",
+                            )
+                        ],
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("active", "Active"),
+                            ("inactive", "Inactive"),
+                            ("archived", "Archived"),
+                        ],
+                        default="active",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "last_activity_date",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
+                ("archived_date", models.DateTimeField(blank=True, null=True)),
             ],
             options={
-                'db_table': 'customers',
+                "db_table": "customers",
             },
         ),
         migrations.CreateModel(
-            name='Supplier',
+            name="Supplier",
             fields=[
-                ('supplier_id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=255)),
-                ('contact_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('phone', models.CharField(blank=True, max_length=20, null=True)),
-                ('email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('address', models.CharField(blank=True, max_length=255, null=True)),
-                ('city', models.CharField(blank=True, max_length=100, null=True)),
-                ('country', models.CharField(blank=True, max_length=100, null=True)),
+                ("supplier_id", models.AutoField(primary_key=True, serialize=False)),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "contact_name",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("phone", models.CharField(blank=True, max_length=20, null=True)),
+                ("email", models.EmailField(blank=True, max_length=254, null=True)),
+                ("address", models.CharField(blank=True, max_length=255, null=True)),
+                ("city", models.CharField(blank=True, max_length=100, null=True)),
+                ("country", models.CharField(blank=True, max_length=100, null=True)),
             ],
             options={
-                'db_table': 'suppliers',
+                "db_table": "suppliers",
             },
         ),
         migrations.CreateModel(
-            name='Order',
+            name="Order",
             fields=[
-                ('order_id', models.AutoField(primary_key=True, serialize=False)),
-                ('order_date', models.DateField()),
-                ('customer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to='DjTraders.customer')),
+                ("order_id", models.AutoField(primary_key=True, serialize=False)),
+                ("order_date", models.DateField()),
+                (
+                    "customer",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="orders",
+                        to="DjTraders.customer",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'orders',
+                "db_table": "orders",
             },
         ),
         migrations.CreateModel(
-            name='Product',
+            name="Product",
             fields=[
-                ('product_id', models.AutoField(primary_key=True, serialize=False)),
-                ('product_name', models.CharField(max_length=255)),
-                ('unit', models.CharField(max_length=50)),
-                ('price', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('status', models.CharField(choices=[('active', 'Active'), ('inactive', 'Inactive')], default='active', max_length=15)),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='products', to='DjTraders.category')),
+                ("product_id", models.AutoField(primary_key=True, serialize=False)),
+                ("product_name", models.CharField(max_length=255)),
+                ("unit", models.CharField(max_length=50)),
+                ("price", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("active", "Active"), ("inactive", "Inactive")],
+                        default="active",
+                        max_length=15,
+                    ),
+                ),
+                (
+                    "category",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="products",
+                        to="DjTraders.category",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'products',
+                "db_table": "products",
             },
         ),
         migrations.CreateModel(
-            name='OrderDetail',
+            name="OrderDetail",
             fields=[
-                ('order_detail_id', models.AutoField(primary_key=True, serialize=False)),
-                ('quantity', models.PositiveIntegerField()),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orderdetails', to='DjTraders.order')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orderdetails', to='DjTraders.product')),
+                (
+                    "order_detail_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
+                ("quantity", models.PositiveIntegerField()),
+                (
+                    "order",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="orderdetails",
+                        to="DjTraders.order",
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="orderdetails",
+                        to="DjTraders.product",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'order_details',
+                "db_table": "order_details",
             },
         ),
     ]

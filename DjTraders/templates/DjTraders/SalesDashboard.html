@@ -8,33 +8,43 @@
 {% endblock %}
 
 {% block content %}
-<div class="customer-dashboard">
+<div class="sales-dashboard">
     <div class="page-header">
         <h1>Product Sales Dashboard</h1>
-        <div class="filter-section">
-            <form id="filterForm" method="GET" action="{% url 'DjTraders:SalesDashboard' %}">
-                <div class="filter-group">
-                    <label>Year:</label>
-                    <select name="year" class="year-select">
-                        {% for year in available_years %}
-                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </form>
+        <h2 class="product-name-title">{{ product_name }}</h2>
+<div class="filter-section">
+    <form id="filterForm" method="GET" action="{% url 'DjTraders:SalesDashboard' %}">
+        <div class="filter-group">
+            <label>Year:</label>
+            <select name="year" class="year-select">
+                {% for year in available_years %}
+                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+            
+            <label>Product:</label>
+            <select name="product" class="product-select">
+                <option value="">All Products</option>
+                {% for product in products %}
+                <option value="{{ product.product_id }}" {% if product.product_id == selected_product %}selected{% endif %}>
+                    {{ product.product_name }}
+                </option>
+                {% endfor %}
+            </select>
         </div>
-    </div>
+    </form>
+</div>
 
     <!-- Tabs Navigation -->
-    <div class="customer-dashboard-tabs">
-        <button class="customer-tab-button active" data-tab="tab-annual-overview">Annual Sales Overview</button>
-        <button class="customer-tab-button" data-tab="tab-top-products">Top 10 Products</button>
-        <button class="customer-tab-button" data-tab="tab-bottom-products">Bottom 10 Products</button>
-        <button class="customer-tab-button" data-tab="tab-category-analysis">Category Sales Analysis</button>
+    <div class="sales-dashboard-tabs">
+        <button class="sales-tab-button active" data-tab="tab-annual-overview">Annual Sales Overview</button>
+        <button class="sales-tab-button" data-tab="tab-top-products">Top 10 Products</button>
+        <button class="sales-tab-button" data-tab="tab-bottom-products">Bottom 10 Products</button>
+        <button class="sales-tab-button" data-tab="tab-category-analysis">Category Sales Analysis</button>
     </div>
 
     <!-- Tab Content Sections -->
-    <div id="tab-annual-overview" class="customer-tab-content active">
+    <div id="tab-annual-overview" class="sales-tab-content active">
         <h2>Annual Sales Overview</h2>
         <div class="chart-container">
             <canvas id="annualSalesChart"></canvas>
@@ -61,7 +71,7 @@
         </div>
     </div>
 
-    <div id="tab-top-products" class="customer-tab-content">
+    <div id="tab-top-products" class="sales-tab-content">
         <h2>Top 10 Products by Revenue</h2>
         <div class="chart-container">
             <canvas id="topProductsChart"></canvas>
@@ -90,7 +100,7 @@
         </div>
     </div>
 
-    <div id="tab-bottom-products" class="customer-tab-content">
+    <div id="tab-bottom-products" class="sales-tab-content">
         <h2>Bottom 10 Products by Revenue</h2>
         <div class="chart-container">
             <canvas id="bottomProductsChart"></canvas>
@@ -119,7 +129,7 @@
         </div>
     </div>
 
-    <div id="tab-category-analysis" class="customer-tab-content">
+    <div id="tab-category-analysis" class="sales-tab-content">
         <h2>Category Sales Analysis</h2>
         <div class="chart-container">
             <canvas id="categorySalesChart"></canvas>
@@ -165,9 +175,4 @@
     const categorySalesLabels = {{ category_sales_labels|safe }};
     const categorySalesData = {{ category_sales_data|safe }};
 </script>
-<script>
-    document.querySelector('.year-select').addEventListener('change', function() {
-        this.form.submit();
-    });
-    </script>
 {% endblock %}

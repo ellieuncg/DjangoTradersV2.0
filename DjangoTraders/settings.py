@@ -59,18 +59,18 @@ ROOT_URLCONF = "DjangoTraders.urls"
 # Templates Configuration
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
-            os.path.join(BASE_DIR, 'static', 'templates'),  # Add this line
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
+            os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, "static", "templates"),  # Add this line
         ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -90,9 +90,7 @@ DATABASES = {
         "PASSWORD": "ISM672Python",
         "HOST": "localhost",
         "PORT": "5432",
-        "OPTIONS": {
-            "client_encoding": "UTF8"
-        }
+        "OPTIONS": {"client_encoding": "UTF8"},
     }
 }
 
@@ -115,21 +113,21 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGIN_URL = 'DjTraders:login'
-LOGIN_REDIRECT_URL = 'DjTraders:Index'
-LOGOUT_REDIRECT_URL = 'DjTraders:login'
+LOGIN_URL = "DjTraders:login"
+LOGIN_REDIRECT_URL = "DjTraders:Index"
+LOGOUT_REDIRECT_URL = "DjTraders:login"
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
     },
 }
 

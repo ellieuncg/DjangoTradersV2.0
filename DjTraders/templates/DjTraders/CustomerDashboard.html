@@ -6,7 +6,8 @@
 {% block content %}
 <div class="customer-dashboard">
     <div class="page-header">
-        <h1>{{ customer.customer_name }} Dashboard</h1>
+        <h1>{{ company_name }} Dashboard</h1>
+        <p class="contact-info">Contact: {{ contact_name }}</p>
     </div>
 
     <!-- Tabs Navigation -->
@@ -18,118 +19,124 @@
         <button class="customer-tab-button" data-tab="tab-top-categories">Top Categories by Year</button>
     </div>
 
-    <!-- Tab Content Sections -->
+    <!-- Loyalty Program Tab -->
     <div id="tab-loyalty" class="customer-tab-content active">
         <section class="loyalty-program">
             <h2 class="section-title">Loyalty Program Status</h2>
-            <div class="loyalty-info">
-                <div class="current-status">
-                    <h3>Current Level: {{ loyalty_info.current_level|default:"Not Qualified" }}</h3>
-                    <p>Annual Spend: ${{ loyalty_info.annual_spend|floatformat:2 }}</p>
-                    <p>Current Discount: {{ loyalty_info.discount_percentage }}%</p>
-                    {% if loyalty_info.spend_to_next %}
-                        <p class="next-level-info">
-                            Spend ${{ loyalty_info.spend_to_next|floatformat:2 }} more to reach the next level!
-                        </p>
-                    {% endif %}
+
+            <!-- Loyalty Tiers -->
+            <div class="loyalty-tiers">
+                {% for tier in loyalty_tiers %}
+                <div class="loyalty-tier{% if tier.name == loyalty_info.current_level %} active{% endif %}">
+                    <div class="tier-header">
+                        <h3>{{ tier.name }}</h3>
+                        <span class="tier-threshold">${{ tier.threshold|floatformat:0 }}</span>
+                    </div>
+                    <div class="tier-benefits">
+                        <p>{{ tier.discount }}% Discount</p>
+                    </div>
                 </div>
+                {% endfor %}
+            </div>
+
+            <!-- Status Cards -->
+            <div class="card-grid-loyalty">
+                <div class="status-card level-card">
+                    <i class="fas fa-trophy status-icon"></i>
+                    <div class="status-content">
+                        <h3>Current Level</h3>
+                        <p class="status-value">{{ loyalty_info.current_level }}</p>
+                    </div>
+                </div>
+
+                <div class="status-card spend-card">
+                    <i class="fas fa-dollar-sign status-icon"></i>
+                    <div class="status-content">
+                        <h3>Annual Spend</h3>
+                        <p class="status-value">${{ loyalty_info.annual_spend|floatformat:2 }}</p>
+                        <p class="previous-spend">Previous Year: ${{ previous_year_spend|floatformat:2 }}</p>
+                    </div>
+                </div>
+
+                <div class="status-card discount-card">
+                    <i class="fas fa-percent status-icon"></i>
+                    <div class="status-content">
+                        <h3>Current Discount</h3>
+                        <p class="status-value">{{ loyalty_info.discount_percentage }}%</p>
+                    </div>
+                </div>
+
+                <div class="status-card next-level-card">
+                    <i class="fas fa-arrow-up status-icon"></i>
+                    <div class="status-content">
+                        <h3>Until Next Level</h3>
+                        <p class="status-value">${{ loyalty_info.spend_to_next|floatformat:2 }}</p>
+                        <p class="time-remaining">{{ days_remaining }} days remaining</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="loyalty-progress">
+                    <div class="progress-bar" style="width: {{ progress_percentage }}%"></div>
+                    <div class="progress-markers">
+                        {% for tier in loyalty_tiers %}
+                        <div class="progress-marker" style="left: {{ tier.position }}%">
+                            <span class="marker-label">${{ tier.threshold|floatformat:0 }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <p class="progress-text">{{ progress_percentage }}% progress to next level</p>
+            </div>
+
+            <!-- Transaction History Link -->
+            <div class="loyalty-actions">
+                <a href="{% url 'DjTraders:CustomerTransactions' pk=customer.pk %}" class="action-btn">
+                    <i class="fas fa-history"></i> View Transaction History
+                </a>
             </div>
         </section>
     </div>
 
-    <!-- Annual Sales Analysis -->
+    <!-- Annual Sales Analysis Tab -->
     <div id="tab-annual" class="customer-tab-content">
         <section class="customer-info">
             <h2 class="section-title">Annual Sales Analysis</h2>
-            <canvas id="annualSalesChart"></canvas>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>Revenue</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for year, revenue in annual_data %}
-                    <tr>
-                        <td>{{ year }}</td>
-                        <td>${{ revenue|floatformat:2 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="chart-container">
+                <canvas id="annualSalesChart"></canvas>
+            </div>
         </section>
     </div>
 
-    <!-- Monthly Sales Analysis -->
+    <!-- Monthly Sales Analysis Tab -->
     <div id="tab-monthly" class="customer-tab-content">
         <section class="order-history">
             <h2 class="section-title">Monthly Sales Analysis</h2>
-            <canvas id="monthlySalesChart"></canvas>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Month</th>
-                        <th>Revenue</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for month, revenue in monthly_data %}
-                    <tr>
-                        <td>{{ month }}</td>
-                        <td>${{ revenue|floatformat:2 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="chart-container">
+                <canvas id="monthlySalesChart"></canvas>
+            </div>
         </section>
     </div>
 
-    <!-- Top Products by Year -->
+    <!-- Top Products Tab -->
     <div id="tab-top-products" class="customer-tab-content">
         <section class="order-history">
             <h2 class="section-title">Top Products by Year</h2>
-            <canvas id="topProductsChart"></canvas>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Quantity Sold</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product, quantity in top_products %}
-                    <tr>
-                        <td>{{ product }}</td>
-                        <td>{{ quantity }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="chart-container">
+                <canvas id="topProductsChart"></canvas>
+            </div>
         </section>
     </div>
 
-    <!-- Top Categories by Year -->
+    <!-- Top Categories Tab -->
     <div id="tab-top-categories" class="customer-tab-content">
         <section class="order-history">
             <h2 class="section-title">Top Categories by Year</h2>
-            <canvas id="topCategoriesChart"></canvas>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Quantity Sold</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for category, quantity in top_categories %}
-                    <tr>
-                        <td>{{ category }}</td>
-                        <td>{{ quantity }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="chart-container">
+                <canvas id="topCategoriesChart"></canvas>
+            </div>
         </section>
     </div>
 </div>
@@ -138,7 +145,6 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'scripts/DJTraders.js' %}"></script>
-
 <script>
     const yearlyOrders = {{ yearly_orders|safe }};
     const yearlyRevenue = {{ yearly_revenue|safe }};

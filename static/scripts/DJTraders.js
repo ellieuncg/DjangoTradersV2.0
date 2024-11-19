@@ -2,10 +2,10 @@ console.log("DJTraders.js is loaded and running");
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Document ready in DJTraders.js');
-    setupCustomerDashboardTabs();
+    setupSalesDashboardTabs();
     setupFilterForm();
     // Initialize the default active tab's chart
-    const activeTab = document.querySelector('.customer-tab-button.active');
+    const activeTab = document.querySelector('.sales-tab-button.active');
     if (activeTab) {
         initializeChartForTab(activeTab.dataset.tab);
     }
@@ -13,42 +13,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Set up filter form functionality
 function setupFilterForm() {
-    const filterForm = document.getElementById('customerFilterForm');
+    // Handle sales dashboard filter form
+    const filterForm = document.getElementById('filterForm');
     if (filterForm) {
-        const clearButton = filterForm.querySelector('.btn-clear');
-        const inputs = filterForm.querySelectorAll('input[type="text"], select');
-        const countrySelect = document.getElementById('country');
-
-        if (clearButton) {
-            clearButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log("Clear button clicked");
-                inputs.forEach(input => input.value = '');
-                const letterInput = filterForm.querySelector('input[name="letter"]');
-                if (letterInput) letterInput.remove();
-                filterForm.submit();
-            });
+        const yearSelect = filterForm.querySelector('.year-select');
+        const productSelect = filterForm.querySelector('.product-select');
+        
+        // Handle both year and product selection changes
+        if (yearSelect) {
+            yearSelect.addEventListener('change', () => filterForm.submit());
         }
-
-        if (countrySelect) {
-            countrySelect.addEventListener('change', () => {
-                console.log('Country changed to:', countrySelect.value);
-                filterForm.submit();
-            });
+        if (productSelect) {
+            productSelect.addEventListener('change', () => filterForm.submit());
         }
-    }
-
-    const yearSelect = document.querySelector('.year-select');
-    if (yearSelect) {
-        yearSelect.addEventListener('change', () => {
-            yearSelect.closest('form').submit();
-        });
     }
 }
 
-function setupCustomerDashboardTabs() {
-    const tabButtons = document.querySelectorAll('.customer-tab-button');
-    const tabContents = document.querySelectorAll('.customer-tab-content');
+function setupSalesDashboardTabs() {
+    const tabButtons = document.querySelectorAll('.sales-tab-button');
+    const tabContents = document.querySelectorAll('.sales-tab-content');
 
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -90,18 +73,6 @@ function initializeChartForTab(tabId) {
         case 'tab-category-analysis':
             createCategoryAnalysisChart();
             break;
-        case 'tab-annual':
-            createAnnualChart();
-            break;
-        case 'tab-monthly':
-            createMonthlyChart();
-            break;
-        case 'tab-top-products':
-            createProductsChart();
-            break;
-        case 'tab-top-categories':
-            createCategoriesChart();
-            break;
     }
 }
 
@@ -111,10 +82,6 @@ function getChartIdForTab(tabId) {
         'tab-top-products': 'topProductsChart',
         'tab-bottom-products': 'bottomProductsChart',
         'tab-category-analysis': 'categorySalesChart',
-        'tab-annual': 'annualSalesChart',
-        'tab-monthly': 'monthlySalesChart',
-        'tab-top-products': 'topProductsChart',
-        'tab-top-categories': 'topCategoriesChart'
     };
     return chartIds[tabId];
 }
@@ -201,11 +168,7 @@ function createCategoryAnalysisChart() {
                     'rgba(82, 103, 84, 0.8)',
                     'rgba(103, 82, 84, 0.8)',
                     'rgba(84, 103, 82, 0.8)',
-                    'rgba(123, 82, 84, 0.8)',
-                    'rgba(82, 84, 103, 0.8)',
-                    'rgba(103, 84, 82, 0.8)',
-                    'rgba(84, 82, 103, 0.8)',
-                    'rgba(123, 84, 82, 0.8)'
+                    'rgba(123, 82, 84, 0.8)'
                 ]
             }]
         },
@@ -220,100 +183,17 @@ function createCategoryAnalysisChart() {
     });
 }
 
-// Customer Dashboard Charts
-function createAnnualChart() {
-    const ctx = document.getElementById('annualSalesChart')?.getContext('2d');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: yearlyOrders.map(year => year),
-            datasets: [{
-                label: 'Annual Revenue',
-                data: yearlyRevenue,
-                borderColor: 'rgb(82, 103, 84)',
-                backgroundColor: 'rgba(82, 103, 84, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: getChartOptions('currency')
-    });
-}
-
-function createMonthlyChart() {
-    const ctx = document.getElementById('monthlySalesChart')?.getContext('2d');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: monthlySalesLabels,
-            datasets: [{
-                label: 'Monthly Revenue',
-                data: monthlySalesData,
-                backgroundColor: 'rgba(82, 103, 84, 0.7)',
-                borderColor: 'rgb(82, 103, 84)',
-                borderWidth: 1
-            }]
-        },
-        options: getChartOptions('currency')
-    });
-}
-
-function createProductsChart() {
-    const ctx = document.getElementById('topProductsChart')?.getContext('2d');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: topProductsLabels,
-            datasets: [{
-                label: 'Products Sold',
-                data: topProductsData,
-                backgroundColor: 'rgba(82, 103, 84, 0.7)',
-                borderColor: 'rgb(82, 103, 84)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            ...getChartOptions('units'),
-            indexAxis: 'y'
-        }
-    });
-}
-
-function createCategoriesChart() {
-    const ctx = document.getElementById('topCategoriesChart')?.getContext('2d');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: topCategoriesLabels,
-            datasets: [{
-                data: topCategoriesData,
-                backgroundColor: [
-                    'rgba(82, 103, 84, 0.8)',
-                    'rgba(103, 82, 84, 0.8)',
-                    'rgba(84, 103, 82, 0.8)',
-                    'rgba(123, 82, 84, 0.8)'
-                ]
-            }]
-        },
-        options: getChartOptions('units')
-    });
-}
-
 function getChartOptions(type, title = '') {
     const baseOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'bottom'
+                position: 'bottom',
+                labels: {
+                    boxWidth: 20,
+                    padding: 15
+                }
             },
             title: {
                 display: !!title,
@@ -322,6 +202,14 @@ function getChartOptions(type, title = '') {
                     top: 10,
                     bottom: 10
                 }
+            }
+        },
+        layout: {
+            padding: {
+                top: 10,
+                right: 15,
+                bottom: 20,
+                left: 15
             }
         }
     };

@@ -61,7 +61,8 @@
 
         <div class="card-grid-products">
             {% for product in products %}
-            <div class="card-products {% if product.status == 'inactive' %}inactive{% endif %} {% if product.status == 'archived' %}archived{% endif %}">
+            <div class="card-products {% if product.status == 'active' %}active{% elif product.status == 'inactive' %}inactive{% elif product.status == 'archived' %}archived{% endif %}">
+
                 <h3 class="card-title">{{ product.product_name }}</h3>
                 <div class="card-info">
                     <p><strong>Category:</strong> {{ product.category.category_name }}</p>
