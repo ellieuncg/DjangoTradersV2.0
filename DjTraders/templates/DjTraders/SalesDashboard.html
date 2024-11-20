@@ -12,28 +12,31 @@
     <div class="page-header">
         <h1>Product Sales Dashboard</h1>
         <h2 class="product-name-title">{{ product_name }}</h2>
-<div class="filter-section">
-    <form id="filterForm" method="GET" action="{% url 'DjTraders:SalesDashboard' %}">
-        <div class="filter-group">
-            <label>Year:</label>
-            <select name="year" class="year-select">
-                {% for year in available_years %}
-                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
-                {% endfor %}
-            </select>
-            
-            <label>Product:</label>
-            <select name="product" class="product-select">
-                <option value="">All Products</option>
-                {% for product in products %}
-                <option value="{{ product.product_id }}" {% if product.product_id == selected_product %}selected{% endif %}>
-                    {{ product.product_name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-    </form>
-</div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form id="filterForm" method="GET" action="{% url 'DjTraders:SalesDashboard' %}">
+            <div class="filter-group">
+                <label for="year">Year:</label>
+                <select id="year" name="year" class="year-select">
+                    {% for year in available_years %}
+                    <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="product">Product:</label>
+                <select id="product" name="product" class="product-select">
+                    <option value="">All Products</option>
+                    {% for product in products %}
+                    <option value="{{ product.product_id }}" {% if product.product_id == selected_product %}selected{% endif %}>
+                        {{ product.product_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
 
     <!-- Tabs Navigation -->
     <div class="sales-dashboard-tabs">
@@ -162,17 +165,17 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{% static 'DjTraders/DJTraders.js' %}"></script>
-
-<!-- Define JSON data in HTML template for Chart.js -->
 <script>
-    const annualSalesLabels = {{ annual_sales_labels|safe }};
-    const annualSalesData = {{ annual_sales_data|safe }};
-    const topProductsLabels = {{ top_products_labels|safe }};
-    const topProductsData = {{ top_products_data|safe }};
-    const bottomProductsLabels = {{ bottom_products_labels|safe }};
-    const bottomProductsData = {{ bottom_products_data|safe }};
-    const categorySalesLabels = {{ category_sales_labels|safe }};
-    const categorySalesData = {{ category_sales_data|safe }};
+    const salesDashboardData = {
+        annualSalesLabels: {{ annual_sales_labels|safe }},
+        annualSalesData: {{ annual_sales_data|safe }},
+        topProductsLabels: {{ top_products_labels|safe }},
+        topProductsData: {{ top_products_data|safe }},
+        bottomProductsLabels: {{ bottom_products_labels|safe }},
+        bottomProductsData: {{ bottom_products_data|safe }},
+        categorySalesLabels: {{ category_sales_labels|safe }},
+        categorySalesData: {{ category_sales_data|safe }},
+    };
 </script>
+<script src="{% static 'scripts/DJTraders.js' %}"></script>
 {% endblock %}

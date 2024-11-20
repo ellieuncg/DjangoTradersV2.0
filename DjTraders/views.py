@@ -4,10 +4,9 @@ from django.views.generic import DetailView, ListView, UpdateView
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models.functions import ExtractYear, ExtractMonth
-
-""" from django.db.models import (
+from django.db.models import (
     Count, Sum, F, Avg, Q, ExpressionWrapper, FloatField, DecimalField, Case, When, Value
-) """
+) 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
@@ -29,6 +28,8 @@ def index(request):
 # Check if User is Employee
 def is_employee(user):
     return user.groups.filter(name="Employees").exists()
+
+
 
 
 # Custom Login View
@@ -431,6 +432,11 @@ def SalesDashboard(request):
     category_sales_table_data = []
 
     for category in category_sales:
+        print(f"\nDEBUG: Processing Category")
+        print(f"Category Name: {category['product__category__category_name']}")
+        print(f"Revenue: {category['revenue']}")
+        print(f"Units: {category['units']}")
+        
         category_sales_labels.append(category["product__category__category_name"])
         category_sales_data.append(float(category["revenue"]))
         category_sales_table_data.append(
@@ -445,28 +451,39 @@ def SalesDashboard(request):
         )
 
     context = {
+        # Basic Info
         "available_years": available_years,
         "selected_year": selected_year,
-        "products": products,  # Add this
-        "selected_product": selected_product,  # Add this
+        "products": products,
+        "selected_product": selected_product,
         "product_name": product_name,
+        
         # Annual Sales Data
         "annual_sales_labels": json.dumps(annual_sales_labels),
         "annual_sales_data": json.dumps(annual_sales_data),
         "annual_sales_table_data": annual_sales_table_data,
+        
         # Top Products Data
         "top_products_labels": json.dumps(top_products_labels),
         "top_products_data": json.dumps(top_products_data),
         "top_products_table_data": top_products_table_data,
+        
         # Bottom Products Data
         "bottom_products_labels": json.dumps(bottom_products_labels),
         "bottom_products_data": json.dumps(bottom_products_data),
         "bottom_products_table_data": bottom_products_table_data,
+        
         # Category Sales Data
         "category_sales_labels": json.dumps(category_sales_labels),
         "category_sales_data": json.dumps(category_sales_data),
         "category_sales_table_data": category_sales_table_data,
+        
+        # Chart Data
+        "yearly_orders": json.dumps(annual_sales_labels),
+        "yearly_revenue": json.dumps([float(value) for value in annual_sales_data])
     }
+    
+    print("DEBUG: category_sales_table_data:", category_sales_table_data)
 
     return render(request, "DjTraders/SalesDashboard.html", context)
 
@@ -488,9 +505,9 @@ def CustomerDashboard(request, pk):
     year_end = timezone.datetime(today.year, 12, 31).date()
     days_remaining = (year_end - today).days
 
-    # Calculate previous year's spend
-    last_year_start = today - timezone.timedelta(days=730)  # 2 years ago
-    last_year_end = today - timezone.timedelta(days=365)  # 1 year ago
+    # Previous year's spend
+    last_year_start = today - timezone.timedelta(days=730)
+    last_year_end = today - timezone.timedelta(days=365)
     previous_year_spend = (
         OrderDetail.objects.filter(
             order__customer=customer,
@@ -499,27 +516,6 @@ def CustomerDashboard(request, pk):
         ).aggregate(total=Sum(F("quantity") * F("product__price")))["total"]
         or 0
     )
-
-    # Yearly Orders and Revenue
-    yearly_orders = (
-        Order.objects.filter(customer=customer)
-        .annotate(year=ExtractYear("order_date"))
-        .values("year")
-        .annotate(
-            order_count=Count("order_id"),
-            total_revenue=Sum(
-                F("orderdetails__quantity") * F("orderdetails__product__price")
-            ),
-        )
-        .order_by("-year")
-    )
-
-    # Prepare annual data for template
-    yearly_orders_list = list(yearly_orders)
-    yearly_revenue = [
-        float(order["total_revenue"] or 0) for order in yearly_orders_list
-    ]
-    yearly_orders_labels = [str(order["year"]) for order in yearly_orders_list]
 
     # Monthly Sales Analysis
     monthly_sales = (
@@ -534,16 +530,107 @@ def CustomerDashboard(request, pk):
         .order_by("-year", "-month")
     )
 
-    # Calculate annual spend for loyalty
+    monthly_sales_table_data = list(
+        zip(
+            [f"{sale['year']}-{sale['month']}" for sale in monthly_sales],
+            [float(sale["total_revenue"]) for sale in monthly_sales],
+        )
+    )
+
+    # Annual Sales Analysis
+    base_query = OrderDetail.objects.filter(order__customer=customer)
+
+    annual_sales = (
+        base_query.values("order__order_date__month")
+        .annotate(
+            revenue=Sum(F("quantity") * F("product__price")), 
+            units=Sum("quantity")
+        )
+        .order_by("order__order_date__month")
+    )
+
+    annual_sales_labels = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
+    annual_sales_data = [0] * 12
+
+    for sale in annual_sales:
+        month_index = sale["order__order_date__month"] - 1
+        annual_sales_data[month_index] = float(sale["revenue"])
+
+    annual_sales_table_data = []
+    previous_revenue = None
+    for i, revenue in enumerate(annual_sales_data):
+        growth = 0
+        if previous_revenue and previous_revenue != 0:
+            growth = ((revenue - previous_revenue) / previous_revenue) * 100
+        annual_sales_table_data.append(
+            {"name": annual_sales_labels[i], "revenue": revenue, "growth": growth}
+        )
+        previous_revenue = revenue
+
+    # Top Products by Year
+    top_products = (
+        OrderDetail.objects.filter(order__customer=customer)
+        .values("product__product_name")
+        .annotate(
+            total_quantity=Sum("quantity"),
+            revenue=Sum(F("quantity") * F("product__price"))
+        )
+        .order_by("-revenue")[:10]
+    )
+
+    top_products_labels = [product["product__product_name"] for product in top_products]
+    top_products_data = [float(product["revenue"]) for product in top_products]
+
+    total_revenue = (
+        OrderDetail.objects.filter(order__customer=customer)
+        .aggregate(total=Sum(F("quantity") * F("product__price")))["total"]
+        or 0
+    )
+
+    top_products_table_data = [
+        {
+            "name": product["product__product_name"],
+            "revenue": product["revenue"],
+            "units": product["total_quantity"],
+            "percentage": (product["revenue"] / total_revenue * 100) if total_revenue else 0,
+        }
+        for product in top_products
+    ]
+
+    # Category Analysis
+    category_sales = (
+        OrderDetail.objects.filter(order__customer=customer)
+        .values("product__category__category_name")
+        .annotate(
+            revenue=Sum(F("quantity") * F("product__price")),
+            units=Sum("quantity")
+        )
+        .order_by("-revenue")
+    )
+
+    category_sales_table_data = [
+        {
+            "name": category["product__category__category_name"],
+            "revenue": category["revenue"],
+            "units": category["units"],
+            "percentage": (category["revenue"] / total_revenue * 100) if total_revenue else 0,
+        }
+        for category in category_sales
+    ]
+
+    # Calculate loyalty program progress
     one_year_ago = timezone.now().date() - timezone.timedelta(days=365)
     annual_spend = (
         OrderDetail.objects.filter(
-            order__customer=customer, order__order_date__gte=one_year_ago
+            order__customer=customer,
+            order__order_date__gte=one_year_ago
         ).aggregate(total=Sum(F("quantity") * F("product__price")))["total"]
         or 0
     )
 
-    # Loyalty info calculation
     loyalty_info = {
         "current_level": customer.loyalty_level or "Not Qualified",
         "annual_spend": float(annual_spend),
@@ -551,49 +638,52 @@ def CustomerDashboard(request, pk):
         "spend_to_next": float(customer.get_spend_to_next_level() or 0),
     }
 
-    # Calculate progress percentage
     next_level_spend = customer.get_spend_to_next_level()
     if next_level_spend and next_level_spend > 0:
         progress_percentage = min(
-            (float(annual_spend) / (float(annual_spend) + float(next_level_spend)))
-            * 100,
+            (float(annual_spend) / (float(annual_spend) + float(next_level_spend))) * 100,
             100,
         )
     else:
         progress_percentage = 100
 
-    # Top Products
-    top_products = (
-        OrderDetail.objects.filter(order__customer=customer)
-        .values("product__product_name")
-        .annotate(total_quantity=Sum("quantity"))
-        .order_by("-total_quantity")[:10]
-    )
-
-    # Prepare context data
+    # Context for rendering
     context = {
+        # Basic Info
         "customer": customer,
         "company_name": customer.customer_name,
         "contact_name": customer.contact_name,
+        
+        # Loyalty Program Info
         "loyalty_info": loyalty_info,
         "loyalty_tiers": loyalty_tiers,
         "progress_percentage": round(progress_percentage, 1),
         "days_remaining": days_remaining,
-        "previous_year_spend": previous_year_spend,
-        "yearly_orders": json.dumps(yearly_orders_labels),
-        "yearly_revenue": json.dumps(yearly_revenue),
-        "monthly_sales_labels": json.dumps(
-            [f"{sale['year']}-{sale['month']}" for sale in monthly_sales]
-        ),
-        "monthly_sales_data": json.dumps(
-            [float(sale["total_revenue"]) for sale in monthly_sales]
-        ),
-        "top_products_labels": json.dumps(
-            [item["product__product_name"] for item in top_products]
-        ),
-        "top_products_data": json.dumps(
-            [item["total_quantity"] for item in top_products]
-        ),
+        "previous_year_spend": float(previous_year_spend),
+        
+        # Monthly Sales Data
+        "monthly_sales_labels": json.dumps([f"{sale['year']}-{sale['month']}" for sale in monthly_sales]),
+        "monthly_sales_data": json.dumps([float(sale["total_revenue"]) for sale in monthly_sales]),
+        "monthly_sales_table_data": monthly_sales_table_data,
+        
+        # Annual Sales Data
+        "annual_sales_labels": json.dumps(annual_sales_labels),
+        "annual_sales_data": json.dumps([float(value) for value in annual_sales_data]),
+        "annual_sales_table_data": annual_sales_table_data,
+        
+        # Top Products Data
+        "top_products_labels": json.dumps(top_products_labels),
+        "top_products_data": json.dumps(top_products_data),
+        "top_products_table_data": top_products_table_data,
+        
+        # Category Sales Data
+        "category_sales_table_data": category_sales_table_data,
+        "top_categories_labels": json.dumps([category["name"] for category in category_sales_table_data]),
+        "top_categories_data": json.dumps([float(category["revenue"]) for category in category_sales_table_data]),
+        
+        # Chart Data
+        "yearly_orders": json.dumps(annual_sales_labels),
+        "yearly_revenue": json.dumps([float(value) for value in annual_sales_data])
     }
 
     return render(request, "DjTraders/CustomerDashboard.html", context)

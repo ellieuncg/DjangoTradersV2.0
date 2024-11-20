@@ -1739,3 +1739,11 @@ select.form-control {
         overflow-x: auto;
     }
 }
+
+.sales-tab-content {
+    display: none; /* Hide all tab content by default */
+}
+
+.sales-tab-content.active {
+    display: block; /* Show only active tab content */
+}

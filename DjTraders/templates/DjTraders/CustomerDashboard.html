@@ -23,8 +23,6 @@
     <div id="tab-loyalty" class="customer-tab-content active">
         <section class="loyalty-program">
             <h2 class="section-title">Loyalty Program Status</h2>
-
-            <!-- Loyalty Tiers -->
             <div class="loyalty-tiers">
                 {% for tier in loyalty_tiers %}
                 <div class="loyalty-tier{% if tier.name == loyalty_info.current_level %} active{% endif %}">
@@ -38,8 +36,6 @@
                 </div>
                 {% endfor %}
             </div>
-
-            <!-- Status Cards -->
             <div class="card-grid-loyalty">
                 <div class="status-card level-card">
                     <i class="fas fa-trophy status-icon"></i>
@@ -48,7 +44,6 @@
                         <p class="status-value">{{ loyalty_info.current_level }}</p>
                     </div>
                 </div>
-
                 <div class="status-card spend-card">
                     <i class="fas fa-dollar-sign status-icon"></i>
                     <div class="status-content">
@@ -57,7 +52,6 @@
                         <p class="previous-spend">Previous Year: ${{ previous_year_spend|floatformat:2 }}</p>
                     </div>
                 </div>
-
                 <div class="status-card discount-card">
                     <i class="fas fa-percent status-icon"></i>
                     <div class="status-content">
@@ -65,7 +59,6 @@
                         <p class="status-value">{{ loyalty_info.discount_percentage }}%</p>
                     </div>
                 </div>
-
                 <div class="status-card next-level-card">
                     <i class="fas fa-arrow-up status-icon"></i>
                     <div class="status-content">
@@ -75,8 +68,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Progress Bar -->
             <div class="progress-container">
                 <div class="loyalty-progress">
                     <div class="progress-bar" style="width: {{ progress_percentage }}%"></div>
@@ -90,13 +81,6 @@
                 </div>
                 <p class="progress-text">{{ progress_percentage }}% progress to next level</p>
             </div>
-
-            <!-- Transaction History Link -->
-            <div class="loyalty-actions">
-                <a href="{% url 'DjTraders:CustomerTransactions' pk=customer.pk %}" class="action-btn">
-                    <i class="fas fa-history"></i> View Transaction History
-                </a>
-            </div>
         </section>
     </div>
 
@@ -107,6 +91,24 @@
             <div class="chart-container">
                 <canvas id="annualSalesChart"></canvas>
             </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Revenue</th>
+                        <th>Growth (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for month in annual_sales_table_data %}
+                    <tr>
+                        <td>{{ month.name }}</td>
+                        <td>${{ month.revenue|floatformat:2 }}</td>
+                        <td>{{ month.growth|floatformat:2 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </section>
     </div>
 
@@ -117,6 +119,22 @@
             <div class="chart-container">
                 <canvas id="monthlySalesChart"></canvas>
             </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Month-Year</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for label, data in monthly_sales_table_data %}
+                    <tr>
+                        <td>{{ label }}</td>
+                        <td>${{ data|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </section>
     </div>
 
@@ -127,6 +145,26 @@
             <div class="chart-container">
                 <canvas id="topProductsChart"></canvas>
             </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Revenue</th>
+                        <th>Units Sold</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in top_products_table_data %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>${{ product.revenue|floatformat:2 }}</td>
+                        <td>{{ product.units }}</td>
+                        <td>{{ product.percentage|floatformat:2 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </section>
     </div>
 
@@ -137,6 +175,26 @@
             <div class="chart-container">
                 <canvas id="topCategoriesChart"></canvas>
             </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Revenue</th>
+                        <th>Units Sold</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in category_sales_table_data %}
+                    <tr>
+                        <td>{{ category.name }}</td>
+                        <td>${{ category.revenue|floatformat:2 }}</td>
+                        <td>{{ category.units }}</td>
+                        <td>{{ category.percentage|floatformat:2 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </section>
     </div>
 </div>
@@ -144,8 +202,13 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{% static 'scripts/DJTraders.js' %}"></script>
 <script>
+    // Debug data availability
+    console.log("Data check:");
+    console.log("Yearly Orders:", {{ yearly_orders|safe }});
+    console.log("Yearly Revenue:", {{ yearly_revenue|safe }});
+    
+    // Define variables
     const yearlyOrders = {{ yearly_orders|safe }};
     const yearlyRevenue = {{ yearly_revenue|safe }};
     const monthlySalesLabels = {{ monthly_sales_labels|safe }};
@@ -155,4 +218,5 @@
     const topCategoriesLabels = {{ top_categories_labels|safe }};
     const topCategoriesData = {{ top_categories_data|safe }};
 </script>
+<script src="{% static 'scripts/DJTraders.js' %}"></script>
 {% endblock %}
