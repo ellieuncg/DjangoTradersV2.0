@@ -4,21 +4,22 @@
 document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM Loaded');
 
-    // Fetch customer dashboard data
-    fetchCustomerDashboardData()
-        .then(data => {
-            // Initialize Customer Dashboard
-            initializeCustomerDashboard(data);
+    // Assume `salesDashboardData` is injected via the Django template
+    if (typeof salesDashboardData !== "undefined") {
+        initializeSalesDashboard(salesDashboardData);
+    } else {
+        console.error("Sales dashboard data not found.");
+    }
 
-            // Initialize Sales Dashboard
-            initializeSalesDashboard();
-        })
+    // Fetch customer dashboard data (if required)
+    fetchCustomerDashboardData()
+        .then(data => initializeCustomerDashboard(data))
         .catch(error => {
             console.error('Error fetching customer dashboard data:', error);
-            // Display an error message or fallback content
             handleCustomerDashboardError();
         });
 });
+
 
 function fetchCustomerDashboardData() {
     // Replace this with your actual data fetching logic
@@ -246,10 +247,35 @@ function createTopCategoriesYearChart(customerDashboardData) {
 /* ==========================================================================
    SALES DASHBOARD
 ========================================================================== */
-function initializeSalesDashboard() {
-    // Initialize sales dashboard tabs and charts
-    setupSalesDashboardTabs();
+function initializeSalesDashboard(data) {
+    console.log("Initializing Sales Dashboard", data);
+
+    const tabButtons = document.querySelectorAll(".sales-tab-button");
+    const tabContents = document.querySelectorAll(".sales-tab-content");
+
+    tabButtons.forEach((button, index) => {
+        button.addEventListener("click", () => {
+            // Toggle Active Tab
+            tabButtons.forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+
+            // Toggle Active Content
+            tabContents.forEach((content) => content.classList.remove("active"));
+            tabContents[index].classList.add("active");
+
+            // Render Charts
+            if (index === 0) createChart("line", "annualSalesChart", data.annualSalesLabels, data.annualSalesData, "Annual Sales Overview");
+            else if (index === 1) createChart("bar", "monthlySalesChart", data.monthlySalesLabels, data.monthlySalesData, "Monthly Sales Analysis");
+            else if (index === 2) createChart("bar", "topProductsChart", data.topProductsLabels, data.topProductsData, "Top 10 Products");
+            else if (index === 3) createChart("bar", "bottomProductsChart", data.bottomProductsLabels, data.bottomProductsData, "Bottom 10 Products");
+            else if (index === 4) createChart("pie", "categorySalesChart", data.categorySalesLabels, data.categorySalesData, "Category Sales Analysis");
+        });
+    });
+
+    // Initialize First Chart
+    createChart("line", "annualSalesChart", data.annualSalesLabels, data.annualSalesData, "Annual Sales Overview");
 }
+
 
 function setupSalesDashboardTabs() {
     const salesTabButtons = document.querySelectorAll(".sales-tab-button");
@@ -676,6 +702,34 @@ function createCategorySalesChart() {
     });
 }
 
+function createChart(type, canvasId, labels, data, title) {
+    const ctx = document.getElementById(canvasId)?.getContext("2d");
+    if (!ctx) return;
+
+    new Chart(ctx, {
+        type,
+        data: {
+            labels,
+            datasets: [{
+                label: title,
+                data,
+                backgroundColor: type === "pie" ? ["#526754", "#BC984E", "#F5F2EA", "#23645C"] : "#BC984E",
+                borderColor: "#526754",
+                borderWidth: 1,
+            }],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: "top" },
+                title: { display: true, text: title }
+            },
+            scales: type === "pie" ? {} : {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
 
 
 /* ==========================================================================

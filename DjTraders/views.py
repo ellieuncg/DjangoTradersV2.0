@@ -16,6 +16,24 @@ from .forms import CustomerForm, ProductForm
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from itertools import zip_longest
+from django.db.models import Sum, Count
+from django.http import JsonResponse
+from django.shortcuts import render
+import json
+from .models import Order, Product, Category
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Sum, F, Count
+from django.utils import timezone
+from django.db.models.functions import ExtractYear
+from .models import Order, Product, OrderDetail, Category
+from django.utils.timezone import now
+from django.contrib.auth import authenticate
+
+from django.urls import clear_url_caches
+clear_url_caches()
 
 logger = logging.getLogger(__name__)
 
@@ -27,24 +45,44 @@ def index(request):
 
 # Check if User is Employee
 def is_employee(user):
-    return user.groups.filter(name="Employees").exists()
+    result = user.groups.filter(name="Employees").exists()
+    print(f"\nDEBUG IS_EMPLOYEE CHECK")
+    print(f"User: {user.username}")
+    print(f"Result: {result}")
+    print(f"Groups: {[g.name for g in user.groups.all()]}")
+    return result
 
-
-
-
-# Custom Login View
 def custom_login_view(request):
+    # First, check if user is already authenticated
+    print("\nDEBUG LOGIN VIEW")
+    print(f"User is authenticated: {request.user.is_authenticated}")
+    if request.user.is_authenticated:
+        print(f"Current user: {request.user.username}")
+        print(f"Groups: {[g.name for g in request.user.groups.all()]}")
+        print(f"Is superuser: {request.user.is_superuser}")
+
     if request.method == "POST":
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
             login(request, user)
-            if user.groups.filter(name="Employees").exists():
-                return redirect("DjTraders:SalesDashboard")
-            return redirect("DjTraders:Index")
-    else:
-        form = AuthenticationForm()
-    return render(request, "DjTraders/login.html", {"form": form})
+            next_url = request.GET.get('next')
+            print(f"Login successful for {username}")
+            print(f"Next URL: {next_url}")
+            print(f"Groups: {[g.name for g in user.groups.all()]}")
+            print(f"Is superuser: {user.is_superuser}")
+            
+            if next_url and next_url.startswith('/sales/dashboard/'):
+                return redirect('DjTraders:SalesDashboard')
+            elif user.groups.filter(name='Employees').exists():
+                return redirect('DjTraders:SalesDashboard')
+            return redirect('DjTraders:Index')
+        else:
+            messages.error(request, "Invalid username or password.")
+    
+    return render(request, "DjTraders/login.html")
 
 class DjTradersProductsView(ListView):
     model = Product
@@ -288,9 +326,24 @@ def update_customer_status(request, pk):
 
 
 # Sales Dashboard View
-@login_required
-@user_passes_test(is_employee)
+
+
+# Helper functions
+def is_employee(user):
+    return user.groups.filter(name="Employees").exists()  
+
+# Sales Dashboard View
+@login_required(login_url='DjTraders:login')  # Specify the login URL
+@user_passes_test(is_employee, login_url='DjTraders:login')
 def SalesDashboard(request):
+    # Add debug prints
+    print("\nDEBUG SALES DASHBOARD ACCESS")
+    print(f"User: {request.user.username}")
+    print(f"Authenticated: {request.user.is_authenticated}")
+    print(f"Groups: {[g.name for g in request.user.groups.all()]}")
+    print(f"Is employee check: {is_employee(request.user)}")
+    
+    # Rest of your code...
     # Get available years and selected year
     years_query = (
         Order.objects.annotate(year=ExtractYear("order_date"))
@@ -464,11 +517,6 @@ def SalesDashboard(request):
     category_sales_table_data = []
 
     for category in category_sales:
-        print(f"\nDEBUG: Processing Category")
-        print(f"Category Name: {category['product__category__category_name']}")
-        print(f"Revenue: {category['revenue']}")
-        print(f"Units: {category['units']}")
-        
         category_sales_labels.append(category["product__category__category_name"])
         category_sales_data.append(float(category["revenue"]))
         category_sales_table_data.append(
@@ -509,13 +557,7 @@ def SalesDashboard(request):
         "category_sales_labels": json.dumps(category_sales_labels),
         "category_sales_data": json.dumps(category_sales_data),
         "category_sales_table_data": category_sales_table_data,
-        
-        # Chart Data
-        "yearly_orders": json.dumps(annual_sales_labels),
-        "yearly_revenue": json.dumps([float(value) for value in annual_sales_data])
     }
-    
-    print("DEBUG: category_sales_table_data:", category_sales_table_data)
 
     return render(request, "DjTraders/SalesDashboard.html", context)
 

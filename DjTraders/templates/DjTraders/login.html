@@ -1,47 +1,43 @@
 {% extends "base.html" %}
 {% load static %}
-
-{% block title %}Login - Django Traders{% endblock %}
-
 {% block content %}
+
 <div class="page-header">
     <h1>Login</h1>
 </div>
 
 <div class="customer-detail-page">
-    <section class="customer-info">
+    <div class="section customer-info">
         <h2 class="section-title">Please Sign In</h2>
-        
+
         <div class="customer-info-section">
-            <form method="post" action="{% url 'DjTraders:login' %}">
+            <form method="POST" action="">
                 {% csrf_token %}
-                {% if form.errors %}
-                <div class="alert alert-danger">
-                    Your username and password didn't match. Please try again.
-                </div>
-                {% endif %}
-
-                {% if next %}
-                    <input type="hidden" name="next" value="{{ next }}">
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 {% endif %}
 
                 <div class="mb-3">
-                    <label for="id_username" class="form-label">Username:</label>
-                    <input type="text" name="username" id="id_username" class="form-control" required>
+                    <label for="username">Username:</label>
+                    <input type="text" name="username" id="username" required>
                 </div>
 
                 <div class="mb-3">
-                    <label for="id_password" class="form-label">Password:</label>
-                    <input type="password" name="password" id="id_password" class="form-control" required>
+                    <label for="password">Password:</label>
+                    <input type="password" name="password" id="password" required>
                 </div>
 
                 <div class="button-group">
-                    <button type="submit" class="action-btn btn-edit">
-                        <i class="fas fa-sign-in-alt"></i> Login
-                    </button>
+                    <button type="submit" class="btn btn-primary">Login</button>
                 </div>
             </form>
         </div>
-    </section>
+    </div>
 </div>
+
 {% endblock %}

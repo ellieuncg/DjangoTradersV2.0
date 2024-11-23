@@ -1,120 +1,71 @@
-{% extends "base.html" %}
+{% extends "base.html" %} 
 {% load static %}
-
 {% block title %}Product Sales Dashboard{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'DjTraders/dashboard.css' %}">
-{% endblock %}
-
+{% block extra_css %}{% endblock %}
 {% block content %}
+
 <div class="sales-dashboard">
-    <div class="page-header">
+    <header class="page-header">
         <h1>Product Sales Dashboard</h1>
-        <h2 class="product-name-title">{{ product_name }}</h2>
-        
-        <!-- Filter Section -->
+        <h2 id="product_name" class="product-name-title">{{ product_name }}</h2>
+
         <div class="filter-section">
-            <form id="filterForm" method="GET">
-                <div class="filter-group">
-                    <div class="filter-item">
-                        <label for="year">Year:</label>
-                        <select id="year" name="year" class="year-select">
-                            {% for year in available_years %}
-                                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="filter-item">
-                        <label for="product">Product:</label>
-                        <select id="product" name="product" class="product-select">
-                            <option value="">All Products</option>
-                            {% for product in products %}
-                                <option value="{{ product.product_id }}" {% if product.product_id|stringformat:"s" == selected_product %}selected{% endif %}>
-                                    {{ product.product_name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <button type="submit" class="filter-button">Apply Filters</button>
+            <div class="filter-group">
+                <div class="filter-item">
+                    <label for="year">Year:</label>
+                    <select name="year" id="year">
+                        {% for year in available_years %}
+                            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-            </form>
+
+                <div class="filter-item">
+                    <label for="product">Product:</label>
+                    <select name="product" id="product">
+                        <option value="">All Products</option>
+                        {% for product in products %}
+                            <option value="{{ product.product_id }}" {% if product.product_id == selected_product %}selected{% endif %}>
+                                {{ product.product_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="button" class="btn btn-primary" id="applyFilters">Apply Filters</button>
+            </div>
         </div>
-    </div>
+    </header>
 
-    {% if debug %}
-    <!-- Debug Information -->
-    <div class="debug-info">
-        <p>Selected Year: {{ selected_year }}</p>
-        <p>Selected Product: {{ selected_product }}</p>
-        <p>Product Name: {{ product_name }}</p>
-        <p>Available Products: {{ products|length }}</p>
-    </div>
-    {% endif %}
-
-    <!-- Tabs Navigation -->
     <div class="sales-dashboard-tabs">
-        <button class="sales-tab-button active" data-tab="tab-annual-overview">
-            Annual Sales Overview
-        </button>
-        <button class="sales-tab-button" data-tab="tab-monthly-analysis">
-            Monthly Analysis
-        </button>
-        <button class="sales-tab-button" data-tab="tab-top-products">
-            Top 10 Products
-        </button>
-        <button class="sales-tab-button" data-tab="tab-bottom-products">
-            Bottom 10 Products
-        </button>
-        <button class="sales-tab-button" data-tab="tab-category-analysis">
-            Category Sales Analysis
-        </button>
+        <button class="sales-tab-button active" data-tab="tab-annual-overview">Annual Sales Overview</button>
+        <button class="sales-tab-button" data-tab="tab-monthly-analysis">Monthly Analysis</button>
+        <button class="sales-tab-button" data-tab="tab-top-products">Top 10 Products</button>
+        <button class="sales-tab-button" data-tab="tab-bottom-products">Bottom 10 Products</button>
+        <button class="sales-tab-button" data-tab="tab-category-analysis">Category Sales Analysis</button>
     </div>
 
-    <!-- Tab Content Sections -->
     <div class="sales-dashboard-content">
-        <!-- Annual Overview Tab -->
         <div id="tab-annual-overview" class="sales-tab-content active">
             <h2>Annual Sales Overview</h2>
-            <!-- KPI Summary Cards -->
-            <div class="kpi-summary">
-                <div class="kpi-card">
-                    <h3>Total Orders</h3>
-                    <p>{{ annual_orders_total }}</p>
-                </div>
-                <div class="kpi-card">
-                    <h3>Products Sold</h3>
-                    <p>{{ annual_products_total }}</p>
-                </div>
-                <div class="kpi-card">
-                    <h3>Total Revenue</h3>
-                    <p>${{ annual_revenue_total|floatformat:2 }}</p>
-                </div>
-            </div>
             <div class="chart-container">
                 <canvas id="annualSalesChart"></canvas>
             </div>
-            <div class="sales-data-table-container">
-                <table class="sales-data-table">
+            <div class="table-container">
+                <table class="min-w-full bg-white">
                     <thead>
                         <tr>
-                            <th>Period</th>
-                            <th>Orders</th>
-                            <th>Products</th>
-                            <th>Revenue</th>
-                            <th>Growth (%)</th>
+                            <th class="px-4 py-2">Month</th>
+                            <th class="px-4 py-2">Revenue</th>
+                            <th class="px-4 py-2">Growth</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in annual_sales_table_data %}
+                        {% for data in annual_sales_table_data %}
                         <tr>
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.orders }}</td>
-                            <td>{{ item.products }}</td>
-                            <td>${{ item.revenue|floatformat:2 }}</td>
-                            <td>{{ item.growth|floatformat:1 }}%</td>
+                            <td class="border px-4 py-2">{{ data.name }}</td>
+                            <td class="border px-4 py-2">${{ data.revenue|floatformat:2 }}</td>
+                            <td class="border px-4 py-2">{{ data.growth|floatformat:1 }}%</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -122,33 +73,26 @@
             </div>
         </div>
 
-        <!-- Monthly Analysis Tab -->
         <div id="tab-monthly-analysis" class="sales-tab-content">
             <h2>Monthly Sales Analysis</h2>
             <div class="chart-container">
                 <canvas id="monthlySalesChart"></canvas>
             </div>
-            <div class="sales-data-table-container">
-                <table class="sales-data-table">
+            <div class="table-container">
+                <table class="min-w-full bg-white">
                     <thead>
                         <tr>
-                            <th>Month</th>
-                            <th>Orders</th>
-                            <th>Products</th>
-                            <th>Revenue</th>
-                            <th>Avg Revenue</th>
-                            <th>Growth (%)</th>
+                            <th class="px-4 py-2">Month</th>
+                            <th class="px-4 py-2">Revenue</th>
+                            <th class="px-4 py-2">Growth</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in monthly_sales_table_data %}
+                        {% for data in annual_sales_table_data %}
                         <tr>
-                            <td>{{ item.month }}</td>
-                            <td>{{ item.orders }}</td>
-                            <td>{{ item.products }}</td>
-                            <td>${{ item.revenue|floatformat:2 }}</td>
-                            <td>${{ item.avg_revenue|floatformat:2 }}</td>
-                            <td>{{ item.growth|floatformat:1 }}%</td>
+                            <td class="border px-4 py-2">{{ data.name }}</td>
+                            <td class="border px-4 py-2">${{ data.revenue|floatformat:2 }}</td>
+                            <td class="border px-4 py-2">{{ data.growth|floatformat:1 }}%</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -156,29 +100,28 @@
             </div>
         </div>
 
-        <!-- Top Products Tab -->
         <div id="tab-top-products" class="sales-tab-content">
-            <h2>Top 10 Products by Revenue</h2>
+            <h2>Top 10 Products</h2>
             <div class="chart-container">
                 <canvas id="topProductsChart"></canvas>
             </div>
-            <div class="sales-data-table-container">
-                <table class="sales-data-table">
+            <div class="table-container">
+                <table class="min-w-full bg-white">
                     <thead>
                         <tr>
-                            <th>Product</th>
-                            <th>Revenue</th>
-                            <th>Units Sold</th>
-                            <th>% of Total</th>
+                            <th class="px-4 py-2">Product</th>
+                            <th class="px-4 py-2">Revenue</th>
+                            <th class="px-4 py-2">Units</th>
+                            <th class="px-4 py-2">% of Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for product in top_products_table_data %}
                         <tr>
-                            <td>{{ product.name }}</td>
-                            <td>${{ product.revenue|floatformat:2 }}</td>
-                            <td>{{ product.units }}</td>
-                            <td>{{ product.percentage|floatformat:1 }}%</td>
+                            <td class="border px-4 py-2">{{ product.name }}</td>
+                            <td class="border px-4 py-2">${{ product.revenue|floatformat:2 }}</td>
+                            <td class="border px-4 py-2">{{ product.units }}</td>
+                            <td class="border px-4 py-2">{{ product.percentage|floatformat:1 }}%</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -186,29 +129,28 @@
             </div>
         </div>
 
-        <!-- Bottom Products Tab -->
         <div id="tab-bottom-products" class="sales-tab-content">
-            <h2>Bottom 10 Products by Revenue</h2>
+            <h2>Bottom 10 Products</h2>
             <div class="chart-container">
                 <canvas id="bottomProductsChart"></canvas>
             </div>
-            <div class="sales-data-table-container">
-                <table class="sales-data-table">
+            <div class="table-container">
+                <table class="min-w-full bg-white">
                     <thead>
                         <tr>
-                            <th>Product</th>
-                            <th>Revenue</th>
-                            <th>Units Sold</th>
-                            <th>% of Total</th>
+                            <th class="px-4 py-2">Product</th>
+                            <th class="px-4 py-2">Revenue</th>
+                            <th class="px-4 py-2">Units</th>
+                            <th class="px-4 py-2">% of Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for product in bottom_products_table_data %}
                         <tr>
-                            <td>{{ product.name }}</td>
-                            <td>${{ product.revenue|floatformat:2 }}</td>
-                            <td>{{ product.units }}</td>
-                            <td>{{ product.percentage|floatformat:1 }}%</td>
+                            <td class="border px-4 py-2">{{ product.name }}</td>
+                            <td class="border px-4 py-2">${{ product.revenue|floatformat:2 }}</td>
+                            <td class="border px-4 py-2">{{ product.units }}</td>
+                            <td class="border px-4 py-2">{{ product.percentage|floatformat:1 }}%</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -216,29 +158,28 @@
             </div>
         </div>
 
-        <!-- Category Analysis Tab -->
         <div id="tab-category-analysis" class="sales-tab-content">
             <h2>Category Sales Analysis</h2>
             <div class="chart-container">
                 <canvas id="categorySalesChart"></canvas>
             </div>
-            <div class="sales-data-table-container">
-                <table class="sales-data-table">
+            <div class="table-container">
+                <table class="min-w-full bg-white">
                     <thead>
                         <tr>
-                            <th>Category</th>
-                            <th>Revenue</th>
-                            <th>Units Sold</th>
-                            <th>% of Total</th>
+                            <th class="px-4 py-2">Category</th>
+                            <th class="px-4 py-2">Revenue</th>
+                            <th class="px-4 py-2">Units</th>
+                            <th class="px-4 py-2">% of Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for category in category_sales_table_data %}
                         <tr>
-                            <td>{{ category.name }}</td>
-                            <td>${{ category.revenue|floatformat:2 }}</td>
-                            <td>{{ category.units }}</td>
-                            <td>{{ category.percentage|floatformat:1 }}%</td>
+                            <td class="border px-4 py-2">{{ category.name }}</td>
+                            <td class="border px-4 py-2">${{ category.revenue|floatformat:2 }}</td>
+                            <td class="border px-4 py-2">{{ category.units }}</td>
+                            <td class="border px-4 py-2">{{ category.percentage|floatformat:1 }}%</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -247,27 +188,18 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
+<!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Pass dashboard data to JavaScript -->
 <script>
-    console.log('Chart.js loaded:', typeof Chart !== 'undefined');
-    
     const salesDashboardData = {
         annualSalesLabels: {{ annual_sales_labels|safe }},
-        annualSalesData: {
-            revenue: {{ annual_sales_data|safe }},
-            orders: {{ annual_orders_data|safe }},
-            products: {{ annual_products_data|safe }}
-        },
-        monthlySalesLabels: {{ monthly_sales_labels|safe }},
-        monthlySalesData: {
-            revenue: {{ monthly_sales_data|safe }},
-            orders: {{ monthly_orders_data|safe }},
-            products: {{ monthly_products_data|safe }},
-            average: {{ monthly_average_data|safe }}
-        },
+        annualSalesData: {{ annual_sales_data|safe }},
         topProductsLabels: {{ top_products_labels|safe }},
         topProductsData: {{ top_products_data|safe }},
         bottomProductsLabels: {{ bottom_products_labels|safe }},
@@ -275,16 +207,8 @@
         categorySalesLabels: {{ category_sales_labels|safe }},
         categorySalesData: {{ category_sales_data|safe }}
     };
-    console.log('Sales data loaded:', {
-        hasLabels: !!salesDashboardData.annualSalesLabels,
-        hasRevenue: !!salesDashboardData.annualSalesData?.revenue,
-        hasOrders: !!salesDashboardData.annualSalesData?.orders,
-        hasProducts: !!salesDashboardData.annualSalesData?.products
-    });
 </script>
-<script>
-    // Add this right after your salesDashboardData declaration
-    console.log('Loaded data:', salesDashboardData);
-</script>
-<script src="{% static 'scripts/DJTraders.js' %}"></script>
+
+<!-- Include your custom JavaScript -->
+<script src="{% static 'js/DJTraders.js' %}"></script>
 {% endblock %}
