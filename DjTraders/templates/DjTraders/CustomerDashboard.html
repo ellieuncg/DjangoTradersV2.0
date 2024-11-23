@@ -12,15 +12,15 @@
 
     <!-- Tabs Navigation -->
     <div class="customer-dashboard-tabs">
-        <button class="customer-tab-button active" data-tab="tab-loyalty">Loyalty Program Status</button>
-        <button class="customer-tab-button" data-tab="tab-annual">Annual Sales Analysis</button>
-        <button class="customer-tab-button" data-tab="tab-monthly">Monthly Sales Analysis</button>
-        <button class="customer-tab-button" data-tab="tab-top-products">Top Products by Year</button>
-        <button class="customer-tab-button" data-tab="tab-top-categories">Top Categories by Year</button>
+        <button class="customer-tab-button" data-tab="loyalty-tab">Loyalty Program Status</button>
+        <button class="customer-tab-button" data-tab="annual-tab">Annual Sales Analysis</button>
+        <button class="customer-tab-button" data-tab="monthly-tab">Monthly Sales Analysis</button>
+        <button class="customer-tab-button" data-tab="top-products-tab">Top Products by Year</button>
+        <button class="customer-tab-button" data-tab="top-categories-tab">Top Categories by Year</button>
     </div>
 
     <!-- Loyalty Program Tab -->
-    <div id="tab-loyalty" class="customer-tab-content active">
+    <div id="loyalty-tab" class="customer-tab-content active">
         <section class="loyalty-program">
             <h2 class="section-title">Loyalty Program Status</h2>
             <div class="loyalty-tiers">
@@ -85,7 +85,7 @@
     </div>
 
     <!-- Annual Sales Analysis Tab -->
-    <div id="tab-annual" class="customer-tab-content">
+    <div id="annual-tab" class="customer-tab-content">
         <section class="customer-info">
             <h2 class="section-title">Annual Sales Analysis</h2>
             <div class="chart-container">
@@ -113,7 +113,7 @@
     </div>
 
     <!-- Monthly Sales Analysis Tab -->
-    <div id="tab-monthly" class="customer-tab-content">
+    <div id="monthly-tab" class="customer-tab-content">
         <section class="order-history">
             <h2 class="section-title">Monthly Sales Analysis</h2>
             <div class="chart-container">
@@ -127,23 +127,24 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for label, data in monthly_sales_table_data %}
+                    {% for month, revenue in monthly_sales_table_data %}
                     <tr>
-                        <td>{{ label }}</td>
-                        <td>${{ data|floatformat:2 }}</td>
+                        <td>{{ month }}</td>
+                        <td>${{ revenue|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </section>
     </div>
+    
 
     <!-- Top Products Tab -->
-    <div id="tab-top-products" class="customer-tab-content">
+    <div id="top-products-tab" class="customer-tab-content">
         <section class="order-history">
             <h2 class="section-title">Top Products by Year</h2>
             <div class="chart-container">
-                <canvas id="topProductsChart"></canvas>
+                <canvas id="topProductsYearChart"></canvas> <!-- Updated canvas ID -->
             </div>
             <table class="data-table">
                 <thead>
@@ -169,11 +170,11 @@
     </div>
 
     <!-- Top Categories Tab -->
-    <div id="tab-top-categories" class="customer-tab-content">
+    <div id="top-categories-tab" class="customer-tab-content">
         <section class="order-history">
             <h2 class="section-title">Top Categories by Year</h2>
             <div class="chart-container">
-                <canvas id="topCategoriesChart"></canvas>
+                <canvas id="topCategoriesYearChart"></canvas> <!-- Updated canvas ID -->
             </div>
             <table class="data-table">
                 <thead>
@@ -185,38 +186,37 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for category in category_sales_table_data %}
+                    {% for category_name, revenue, units, percentage in category_sales_table_data %}
                     <tr>
-                        <td>{{ category.name }}</td>
-                        <td>${{ category.revenue|floatformat:2 }}</td>
-                        <td>{{ category.units }}</td>
-                        <td>{{ category.percentage|floatformat:2 }}%</td>
+                        <td>{{ category_name }}</td>
+                        <td>${{ revenue|floatformat:2 }}</td>
+                        <td>{{ units }}</td>
+                        <td>{{ percentage|floatformat:2 }}%</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </section>
     </div>
-</div>
+    
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Debug data availability
-    console.log("Data check:");
-    console.log("Yearly Orders:", {{ yearly_orders|safe }});
-    console.log("Yearly Revenue:", {{ yearly_revenue|safe }});
-    
-    // Define variables
-    const yearlyOrders = {{ yearly_orders|safe }};
-    const yearlyRevenue = {{ yearly_revenue|safe }};
-    const monthlySalesLabels = {{ monthly_sales_labels|safe }};
-    const monthlySalesData = {{ monthly_sales_data|safe }};
-    const topProductsLabels = {{ top_products_labels|safe }};
-    const topProductsData = {{ top_products_data|safe }};
-    const topCategoriesLabels = {{ top_categories_labels|safe }};
-    const topCategoriesData = {{ top_categories_data|safe }};
+    const customerDashboardData = {
+        yearlyOrders: {{ yearly_orders|safe }},
+        yearlyRevenue: {{ yearly_revenue|safe }},
+        monthlySalesLabels: {{ monthly_sales_labels|safe }},
+        monthlySalesData: {{ monthly_sales_data|safe }},
+        topProducts: {
+            labels: {{ top_products_labels|safe }},
+            revenue: {{ top_products_data|safe }},
+        },
+        topCategories: {
+            labels: {{ top_categories_labels|safe }},
+            revenue: {{ top_categories_data|safe }},
+        }
+    };
+    console.log("Customer Dashboard Data:", customerDashboardData);
 </script>
-<script src="{% static 'scripts/DJTraders.js' %}"></script>
 {% endblock %}

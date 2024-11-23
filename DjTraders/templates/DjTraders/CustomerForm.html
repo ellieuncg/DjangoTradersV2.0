@@ -2,106 +2,72 @@
 {% load static %}
 
 {% block content %}
-<div class="customers-page">
-    <div class="container">
-        <div class="page-header">
-            <h1>New/Update Customer</h1>
+<div class="customer-form">
+    <div class="header-product-form">
+        <h1>New/Update Customer</h1>
+        <div class="header-controls">
+            <button type="button" class="btn-save">
+                <i class="fas fa-save"></i>
+            </button>
+            <button type="button" class="btn-return">
+                <i class="fas fa-arrow-left"></i>
+            </button>
         </div>
+    </div>
 
-        {# Success message container - hidden by default #}
-        <div id="successMessage" class="alert alert-success" style="display: none;">
-            Customer updated successfully.
-        </div>
-
-        <form method="post" class="customer-form">
+    <div class="form-container">
+        <form method="post">
             {% csrf_token %}
             
-            <div class="form-group">
-                {{ form.customer_name.label_tag }}
+            <div class="form-row">
+                <label>Customer Name:</label>
                 {{ form.customer_name }}
-                {% if form.customer_name.errors %}
-                    <div class="text-danger">
-                        {% for error in form.customer_name.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </div>
-            
-            <div class="form-group">
-                {{ form.contact_name.label_tag }}
+
+            <div class="form-row">
+                <label>Contact Name:</label>
                 {{ form.contact_name }}
-                {% if form.contact_name.errors %}
-                    <div class="text-danger">
-                        {% for error in form.contact_name.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </div>
 
-            <div class="form-group">
-                {{ form.address.label_tag }}
+            <div class="form-row">
+                <label>Address:</label>
                 {{ form.address }}
-                {% if form.address.errors %}
-                    <div class="text-danger">
-                        {% for error in form.address.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </div>
 
-            <div class="form-group">
-                {{ form.city.label_tag }}
+            <div class="form-row">
+                <label>City:</label>
                 {{ form.city }}
-                {% if form.city.errors %}
-                    <div class="text-danger">
-                        {% for error in form.city.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </div>
 
-            <div class="form-group">
-                {{ form.postal_code.label_tag }}
+            <div class="form-row">
+                <label>Postal Code:</label>
                 {{ form.postal_code }}
-                {% if form.postal_code.errors %}
-                    <div class="text-danger">
-                        {% for error in form.postal_code.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </div>
 
-            <div class="form-group">
-                {{ form.country.label_tag }}
+            <div class="form-row">
+                <label>Country:</label>
                 {{ form.country }}
-                {% if form.country.errors %}
-                    <div class="text-danger">
-                        {% for error in form.country.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </div>
 
-            <div class="form-group">
-                {{ form.status.label_tag }}
+            <div class="form-row">
+                <label>Status:</label>
                 {{ form.status }}
-                {% if form.status.errors %}
-                    <div class="text-danger">
-                        {% for error in form.status.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </div>
 
-            <button type="submit" class="btn btn-primary">Submit</button>
+            {% if form.errors %}
+            <div class="error-message">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'scripts/DJTraders.js' %}"></script>
 {% endblock %}

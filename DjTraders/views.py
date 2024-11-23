@@ -46,8 +46,6 @@ def custom_login_view(request):
         form = AuthenticationForm()
     return render(request, "DjTraders/login.html", {"form": form})
 
-
-# Product Views
 class DjTradersProductsView(ListView):
     model = Product
     template_name = "DjTraders/products.html"
@@ -55,40 +53,58 @@ class DjTradersProductsView(ListView):
 
     def get_queryset(self):
         queryset = Product.objects.all()
-        product_query = self.request.GET.get("product", "")
-        category = self.request.GET.get("category", "")
-        min_price = self.request.GET.get("min_price", "")
-        max_price = self.request.GET.get("max_price", "")
-        status = self.request.GET.get("status", "active")
+        product_query = self.request.GET.get("product", "").strip()
+        category = self.request.GET.get("category", "").strip()
+        min_price = self.request.GET.get("min_price", "").strip()
+        max_price = self.request.GET.get("max_price", "").strip()
+        status = self.request.GET.get("status", "active").strip()
 
+        # Debug prints
+        print("\nDEBUG INFORMATION:")
+        print(f"Category from request: '{category}'")
+        print(f"Initial queryset count: {queryset.count()}")
+
+        # Apply filters based on user input
         if product_query:
             queryset = queryset.filter(product_name__icontains=product_query)
         if category:
-            queryset = queryset.filter(category__category_id=category)
+            print(f"Filtering by category: '{category}'")
+            queryset = queryset.filter(category__category_name=category)
+            print(f"After category filter count: {queryset.count()}")
+            # Print the SQL query
+            print(f"SQL Query: {queryset.query}")
         if min_price:
             try:
-                min_price = float(min_price)
-                queryset = queryset.filter(price__gte=min_price)
+                queryset = queryset.filter(price__gte=float(min_price))
             except ValueError:
                 pass
         if max_price:
             try:
-                max_price = float(max_price)
-                queryset = queryset.filter(price__lte=max_price)
+                queryset = queryset.filter(price__lte=float(max_price))
             except ValueError:
                 pass
-        if status != "all":
+        if status and status != "all":
             queryset = queryset.filter(status=status)
 
         return queryset.order_by("product_name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["categories"] = Category.objects.all().order_by("category_name")
-        context["selected_category"] = self.request.GET.get("category", "")
-        context["status_filter"] = self.request.GET.get("status", "active")
-        return context
+        # Get all categories and print them for debugging
+        categories = Category.objects.all().order_by("category_name")
+        print("\nAvailable Categories:")
+        for cat in categories:
+            print(f"- {cat.category_name}")
 
+        context["categories"] = categories
+        context["selected_category"] = self.request.GET.get("category", "")
+        print(f"Selected category in context: '{context['selected_category']}'")
+        
+        context["status_filter"] = self.request.GET.get("status", "active")
+        context["product_query"] = self.request.GET.get("product", "")
+        context["min_price"] = self.request.GET.get("min_price", "")
+        context["max_price"] = self.request.GET.get("max_price", "")
+        return context
 
 class DjTradersProductDetailView(DetailView):
     model = Product
@@ -191,17 +207,33 @@ class DjTradersCustomersView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["status_filter"] = self.request.GET.get(
-            "status", "active"
-        )  # Add this line
+        context["status_filter"] = self.request.GET.get("status", "active")
+        context["countries"] = (
+            Customer.objects.values_list("country", flat=True)
+            .distinct()
+            .exclude(country__isnull=True)
+            .exclude(country__exact="")
+            .order_by("country")  # Add this line to order countries alphabetically
+        )
         return context
 
-
 class DjTradersCustomerDetailView(DetailView):
-    model = Customer
+    model = Customer 
     template_name = "DjTraders/CustomerDetail.html"
     context_object_name = "customer"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['orders'] = Order.objects.filter(
+            customer=self.object
+        ).annotate(
+            total_amount=Sum(F('orderdetails__quantity') * F('orderdetails__product__price'))
+        ).values(
+            'order_id',
+            'order_date',
+            'total_amount'
+        ).order_by('-order_date')
+        return context
 
 def create_customer(request):
     if request.method == "POST":
@@ -530,12 +562,11 @@ def CustomerDashboard(request, pk):
         .order_by("-year", "-month")
     )
 
-    monthly_sales_table_data = list(
-        zip(
-            [f"{sale['year']}-{sale['month']}" for sale in monthly_sales],
-            [float(sale["total_revenue"]) for sale in monthly_sales],
-        )
-    )
+    monthly_sales_table_data = [
+    (f"{sale['year']}-{sale['month']}", float(sale["total_revenue"]))
+    for sale in monthly_sales
+]
+
 
     # Annual Sales Analysis
     base_query = OrderDetail.objects.filter(order__customer=customer)
@@ -612,14 +643,16 @@ def CustomerDashboard(request, pk):
     )
 
     category_sales_table_data = [
-        {
-            "name": category["product__category__category_name"],
-            "revenue": category["revenue"],
-            "units": category["units"],
-            "percentage": (category["revenue"] / total_revenue * 100) if total_revenue else 0,
-        }
-        for category in category_sales
-    ]
+    {
+        "name": category["product__category__category_name"],
+        "revenue": category["revenue"],
+        "units": category["units"],
+        "percentage": (category["revenue"] / total_revenue * 100) if total_revenue else 0,
+    }
+    for category in category_sales
+]
+
+
 
     # Calculate loyalty program progress
     one_year_ago = timezone.now().date() - timezone.timedelta(days=365)

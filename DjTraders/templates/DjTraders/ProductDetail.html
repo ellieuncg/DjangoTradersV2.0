@@ -3,6 +3,7 @@
 
 {% block content %}
 <div class="product-detail-page">
+    <!-- Header Section -->
     <div class="product-detail__header">
         <h1>{{ product.product_name }}</h1>
         <div class="product-detail__status">
@@ -10,6 +11,7 @@
         </div>
     </div>
 
+    <!-- Product Information -->
     <div class="product-detail__info">
         <div class="product-detail__info-list">
             <div class="product-detail__info-item">
@@ -29,54 +31,65 @@
                 <span class="product-detail__value">{{ product.get_status_display }}</span>
             </div>
         </div>
-
+    
+        <!-- Action Buttons -->
         <div class="product-detail__actions">
-            <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="product-detail__btn product-detail__btn--edit" title="Edit">
+            <button class="product-btn-edit" title="Edit" data-id="{{ product.id }}">
                 <i class="fas fa-pen"></i>
-            </a>
-            <form method="POST" action="{% url 'DjTraders:ProductStatus' pk=product.pk %}">
-                {% csrf_token %}
-                <input type="hidden" name="status" value="inactive">
-                <button type="submit" class="product-detail__btn product-detail__btn--delete" title="Archive">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </form>
-            <a href="{% url 'DjTraders:Products' %}" class="product-detail__btn product-detail__btn--return" title="Return">
-                <i class="fas fa-chevron-left"></i>
-            </a>
+            </button>
+            <button class="product-btn-archive" title="Archive" data-id="{{ product.id }}">
+                <i class="fas fa-archive"></i>
+            </button>
+            <button class="product-btn-return" title="Return" data-id="{{ product.id }}">
+                <i class="fas fa-undo"></i>
+            </button>
         </div>
     </div>
+    
 
+    <!-- Order History Section -->
     <div class="product-detail__orders">
-        <h2 class="product-detail__orders-title">Order History</h2>
-        <table class="product-detail__table">
-            <thead>
-                <tr>
-                    <th>Customer</th>
-                    <th>Order Date</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for detail in order_details %}
-                <tr>
-                    <td>
-                        <a href="{% url 'DjTraders:CustomerDetail' pk=detail.order.customer.pk %}">
-                            {{ detail.order.customer.customer_name }}
-                        </a>
-                    </td>
-                    <td>{{ detail.order.order_date }}</td>
-                    <td>{{ detail.quantity }}</td>
-                    <td>${{ detail.total }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="product-detail__table-empty">No orders found for this product.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="product-detail__orders-header">
+            <h2 class="product-detail__orders-title">Order History</h2>
+            <div class="product-detail__sort-controls">
+                <select class="product-detail__sort-select" id="orderSort">
+                    <option value="date-desc">Date (Newest)</option>
+                    <option value="date-asc">Date (Oldest)</option>
+                    <option value="quantity">Quantity</option>
+                    <option value="total">Total</option>
+                </select>
+            </div>
+        </div>
+        <div class="product-detail__table-container">
+            <table class="product-detail__table">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Order Date</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in order_details %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'DjTraders:CustomerDetail' pk=detail.order.customer.pk %}">
+                                {{ detail.order.customer.customer_name }}
+                            </a>
+                        </td>
+                        <td>{{ detail.order.order_date }}</td>
+                        <td>{{ detail.quantity }}</td>
+                        <td>${{ detail.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="product-detail__table-empty">No orders found for this product.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

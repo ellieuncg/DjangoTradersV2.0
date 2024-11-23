@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+{% csrf_token %}
 <div class="products-page">
     <div class="container">
         <div class="page-header">
@@ -10,12 +11,23 @@
                 <div class="status-filter-header">
                     <form method="GET" class="status-filter-form" id="statusFilterForm">
                         <input type="hidden" name="category" value="{{ request.GET.category }}">
-                        <select name="status" class="status-select" onchange="this.form.submit();" data-current-status="{{ status_filter }}">
-                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
-                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
-                            <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
-                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Show All</option>
+                        <select name="status" id="statusFilter" class="status-select" onchange="this.form.submit();">
+                            <option value="active">Active Only</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="archived">Archived</option>
+                            <option value="all">Show All</option>
                         </select>
+                        
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                const statusFilter = document.getElementById('statusFilter');
+                                const urlParams = new URLSearchParams(window.location.search);
+                                const status = urlParams.get('status') || 'active';
+                                if (statusFilter) {
+                                    statusFilter.value = status;
+                                }
+                            });
+                        </script>
                     </form>
                 </div>
                 <a href="{% url 'DjTraders:ProductCreate' %}" class="btn-add-new">
@@ -24,50 +36,61 @@
             </div>
         </div>
 
-        <div class="search-container-products">
+        <form method="get" class="search-container-products">
             <div class="search-field-group">
                 <div class="search-field-header">
                     <i class="fas fa-sort sort-icon"></i>
-                    <input type="text" name="product" placeholder="Product Name" value="{{ product_query }}">
+                    <input type="text" name="product" placeholder="Product Name" value="{{ request.GET.product|default:'' }}">
                 </div>
                 <div class="search-field-header">
-                    <i class="fas fa-dollar-sign sort-icon"></i>
-                    <input type="number" name="min_price" placeholder="Min Price" value="{{ min_price }}">
+                    <i class="fas fa-sort sort-icon"></i>
+                    <input type="text" name="min_price" placeholder="Min Price" value="{{ request.GET.min_price|default:'' }}">
                 </div>
                 <div class="search-field-header">
-                    <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}">
+                    <i class="fas fa-sort sort-icon"></i>
+                    <input type="text" name="max_price" placeholder="Max Price" value="{{ request.GET.max_price|default:'' }}">
                 </div>
             </div>
             <div class="button-group">
-                <button type="submit" class="btn-search">
+                <button type="submit" class="action-btn btn-search">
                     <i class="fas fa-search"></i>
                 </button>
-                <button type="button" class="btn-clear">
+                <a href="{% url 'DjTraders:Products' %}" class="action-btn btn-clear">
                     <i class="fas fa-times"></i>
-                </button>
+                </a>
             </div>
-        </div>
+
+            {% if request.GET.status %}
+                <input type="hidden" name="status" value="{{ request.GET.status }}">
+            {% endif %}
+        </form>
 
         <div class="categories-wrapper-products">
-            <a href="{% url 'DjTraders:Products' %}{% if request.GET.status %}?status={{ request.GET.status }}{% endif %}" 
+            <a href="{% url 'DjTraders:Products' %}{% if status_filter %}?status={{ status_filter }}{% endif %}" 
                class="{% if not selected_category %}active{% endif %}">All</a>
             {% for category in categories %}
-                <a href="{% url 'DjTraders:Products' %}?category={{ category.category_id }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
-                   class="{% if selected_category == category.category_id|stringformat:'s' %}active{% endif %}">
-                    {{ category.category_name }}
-                </a>
+                <a href="{% url 'DjTraders:Products' %}?category={{ category.category_name }}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                   class="{% if selected_category == category.category_name %}active{% endif %}">{{ category.category_name }}</a>
             {% endfor %}
+            
+            {% if selected_category %}
+<div class="button-group">
+    <a href="{% url 'DjTraders:Products' %}{% if status_filter %}?status={{ status_filter }}{% endif %}" 
+       class="action-btn btn-clear" title="Clear category filter">
+        <i class="fas fa-times"></i>
+    </a>
+</div>
+{% endif %}
         </div>
 
         <div class="card-grid-products">
             {% for product in products %}
-            <div class="card-products {% if product.status == 'active' %}active{% elif product.status == 'inactive' %}inactive{% elif product.status == 'archived' %}archived{% endif %}">
-
+            <div class="card-products {% if product.status == 'active' %}active{% elif product.status == 'inactive' %}inactive{% elif product.status == 'archived' %}archived{% endif %}" data-product-id="{{ product.id }}">
                 <h3 class="card-title">{{ product.product_name }}</h3>
                 <div class="card-info">
                     <p><strong>Category:</strong> {{ product.category.category_name }}</p>
                     <p><strong>Unit Price:</strong> ${{ product.price|floatformat:2 }}</p>
-                    <p><strong>Status:</strong> {{ product.status }}</p>
+                    <p><strong>Status:</strong> {{ product.get_status_display }}</p>
                 </div>
                 <div class="card-actions">
                     <a href="{% url 'DjTraders:ProductDetail' pk=product.pk %}" class="action-btn btn-view" title="View">
@@ -76,14 +99,10 @@
                     <a href="{% url 'DjTraders:ProductUpdate' pk=product.pk %}" class="action-btn btn-edit" title="Edit">
                         <i class="fas fa-pen"></i>
                     </a>
-                    <!-- Place this in your product card HTML -->
-                    <button class="btn-archive" onclick="archiveRecord('product', {{ product.id }})">
+                    <button type="button" class="action-btn btn-archive" onclick="archiveRecord('product', {{ product.pk }})" {% if product.status == 'archived' %}disabled{% endif %}>
                         <i class="fas fa-archive"></i>
                     </button>
-
-                    </button>
                 </div>
-                
             </div>
             {% empty %}
             <p>No products found.</p>
@@ -91,4 +110,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'scripts/DJTraders.js' %}"></script>
 {% endblock %}

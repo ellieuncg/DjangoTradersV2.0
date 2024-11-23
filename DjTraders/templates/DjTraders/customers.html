@@ -4,7 +4,7 @@
 {% block content %}
 {% csrf_token %}
 <div class="customers-page">
-    <div class="container">
+    <div class="container"> 
         <div class="page-header">
             <h1>Our Customers</h1>
             <div class="header-controls">
@@ -42,26 +42,24 @@
             <div class="customer-search-field-group">
                 <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon"></i>
-                    <input type="text" name="customer" placeholder="Customer Name" value="{{ customer_query }}">
+                    <input type="text" name="customer" placeholder="Customer Name" value="{{ request.GET.customer|default:'' }}">
                 </div>
                 <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon"></i>
-                    <input type="text" name="contact" placeholder="Contact" value="{{ contact_query }}">
+                    <input type="text" name="contact" placeholder="Contact" value="{{ request.GET.contact|default:'' }}">
                 </div>
                 <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon"></i>
-                    <input type="text" name="city" placeholder="City" value="{{ city_query }}">
+                    <input type="text" name="city" placeholder="City" value="{{ request.GET.city|default:'' }}">
                 </div>
                 <div class="customer-search-field-header">
                     <i class="fas fa-sort sort-icon"></i>
                     <select name="country" id="country" class="form-select">
                         <option value="">Select Country</option>
                         {% for country in countries %}
-                            {% if country %}
-                                <option value="{{ country }}" {% if country == request.GET.country %}selected{% endif %}>
-                                    {{ country }}
-                                </option>
-                            {% endif %}
+                            <option value="{{ country }}" {% if country == request.GET.country %}selected{% endif %}>
+                                {{ country }}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
@@ -70,14 +68,15 @@
                 <button type="submit" class="action-btn btn-search">
                     <i class="fas fa-search"></i>
                 </button>
-                <button type="button" class="action-btn btn-clear">
+                <a href="{% url 'DjTraders:Customers' %}" class="action-btn btn-clear">
                     <i class="fas fa-times"></i>
-                </button>
+                </a>
             </div>
             {% if request.GET.letter %}
                 <input type="hidden" name="letter" value="{{ request.GET.letter }}">
             {% endif %}
         </form>
+        
 
         <div class="alphabet-links-customers">
             <a href="{% url 'DjTraders:Customers' %}{% if status_filter %}?status={{ status_filter }}{% endif %}" 
