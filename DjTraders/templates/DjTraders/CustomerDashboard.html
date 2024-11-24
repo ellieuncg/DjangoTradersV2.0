@@ -5,6 +5,7 @@
 
 {% block content %}
 <div class="customer-dashboard">
+    <!-- Page Header -->
     <div class="page-header">
         <h1>{{ company_name }} Dashboard</h1>
         <p class="contact-info">Contact: {{ contact_name }}</p>
@@ -12,7 +13,7 @@
 
     <!-- Tabs Navigation -->
     <div class="customer-dashboard-tabs">
-        <button class="customer-tab-button" data-tab="loyalty-tab">Loyalty Program Status</button>
+        <button class="customer-tab-button active" data-tab="loyalty-tab">Loyalty Program Status</button>
         <button class="customer-tab-button" data-tab="annual-tab">Annual Sales Analysis</button>
         <button class="customer-tab-button" data-tab="monthly-tab">Monthly Sales Analysis</button>
         <button class="customer-tab-button" data-tab="top-products-tab">Top Products by Year</button>
@@ -36,61 +37,46 @@
                 </div>
                 {% endfor %}
             </div>
+
+            <!-- Loyalty Status Cards -->
             <div class="card-grid-loyalty">
-                <div class="status-card level-card">
-                    <i class="fas fa-trophy status-icon"></i>
-                    <div class="status-content">
-                        <h3>Current Level</h3>
-                        <p class="status-value">{{ loyalty_info.current_level }}</p>
-                    </div>
+                <div class="status-card">
+                    <i class="fas fa-trophy"></i>
+                    <h3>Current Level</h3>
+                    <p>{{ loyalty_info.current_level }}</p>
                 </div>
-                <div class="status-card spend-card">
-                    <i class="fas fa-dollar-sign status-icon"></i>
-                    <div class="status-content">
-                        <h3>Annual Spend</h3>
-                        <p class="status-value">${{ loyalty_info.annual_spend|floatformat:2 }}</p>
-                        <p class="previous-spend">Previous Year: ${{ previous_year_spend|floatformat:2 }}</p>
-                    </div>
+                <div class="status-card">
+                    <i class="fas fa-dollar-sign"></i>
+                    <h3>Annual Spend</h3>
+                    <p>${{ loyalty_info.annual_spend|floatformat:2 }}</p>
+                    <p>Previous Year: ${{ previous_year_spend|floatformat:2 }}</p>
                 </div>
-                <div class="status-card discount-card">
-                    <i class="fas fa-percent status-icon"></i>
-                    <div class="status-content">
-                        <h3>Current Discount</h3>
-                        <p class="status-value">{{ loyalty_info.discount_percentage }}%</p>
-                    </div>
+                <div class="status-card">
+                    <i class="fas fa-percent"></i>
+                    <h3>Current Discount</h3>
+                    <p>{{ loyalty_info.discount_percentage }}%</p>
                 </div>
-                <div class="status-card next-level-card">
-                    <i class="fas fa-arrow-up status-icon"></i>
-                    <div class="status-content">
-                        <h3>Until Next Level</h3>
-                        <p class="status-value">${{ loyalty_info.spend_to_next|floatformat:2 }}</p>
-                        <p class="time-remaining">{{ days_remaining }} days remaining</p>
-                    </div>
+                <div class="status-card">
+                    <i class="fas fa-arrow-up"></i>
+                    <h3>Until Next Level</h3>
+                    <p>${{ loyalty_info.spend_to_next|floatformat:2 }}</p>
+                    <p>{{ days_remaining }} days remaining</p>
                 </div>
             </div>
+
+            <!-- Progress Bar -->
             <div class="progress-container">
-                <div class="loyalty-progress">
-                    <div class="progress-bar" style="width: {{ progress_percentage }}%"></div>
-                    <div class="progress-markers">
-                        {% for tier in loyalty_tiers %}
-                        <div class="progress-marker" style="left: {{ tier.position }}%">
-                            <span class="marker-label">${{ tier.threshold|floatformat:0 }}</span>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <p class="progress-text">{{ progress_percentage }}% progress to next level</p>
+                <div class="progress-bar" style="width: {{ progress_percentage }}%"></div>
+                <p>{{ progress_percentage }}% progress to next level</p>
             </div>
         </section>
     </div>
 
     <!-- Annual Sales Analysis Tab -->
     <div id="annual-tab" class="customer-tab-content">
-        <section class="customer-info">
+        <section>
             <h2 class="section-title">Annual Sales Analysis</h2>
-            <div class="chart-container">
-                <canvas id="annualSalesChart"></canvas>
-            </div>
+            <canvas id="annualSalesChart"></canvas>
             <table class="data-table">
                 <thead>
                     <tr>
@@ -114,11 +100,9 @@
 
     <!-- Monthly Sales Analysis Tab -->
     <div id="monthly-tab" class="customer-tab-content">
-        <section class="order-history">
+        <section>
             <h2 class="section-title">Monthly Sales Analysis</h2>
-            <div class="chart-container">
-                <canvas id="monthlySalesChart"></canvas>
-            </div>
+            <canvas id="monthlySalesChart"></canvas>
             <table class="data-table">
                 <thead>
                     <tr>
@@ -137,15 +121,12 @@
             </table>
         </section>
     </div>
-    
 
     <!-- Top Products Tab -->
     <div id="top-products-tab" class="customer-tab-content">
-        <section class="order-history">
+        <section>
             <h2 class="section-title">Top Products by Year</h2>
-            <div class="chart-container">
-                <canvas id="topProductsYearChart"></canvas> <!-- Updated canvas ID -->
-            </div>
+            <canvas id="topProductsYearChart"></canvas>
             <table class="data-table">
                 <thead>
                     <tr>
@@ -171,11 +152,9 @@
 
     <!-- Top Categories Tab -->
     <div id="top-categories-tab" class="customer-tab-content">
-        <section class="order-history">
+        <section>
             <h2 class="section-title">Top Categories by Year</h2>
-            <div class="chart-container">
-                <canvas id="topCategoriesYearChart"></canvas> <!-- Updated canvas ID -->
-            </div>
+            <canvas id="topCategoriesYearChart"></canvas>
             <table class="data-table">
                 <thead>
                     <tr>
@@ -198,7 +177,7 @@
             </table>
         </section>
     </div>
-    
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -217,6 +196,5 @@
             revenue: {{ top_categories_data|safe }},
         }
     };
-    console.log("Customer Dashboard Data:", customerDashboardData);
 </script>
 {% endblock %}

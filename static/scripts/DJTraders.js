@@ -277,6 +277,16 @@ function initializeSalesDashboard(data) {
 }
 
 
+// Initialize the Sales Dashboard on DOM load
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.salesDashboardData) {
+        initializeSalesDashboard(window.salesDashboardData);
+    } else {
+        console.error("Sales dashboard data not found.");
+    }
+});
+
+
 function setupSalesDashboardTabs() {
     const salesTabButtons = document.querySelectorAll(".sales-tab-button");
     const salesTabContents = document.querySelectorAll(".sales-tab-content");
@@ -306,7 +316,6 @@ function setupSalesDashboardTabs() {
     }
 }
 
-// Existing chart creation functions...
 
 /* ==========================================================================
    MONTHLY SALES CHART
@@ -460,29 +469,37 @@ function setupSalesDashboardTabs() {
 
     if (salesTabButtons.length && salesTabContents.length) {
         console.log("Setting up Sales Dashboard Tabs...");
+        
+        // Attach click event listeners to each tab button
         salesTabButtons.forEach((button) => {
             button.addEventListener("click", () => {
-                // Reset active states
+                // Reset active classes
                 salesTabButtons.forEach((btn) => btn.classList.remove("active"));
                 salesTabContents.forEach((content) => content.classList.remove("active"));
 
-                // Activate selected tab and content
+                // Activate clicked tab and its corresponding content
                 button.classList.add("active");
                 const targetTab = button.dataset.tab;
                 const targetContent = document.getElementById(targetTab);
+
                 if (targetContent) {
                     targetContent.classList.add("active");
-                    initializeChartForTab(targetTab);
+                    console.log(`Activated tab: ${targetTab}`);
+                    initializeChartForTab(targetTab); // Render chart for the active tab
                 } else {
                     console.warn(`No content found for tab: ${targetTab}`);
                 }
             });
         });
-        return true;
+
+        // Activate the first tab by default
+        console.log("Activating the first tab by default...");
+        salesTabButtons[0]?.click();
+    } else {
+        console.warn("No Sales Dashboard tabs or content found.");
     }
-    console.warn("No Sales Dashboard tabs or content found.");
-    return false;
 }
+
 
 /* ==========================================================================
    SALES CHART CREATION
@@ -702,34 +719,6 @@ function createCategorySalesChart() {
     });
 }
 
-function createChart(type, canvasId, labels, data, title) {
-    const ctx = document.getElementById(canvasId)?.getContext("2d");
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type,
-        data: {
-            labels,
-            datasets: [{
-                label: title,
-                data,
-                backgroundColor: type === "pie" ? ["#526754", "#BC984E", "#F5F2EA", "#23645C"] : "#BC984E",
-                borderColor: "#526754",
-                borderWidth: 1,
-            }],
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: "top" },
-                title: { display: true, text: title }
-            },
-            scales: type === "pie" ? {} : {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-}
 
 
 /* ==========================================================================
@@ -1574,4 +1563,73 @@ function setupCustomerDashboardTabs() {
 
 // Initialize tabs when the page loads
 document.addEventListener("DOMContentLoaded", setupCustomerDashboardTabs);
+}
+
+function createSalesChart(type, canvasId, labels, data, title) {
+    const ctx = document.getElementById(canvasId)?.getContext("2d");
+    if (!ctx) return;
+
+    const existingChart = Chart.getChart(canvasId);
+    if (existingChart) existingChart.destroy();
+
+    new Chart(ctx, {
+        type,
+        data: {
+            labels,
+            datasets: [{
+                label: title,
+                data,
+                backgroundColor: type === "pie" ? ["#526754", "#BC984E", "#F5F2EA", "#23645C"] : "#BC984E",
+                borderColor: "#526754",
+                borderWidth: 1,
+            }],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: "top" },
+                title: { display: true, text: title },
+            },
+            scales: type === "pie" ? {} : {
+                y: { beginAtZero: true },
+            },
+        },
+    });
+}
+
+function createCustomerChart(type, canvasId, labels, data, title) {
+    const ctx = document.getElementById(canvasId)?.getContext("2d");
+    if (!ctx) return;
+
+    const existingChart = Chart.getChart(canvasId);
+    if (existingChart) existingChart.destroy();
+
+    new Chart(ctx, {
+        type,
+        data: {
+            labels,
+            datasets: [{
+                label: title,
+                data,
+                backgroundColor: "rgba(82, 103, 84, 0.7)",
+                borderColor: "rgba(82, 103, 84, 1)",
+                borderWidth: 1,
+            }],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: "top" },
+                title: { display: true, text: title },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: (value) => `$${value.toLocaleString()}`,
+                    },
+                },
+            },
+        },
+    });
 }

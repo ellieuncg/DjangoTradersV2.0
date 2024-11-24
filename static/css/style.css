@@ -2028,66 +2028,47 @@ select.form-control {
 
 /* Enhanced Filter Section */
 .sales-dashboard .filter-section {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--neutral-light);
     border-radius: 12px;
     padding: 1.5rem;
-    margin: 1rem 0 2rem 0;
+    margin: 1.5rem 0;
 }
 
 .sales-dashboard #filterForm {
     display: flex;
-    align-items: center;
-    gap: 1.5rem;
     flex-wrap: wrap;
+    gap: 1rem;
     justify-content: center;
 }
 
 .sales-dashboard .filter-group {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    min-width: 200px;
-}
-
-.sales-dashboard .filter-group label {
-    color: var(--card-background);
-    font-weight: 500;
-    font-size: 0.95rem;
-    white-space: nowrap;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
 }
 
 .sales-dashboard .year-select,
 .sales-dashboard .product-select {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: var(--neutral-light);
+    border: 1px solid var(--neutral-dark);
     border-radius: 8px;
     padding: 0.75rem 1rem;
-    color: var(--card-background);
+    color: var(--text-color);
     min-width: 180px;
     font-size: 0.95rem;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.sales-dashboard .year-select:hover,
-.sales-dashboard .product-select:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .sales-dashboard .filter-button {
-    background-color: var(--secondary-color);
+    background-color: var(--primary-color);
     color: var(--card-background);
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 120px;
-    font-size: 0.95rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 
 .sales-dashboard .filter-button:hover {
     background-color: var(--accent-color);
@@ -2101,34 +2082,32 @@ select.form-control {
     gap: 0.75rem;
     margin: 2rem 0;
     padding: 0.5rem;
-    background: var(--card-background);
+    background: var(--neutral-light);
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     flex-wrap: wrap;
     justify-content: center;
 }
 
 .sales-tab-button {
     padding: 0.875rem 1.5rem;
-    background: transparent;
+    background-color: var(--neutral-light);
     border: none;
     border-radius: 8px;
     color: var(--text-color);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-width: 180px;
-    position: relative;
-    font-size: 0.95rem;
+    min-width: 160px;
 }
 
 .sales-tab-button:hover {
-    background-color: var(--neutral-light);
-    color: var(--primary-color);
+    background-color: var(--primary-color);
+    color: var(--card-background);
 }
 
 .sales-tab-button.active {
-    background-color: var(--primary-color);
+    background-color: var(--accent-color);
     color: var(--card-background);
 }
 
@@ -2154,6 +2133,7 @@ select.form-control {
     height: 400px;
     width: 100%;
 }
+
 
 /* Sales Data Table */
 .sales-dashboard .sales-data-table-container {

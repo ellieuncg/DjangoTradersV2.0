@@ -1,214 +1,77 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 {% load static %}
 {% block title %}Product Sales Dashboard{% endblock %}
-{% block extra_css %}{% endblock %}
 {% block content %}
 
 <div class="sales-dashboard">
+    <!-- Page Header -->
     <header class="page-header">
-        <h1>Product Sales Dashboard</h1>
-        <h2 id="product_name" class="product-name-title">{{ product_name }}</h2>
+        <h1 class="dashboard-title">Product Sales Dashboard</h1>
+        <h2 id="product_name" class="dashboard-subtitle">{{ product_name }}</h2>
 
+        <!-- Filter Section -->
         <div class="filter-section">
-            <div class="filter-group">
-                <div class="filter-item">
-                    <label for="year">Year:</label>
-                    <select name="year" id="year">
-                        {% for year in available_years %}
-                            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <label for="year" class="filter-label">Year:</label>
+            <select id="year" class="filter-select">
+                {% for year in available_years %}
+                    <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
 
-                <div class="filter-item">
-                    <label for="product">Product:</label>
-                    <select name="product" id="product">
-                        <option value="">All Products</option>
-                        {% for product in products %}
-                            <option value="{{ product.product_id }}" {% if product.product_id == selected_product %}selected{% endif %}>
-                                {{ product.product_name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <label for="product" class="filter-label">Product:</label>
+            <select id="product" class="filter-select">
+                <option value="">All Products</option>
+                {% for product in products %}
+                    <option value="{{ product.product_id }}" {% if product.product_id == selected_product %}selected{% endif %}>
+                        {{ product.product_name }}
+                    </option>
+                {% endfor %}
+            </select>
 
-                <button type="button" class="btn btn-primary" id="applyFilters">Apply Filters</button>
-            </div>
+            <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
         </div>
     </header>
 
-    <div class="sales-dashboard-tabs">
-        <button class="sales-tab-button active" data-tab="tab-annual-overview">Annual Sales Overview</button>
-        <button class="sales-tab-button" data-tab="tab-monthly-analysis">Monthly Analysis</button>
-        <button class="sales-tab-button" data-tab="tab-top-products">Top 10 Products</button>
-        <button class="sales-tab-button" data-tab="tab-bottom-products">Bottom 10 Products</button>
-        <button class="sales-tab-button" data-tab="tab-category-analysis">Category Sales Analysis</button>
+    <!-- Sales Tabs -->
+    <div class="sales-tabs">
+        <button class="tab-btn active" data-tab="tab-annual-overview">Annual Sales</button>
+        <button class="tab-btn" data-tab="tab-top-products">Top Products</button>
+        <button class="tab-btn" data-tab="tab-bottom-products">Bottom Products</button>
+        <button class="tab-btn" data-tab="tab-category-analysis">Category Sales</button>
     </div>
 
-    <div class="sales-dashboard-content">
-        <div id="tab-annual-overview" class="sales-tab-content active">
-            <h2>Annual Sales Overview</h2>
-            <div class="chart-container">
-                <canvas id="annualSalesChart"></canvas>
-            </div>
-            <div class="table-container">
-                <table class="min-w-full bg-white">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-2">Month</th>
-                            <th class="px-4 py-2">Revenue</th>
-                            <th class="px-4 py-2">Growth</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for data in annual_sales_table_data %}
-                        <tr>
-                            <td class="border px-4 py-2">{{ data.name }}</td>
-                            <td class="border px-4 py-2">${{ data.revenue|floatformat:2 }}</td>
-                            <td class="border px-4 py-2">{{ data.growth|floatformat:1 }}%</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="tab-monthly-analysis" class="sales-tab-content">
-            <h2>Monthly Sales Analysis</h2>
-            <div class="chart-container">
-                <canvas id="monthlySalesChart"></canvas>
-            </div>
-            <div class="table-container">
-                <table class="min-w-full bg-white">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-2">Month</th>
-                            <th class="px-4 py-2">Revenue</th>
-                            <th class="px-4 py-2">Growth</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for data in annual_sales_table_data %}
-                        <tr>
-                            <td class="border px-4 py-2">{{ data.name }}</td>
-                            <td class="border px-4 py-2">${{ data.revenue|floatformat:2 }}</td>
-                            <td class="border px-4 py-2">{{ data.growth|floatformat:1 }}%</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="tab-top-products" class="sales-tab-content">
-            <h2>Top 10 Products</h2>
-            <div class="chart-container">
-                <canvas id="topProductsChart"></canvas>
-            </div>
-            <div class="table-container">
-                <table class="min-w-full bg-white">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-2">Product</th>
-                            <th class="px-4 py-2">Revenue</th>
-                            <th class="px-4 py-2">Units</th>
-                            <th class="px-4 py-2">% of Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for product in top_products_table_data %}
-                        <tr>
-                            <td class="border px-4 py-2">{{ product.name }}</td>
-                            <td class="border px-4 py-2">${{ product.revenue|floatformat:2 }}</td>
-                            <td class="border px-4 py-2">{{ product.units }}</td>
-                            <td class="border px-4 py-2">{{ product.percentage|floatformat:1 }}%</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="tab-bottom-products" class="sales-tab-content">
-            <h2>Bottom 10 Products</h2>
-            <div class="chart-container">
-                <canvas id="bottomProductsChart"></canvas>
-            </div>
-            <div class="table-container">
-                <table class="min-w-full bg-white">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-2">Product</th>
-                            <th class="px-4 py-2">Revenue</th>
-                            <th class="px-4 py-2">Units</th>
-                            <th class="px-4 py-2">% of Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for product in bottom_products_table_data %}
-                        <tr>
-                            <td class="border px-4 py-2">{{ product.name }}</td>
-                            <td class="border px-4 py-2">${{ product.revenue|floatformat:2 }}</td>
-                            <td class="border px-4 py-2">{{ product.units }}</td>
-                            <td class="border px-4 py-2">{{ product.percentage|floatformat:1 }}%</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="tab-category-analysis" class="sales-tab-content">
-            <h2>Category Sales Analysis</h2>
-            <div class="chart-container">
-                <canvas id="categorySalesChart"></canvas>
-            </div>
-            <div class="table-container">
-                <table class="min-w-full bg-white">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-2">Category</th>
-                            <th class="px-4 py-2">Revenue</th>
-                            <th class="px-4 py-2">Units</th>
-                            <th class="px-4 py-2">% of Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for category in category_sales_table_data %}
-                        <tr>
-                            <td class="border px-4 py-2">{{ category.name }}</td>
-                            <td class="border px-4 py-2">${{ category.revenue|floatformat:2 }}</td>
-                            <td class="border px-4 py-2">{{ category.units }}</td>
-                            <td class="border px-4 py-2">{{ category.percentage|floatformat:1 }}%</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <!-- Tab Content -->
+    <div class="tab-content active" id="tab-annual-overview">
+        <h2 class="tab-title">Annual Sales Overview</h2>
+        <canvas id="annualSalesChart" class="chart-canvas"></canvas>
+    </div>
+    <div class="tab-content" id="tab-top-products">
+        <h2 class="tab-title">Top 10 Products</h2>
+        <canvas id="topProductsChart" class="chart-canvas"></canvas>
+    </div>
+    <div class="tab-content" id="tab-bottom-products">
+        <h2 class="tab-title">Bottom 10 Products</h2>
+        <canvas id="bottomProductsChart" class="chart-canvas"></canvas>
+    </div>
+    <div class="tab-content" id="tab-category-analysis">
+        <h2 class="tab-title">Category Sales Analysis</h2>
+        <canvas id="categorySalesChart" class="chart-canvas"></canvas>
     </div>
 </div>
 
 {% endblock %}
-
 {% block extra_js %}
-<!-- Include Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Pass dashboard data to JavaScript -->
-<script>
-    const salesDashboardData = {
-        annualSalesLabels: {{ annual_sales_labels|safe }},
-        annualSalesData: {{ annual_sales_data|safe }},
-        topProductsLabels: {{ top_products_labels|safe }},
-        topProductsData: {{ top_products_data|safe }},
-        bottomProductsLabels: {{ bottom_products_labels|safe }},
-        bottomProductsData: {{ bottom_products_data|safe }},
-        categorySalesLabels: {{ category_sales_labels|safe }},
-        categorySalesData: {{ category_sales_data|safe }}
-    };
-</script>
-
-<!-- Include your custom JavaScript -->
-<script src="{% static 'js/DJTraders.js' %}"></script>
+    {# Inject Sales Dashboard Data #}
+    <script>
+        window.salesDashboardData = {
+            annualSalesLabels: {{ annual_sales_labels|safe }},
+            annualSalesData: {{ annual_sales_data|safe }},
+            topProductsLabels: {{ top_products_labels|safe }},
+            topProductsData: {{ top_products_data|safe }},
+            bottomProductsLabels: {{ bottom_products_labels|safe }},
+            bottomProductsData: {{ bottom_products_data|safe }},
+            categorySalesLabels: {{ category_sales_labels|safe }},
+            categorySalesData: {{ category_sales_data|safe }}
+        };
+    </script>
 {% endblock %}
