@@ -7,7 +7,11 @@
         <h1>{{ customer.customer_name }}</h1>
         <div class="product-detail__status">
             Status: Active
+            <a href="{% url 'DjTraders:CustomerDash' customer.pk %}" class="action-btn">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
         </div>
+        
     </div>
 
     <div class="product-detail__info">

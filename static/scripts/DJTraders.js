@@ -1,182 +1,165 @@
 /* ==========================================================================
-   Event Listener
+   DASHBOARD INITIALIZATION
 ========================================================================== */
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM Loaded');
+    console.log('Initializing Dashboards...');
 
-    // Assume `salesDashboardData` is injected via the Django template
-    if (typeof salesDashboardData !== "undefined") {
+    // Check for Sales Dashboard
+    if (typeof salesDashboardData !== 'undefined' && salesDashboardData) {
+        console.log('Initializing Sales Dashboard...');
         initializeSalesDashboard(salesDashboardData);
     } else {
-        console.error("Sales dashboard data not found.");
+        console.warn('Sales Dashboard data is missing or undefined.');
     }
 
-    // Fetch customer dashboard data (if required)
-    fetchCustomerDashboardData()
-        .then(data => initializeCustomerDashboard(data))
-        .catch(error => {
-            console.error('Error fetching customer dashboard data:', error);
-            handleCustomerDashboardError();
-        });
+    // Check for Customer Dashboard
+    const customerDashboardElement = document.getElementById('dashboard-data');
+    if (customerDashboardElement) {
+        try {
+            window.customerDashboardData = JSON.parse(customerDashboardElement.textContent);
+            console.log('Customer dashboard data loaded:', window.customerDashboardData);
+            initializeCustomerDashboard();
+        } catch (error) {
+            console.error('Error parsing customer dashboard data:', error);
+        }
+    } else {
+        console.warn('Customer Dashboard element not found.');
+    }
 });
 
 
 function fetchCustomerDashboardData() {
-    // Replace this with your actual data fetching logic
-    return Promise.resolve({
-        yearlyOrders: ['2021', '2022', '2023'],
-        yearlyRevenue: [100000, 120000, 150000],
-        monthlySalesLabels: ['Jan', 'Feb', 'Mar'],
-        monthlySalesData: [30000, 40000, 35000],
-        topProducts: {
-            labels: ['Product A', 'Product B', 'Product C'],
-            revenue: [50000, 40000, 35000]
+    const url = '/api/customer-dashboard-data/'; // Define your API endpoint
+
+    return fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
         },
-        topCategories: {
-            labels: ['Category A', 'Category B', 'Category C'],
-            revenue: [60000, 45000, 40000]
-        }
-    });
+        credentials: 'same-origin', // Ensures cookies are included for authentication
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch data: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('Error fetching customer dashboard data:', error);
+            throw error; // Re-throw the error to handle it elsewhere
+        });
 }
+
 
 /* ==========================================================================
    CUSTOMER DASHBOARD
 ========================================================================== */
 
-function initializeCustomerDashboard(customerDashboardData) {
-    if (!customerDashboardData) {
-        console.warn("Customer Dashboard data is missing.");
-        return;
-    }
+// Get dashboard data from Django template
+if (typeof customerDashboardData === 'undefined') {
+    const customerDashboardData = JSON.parse(document.getElementById('dashboard-data')?.textContent || '{}');
 
-    console.log("Initializing Customer Dashboard...");
-    setupCustomerDashboardTabs(customerDashboardData);
-}
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing Customer Dashboard...');
+    setupCustomerDashboardTabs();
+});
 
-function setupCustomerDashboardTabs(customerDashboardData) {
-    console.log("Setting up Customer Dashboard tabs...");
+function setupCustomerDashboardTabs() {
+    const tabButtons = document.querySelectorAll('.customer-tab-button');
+    const tabContents = document.querySelectorAll('.customer-tab-content');
 
-    const tabButtons = document.querySelectorAll(".customer-tab-button");
-    const tabContents = document.querySelectorAll(".customer-tab-content");
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Reset active states
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
 
-    if (!tabButtons.length || !tabContents.length) {
-        console.warn("No tabs or content found for Customer Dashboard.");
-        return;
-    }
-
-    // Add click event listeners to each tab button
-    tabButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            // Reset all tabs and content
-            tabButtons.forEach((btn) => btn.classList.remove("active"));
-            tabContents.forEach((content) => content.classList.remove("active"));
-
-            // Activate the clicked tab and its content
-            button.classList.add("active");
+            // Activate clicked tab
+            button.classList.add('active');
             const targetTab = button.dataset.tab;
             const targetContent = document.getElementById(targetTab);
+            
             if (targetContent) {
-                targetContent.classList.add("active");
-                console.log(`Activated tab: ${targetTab}`);
-                handleCustomerDashboardCharts(targetTab, customerDashboardData);
-            } else {
-                console.warn(`No content found for tab: ${targetTab}`);
+                targetContent.classList.add('active');
+                console.log(`Handling charts for tab: ${targetTab}`);
+                handleCustomerDashboardCharts(targetTab);
             }
         });
     });
 
-    // Activate the first tab by default
+    // Activate first tab by default
     if (tabButtons.length > 0) {
         tabButtons[0].click();
     }
 }
 
-function handleCustomerDashboardCharts(tabId, customerDashboardData) {
-    console.log(`Handling charts for tab: ${tabId}`);
-    switch (tabId) {
-        case "loyalty-tab":
-            console.log("Loyalty Program Status tab clicked. No chart required.");
-            break;
-        case "annual-tab":
-            createAnnualSalesChart(customerDashboardData);
-            break;
-        case "monthly-tab":
-            createMonthlySalesChart(customerDashboardData);
-            break;
-        case "top-products-tab":
-            createTopProductsYearChart(customerDashboardData);
-            break;
-        case "top-categories-tab":
-            createTopCategoriesYearChart(customerDashboardData);
-            break;
-        default:
-            console.warn(`No chart associated with tabId: ${tabId}`);
-    }
-}
-
-/* ==========================================================================
-   CHART CREATION FUNCTIONS
-========================================================================== */
-
-function createAnnualSalesChart(customerDashboardData) {
-    const ctx = document.getElementById("annualSalesChart")?.getContext("2d");
-    if (!ctx || !customerDashboardData.yearlyOrders || !customerDashboardData.yearlyRevenue) {
-        console.warn("Required data for 'Annual Sales' chart is missing.");
-        return;
-    }
-
-    new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: customerDashboardData.yearlyOrders,
-            datasets: [{
-                label: "Revenue",
-                data: customerDashboardData.yearlyRevenue,
-                borderColor: "rgba(82, 103, 84, 1)",
-                backgroundColor: "rgba(82, 103, 84, 0.1)",
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: "top" },
-                title: { display: true, text: "Annual Sales by Customer" }
-            }
+function handleCustomerDashboardCharts(tabId) {
+    // Destroy existing charts first
+    const chartIds = ['annualSalesChart', 'monthlySalesChart', 'topProductsChart', 'topCategoriesChart'];
+    chartIds.forEach(id => {
+        const existingChart = Chart.getChart(id);
+        if (existingChart) {
+            existingChart.destroy();
         }
     });
+
+    switch (tabId) {
+        case 'annual-tab':
+            createAnnualSalesChart();
+            break;
+        case 'monthly-tab':
+            createMonthlySalesChart();
+            break;
+        case 'top-products-tab':
+            createTopProductsChart();
+            break;
+        case 'top-categories-tab':
+            createTopCategoriesChart();
+            break;
+        case 'loyalty-tab':
+            console.log('Loyalty tab selected - no chart needed');
+            break;
+        default:
+            console.warn(`No chart handler for tab: ${tabId}`);
+    }
 }
 
-function createMonthlySalesChart(customerDashboardData) {
-    const ctx = document.getElementById("monthlySalesChart")?.getContext("2d");
-    if (!ctx || !customerDashboardData.monthlySalesLabels || !customerDashboardData.monthlySalesData) {
-        console.warn("Required data for 'Monthly Sales' chart is missing.");
+function createAnnualSalesChart() {
+    const ctx = document.getElementById('annualSalesChart')?.getContext('2d');
+    if (!ctx) {
+        console.error('Annual sales chart canvas not found');
         return;
     }
 
+    const data = {
+        labels: JSON.parse(customerDashboardData.yearly_orders || '[]'),
+        datasets: [{
+            label: 'Revenue',
+            data: JSON.parse(customerDashboardData.yearly_revenue || '[]'),
+            borderColor: 'rgba(82, 103, 84, 1)',
+            backgroundColor: 'rgba(82, 103, 84, 0.1)',
+            fill: true
+        }]
+    };
+
     new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: customerDashboardData.monthlySalesLabels,
-            datasets: [{
-                label: "Revenue",
-                data: customerDashboardData.monthlySalesData,
-                backgroundColor: "rgba(82, 103, 84, 0.7)"
-            }]
-        },
+        type: 'line',
+        data: data,
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: "top" },
-                title: { display: true, text: "Monthly Sales by Customer" }
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Annual Sales'
+                }
             },
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: (value) => `$${value.toLocaleString()}`
+                        callback: value => `$${value.toLocaleString()}`
                     }
                 }
             }
@@ -184,100 +167,307 @@ function createMonthlySalesChart(customerDashboardData) {
     });
 }
 
-function createTopProductsYearChart(customerDashboardData) {
-    const ctx = document.getElementById("topProductsChart")?.getContext("2d");
-    if (!ctx || !customerDashboardData.topProducts?.labels || !customerDashboardData.topProducts?.revenue) {
-        console.warn("Missing data for 'Top Products by Year' chart.");
+function createMonthlySalesChart() {
+    const ctx = document.getElementById('monthlySalesChart')?.getContext('2d');
+    if (!ctx) {
+        console.error('Monthly sales chart canvas not found');
         return;
     }
 
+    const data = {
+        labels: JSON.parse(customerDashboardData.monthly_sales_labels || '[]'),
+        datasets: [{
+            label: 'Revenue',
+            data: JSON.parse(customerDashboardData.monthly_sales_data || '[]'),
+            backgroundColor: 'rgba(82, 103, 84, 0.7)',
+            borderColor: 'rgba(82, 103, 84, 1)',
+            borderWidth: 1
+        }]
+    };
+
     new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: customerDashboardData.topProducts.labels,
-            datasets: [{
-                label: "Revenue",
-                data: customerDashboardData.topProducts.revenue,
-                backgroundColor: "rgba(82, 103, 84, 0.7)"
-            }]
-        },
+        type: 'bar',
+        data: data,
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: "top" },
-                title: { display: true, text: "Top Products by Year" }
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Monthly Sales'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: value => `$${value.toLocaleString()}`
+                    }
+                }
             }
         }
     });
 }
 
-function createTopCategoriesYearChart(customerDashboardData) {
-    const ctx = document.getElementById("topCategoriesChart")?.getContext("2d");
-    if (!ctx || !customerDashboardData.topCategories?.labels || !customerDashboardData.topCategories?.revenue) {
-        console.warn("Missing data for 'Top Categories by Year' chart.");
+function createTopProductsChart() {
+    const ctx = document.getElementById('topProductsChart')?.getContext('2d');
+    if (!ctx) {
+        console.error('Top products chart canvas not found');
         return;
     }
 
+    const data = {
+        labels: JSON.parse(customerDashboardData.top_products_labels || '[]'),
+        datasets: [{
+            label: 'Revenue',
+            data: JSON.parse(customerDashboardData.top_products_data || '[]'),
+            backgroundColor: 'rgba(82, 103, 84, 0.7)',
+            borderColor: 'rgba(82, 103, 84, 1)',
+            borderWidth: 1
+        }]
+    };
+
     new Chart(ctx, {
-        type: "pie",
-        data: {
-            labels: customerDashboardData.topCategories.labels,
-            datasets: [{
-                data: customerDashboardData.topCategories.revenue,
-                backgroundColor: [
-                    "rgba(82, 103, 84, 0.8)",
-                    "rgba(103, 82, 84, 0.8)",
-                    "rgba(84, 103, 82, 0.8)",
-                    "rgba(123, 82, 84, 0.8)"
-                ]
-            }]
-        },
+        type: 'bar',
+        data: data,
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: "right" },
-                title: { display: true, text: "Top Categories by Year" }
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Top Products'
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: value => `$${value.toLocaleString()}`
+                    }
+                }
             }
         }
     });
 }
 
+function createTopCategoriesChart() {
+    const ctx = document.getElementById('topCategoriesChart')?.getContext('2d');
+    if (!ctx) {
+        console.error('Top categories chart canvas not found');
+        return;
+    }
+
+    const data = {
+        labels: JSON.parse(customerDashboardData.top_categories_labels || '[]'),
+        datasets: [{
+            data: JSON.parse(customerDashboardData.top_categories_data || '[]'),
+            backgroundColor: [
+                'rgba(82, 103, 84, 0.8)',
+                'rgba(103, 82, 84, 0.8)',
+                'rgba(84, 103, 82, 0.8)',
+                'rgba(123, 82, 84, 0.8)'
+            ]
+        }]
+    };
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        generateLabels: chart => {
+                            const data = chart.data;
+                            const total = data.datasets[0].data.reduce((sum, value) => sum + value, 0);
+                            return data.labels.map((label, i) => ({
+                                text: `${label} (${((data.datasets[0].data[i] / total) * 100).toFixed(1)}%)`,
+                                fillStyle: data.datasets[0].backgroundColor[i],
+                                hidden: false
+                            }));
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Category Distribution'
+                }
+            }
+        }
+    });
+}
 /* ==========================================================================
    SALES DASHBOARD
 ========================================================================== */
+if (typeof salesActiveCharts === 'undefined') {
+    var salesActiveCharts = {};
+}
+
 function initializeSalesDashboard(data) {
-    console.log("Initializing Sales Dashboard", data);
+    console.log("Initializing with data:", data);
+    
+    const tabButtons = document.querySelectorAll('.sales-tab-button');
+    const tabContents = document.querySelectorAll('.sales-tab-content');
 
-    const tabButtons = document.querySelectorAll(".sales-tab-button");
-    const tabContents = document.querySelectorAll(".sales-tab-content");
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Destroy any existing charts
+            Object.values(activeCharts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            activeCharts = {};
 
-    tabButtons.forEach((button, index) => {
-        button.addEventListener("click", () => {
-            // Toggle Active Tab
-            tabButtons.forEach((btn) => btn.classList.remove("active"));
-            button.classList.add("active");
+            // Hide all tabs and show selected
+            tabContents.forEach(content => content.classList.remove('active'));
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            button.classList.add('active');
+            const targetId = button.getAttribute('data-tab');
+            const targetContent = document.getElementById(targetId);
+            targetContent.classList.add('active');
 
-            // Toggle Active Content
-            tabContents.forEach((content) => content.classList.remove("active"));
-            tabContents[index].classList.add("active");
-
-            // Render Charts
-            if (index === 0) createChart("line", "annualSalesChart", data.annualSalesLabels, data.annualSalesData, "Annual Sales Overview");
-            else if (index === 1) createChart("bar", "monthlySalesChart", data.monthlySalesLabels, data.monthlySalesData, "Monthly Sales Analysis");
-            else if (index === 2) createChart("bar", "topProductsChart", data.topProductsLabels, data.topProductsData, "Top 10 Products");
-            else if (index === 3) createChart("bar", "bottomProductsChart", data.bottomProductsLabels, data.bottomProductsData, "Bottom 10 Products");
-            else if (index === 4) createChart("pie", "categorySalesChart", data.categorySalesLabels, data.categorySalesData, "Category Sales Analysis");
+            // Create new chart for selected tab
+            createChart(targetId, data);
         });
     });
 
-    // Initialize First Chart
-    createChart("line", "annualSalesChart", data.annualSalesLabels, data.annualSalesData, "Annual Sales Overview");
+    // Initialize first tab
+    if (tabButtons.length) {
+        tabButtons[0].click();
+    }
 }
 
+function createChart(tabId, data) {
+    switch(tabId) {
+        case 'annual':
+            const annualCtx = document.getElementById('annualSalesChart')?.getContext('2d');
+            if (annualCtx) {
+                activeCharts.annual = new Chart(annualCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.annual_sales_labels || [],
+                        datasets: [{
+                            label: 'Revenue',
+                            data: data.annual_sales_data || [],
+                            borderColor: '#526754',
+                            backgroundColor: '#52675444',
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: value => `$${value.toLocaleString()}`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            break;
 
-function setupSalesDashboardTabs() {
+        case 'monthly':
+            const monthlyCtx = document.getElementById('monthlySalesChart')?.getContext('2d');
+            if (monthlyCtx) {
+                activeCharts.monthly = new Chart(monthlyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.monthly_analysis_labels || [],
+                        datasets: [{
+                            label: 'Revenue',
+                            data: data.monthly_analysis_data || [],
+                            backgroundColor: '#526754'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+            break;
+
+        case 'top':
+            const topCtx = document.getElementById('topProductsChart')?.getContext('2d');
+            if (topCtx) {
+                activeCharts.top = new Chart(topCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.top_products_labels || [],
+                        datasets: [{
+                            label: 'Revenue',
+                            data: data.top_products_data || [],
+                            backgroundColor: '#526754'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y'
+                    }
+                });
+            }
+            break;
+
+        case 'bottom':
+            const bottomCtx = document.getElementById('bottomProductsChart')?.getContext('2d');
+            if (bottomCtx) {
+                activeCharts.bottom = new Chart(bottomCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.bottom_products_labels || [],
+                        datasets: [{
+                            label: 'Revenue',
+                            data: data.bottom_products_data || [],
+                            backgroundColor: '#BC984E'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y'
+                    }
+                });
+            }
+            break;
+
+        case 'category':
+            const categoryCtx = document.getElementById('categoryChart')?.getContext('2d');
+            if (categoryCtx) {
+                activeCharts.category = new Chart(categoryCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.category_sales_labels || [],
+                        datasets: [{
+                            data: data.category_sales_data || [],
+                            backgroundColor: ['#526754', '#BC984E', '#F5F2EA', '#23645C']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+            break;
+    }
+}
+
+/* function setupSalesDashboardTabs() {
     const salesTabButtons = document.querySelectorAll(".sales-tab-button");
     const salesTabContents = document.querySelectorAll(".sales-tab-content");
 
@@ -305,12 +495,7 @@ function setupSalesDashboardTabs() {
         console.warn("No Sales Dashboard tabs or content found.");
     }
 }
-
-// Existing chart creation functions...
-
-/* ==========================================================================
-   MONTHLY SALES CHART
-========================================================================== */
+ */
 
 
 /* ==========================================================================
@@ -430,26 +615,25 @@ const SALES_TABS = {
    EVENT LISTENER TWO
 ========================================================================== */
 
-/* document.addEventListener('DOMContentLoaded', function () {
-    setupSalesDashboardTabs();
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Loaded');
+    
+    // Get dashboard data immediately
+    const dashboardDataElement = document.getElementById('dashboard-data');
+    if (!dashboardDataElement) {
+        console.error('Dashboard data element not found');
+        return;
+    }
 
-    // Check which dashboard is active and initialize the first tab
-    if (document.querySelector('.sales-tab-button')) {
-        console.log('Initializing Sales Dashboard...');
-        initializeChartForTab(TABS.SALES.ANNUAL); // Use TABS object for consistency
-    } else if (document.querySelector('.customer-tab-button')) {
-        console.log('Initializing Customer Dashboard...');
-        const firstCustomerTab = document.querySelector('.customer-tab-button');
-        if (firstCustomerTab) {
-            firstCustomerTab.click(); // Automatically activate the first tab
-        } else {
-            console.warn('No customer tab buttons found.');
-        }
-    } else {
-        console.warn('No dashboard tabs detected.');
+    try {
+        window.customerDashboardData = JSON.parse(dashboardDataElement.textContent);
+        console.log('Dashboard data loaded:', window.customerDashboardData);
+        initializeCustomerDashboard();
+    } catch (error) {
+        console.error('Error parsing dashboard data:', error);
     }
 });
- */
+
 /* ==========================================================================
    SALES DASHBOARD TABS
 ========================================================================== */
@@ -488,15 +672,7 @@ function setupSalesDashboardTabs() {
    SALES CHART CREATION
 ========================================================================== */
 
-// Shared chart configuration to avoid repetition
-const CHART_OPTIONS = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: { position: 'top' },
-        title: { display: true }
-    }
-};
+
 
 // Create the "Annual Overview" chart
 /* function createAnnualOverviewChart() {
@@ -1574,4 +1750,9 @@ function setupCustomerDashboardTabs() {
 
 // Initialize tabs when the page loads
 document.addEventListener("DOMContentLoaded", setupCustomerDashboardTabs);
+}
+
+function initializeCustomerDashboard() {
+    console.log('Initializing Customer Dashboard...');
+    setupCustomerDashboardTabs();
 }

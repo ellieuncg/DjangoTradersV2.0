@@ -59,15 +59,13 @@ CSRF_USE_SESSIONS = True
 
 ROOT_URLCONF = "DjangoTraders.urls"
 
-# Templates Configuration
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, "templates"),
-            os.path.join(BASE_DIR, "static", "templates"),  # Add this line
+            os.path.join(BASE_DIR, "static/templates"),  # For base.html
         ],
-        "APP_DIRS": True,
+        "APP_DIRS": True,  # This is important - it will find templates in your app's template directory
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -117,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_URL = "DjTraders:login"
-LOGIN_REDIRECT_URL = "DjTraders:Index"
+LOGIN_REDIRECT_URL = "DjTraders:client_dashboard"
 LOGOUT_REDIRECT_URL = "DjTraders:login"
 
 LOGGING = {
@@ -156,6 +154,9 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",  # Ensures Django looks for static files here
 ]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # This defines where collected static files will be stored
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

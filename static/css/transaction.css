@@ -1,0 +1,8 @@
+.transaction-dashboard {
+    margin-top: 20px;
+}
+
+.transaction-dashboard canvas {
+    max-width: 100%;
+    height: auto;
+}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="transaction-dashboard container mt-5">
+    <h1>Transaction Dashboard</h1>
+    <p>Analyze sales transactions across products and categories.</p>
+    
+    <!-- Chart Container -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <canvas id="transactionChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'scripts/transaction.js' %}"></script>
+{% endblock %}

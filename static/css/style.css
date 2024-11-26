@@ -148,10 +148,11 @@ h1, h2, h3, h4, h5, h6 {
     text-align: center;
     font-size: 0.875rem;
     color: var(--neutral-dark);
-    margin-top: 3rem;
-    padding: 2rem 0;
-    background: linear-gradient(to bottom, transparent, var(--background-color) 80%);
+    margin-top: 2rem;
+    padding: 1rem;
+    background: var(--background-color); /* Matches overall theme */
 }
+
 
 /* Button Styling */
 .button-base {
@@ -724,19 +725,18 @@ select.form-control {
     border-collapse: collapse;
     margin: 1.5rem 0;
 }
-
-.customer-dashboard .order-table th,
-.customer-dashboard .order-table td {
+.customer-dashboard .order-table th, .customer-dashboard .order-table td {
     padding: 1rem;
-    text-align: left;
     border: 1px solid var(--neutral-light);
+    text-align: left;
+    background-color: var(--card-background);
 }
-
 .customer-dashboard .order-table th {
-    background-color: var(--background-color);
+    background-color: var(--neutral-light);
     color: var(--primary-color);
     font-weight: 600;
 }
+
 
 .customer-dashboard .order-table td {
     background-color: var(--card-background);
@@ -2005,11 +2005,12 @@ select.form-control {
 .sales-dashboard .page-header {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     border-radius: 16px;
-    padding: 2.5rem;
-    margin-bottom: 2.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 2rem 2.5rem; /* Reduced padding */
+    margin-bottom: 1.5rem; /* Reduced space below the header */
     text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.1);
 }
+
 
 .sales-dashboard .page-header h1 {
     color: var(--card-background);
@@ -2079,15 +2080,16 @@ select.form-control {
     background-color: var(--secondary-color);
     color: var(--card-background);
     border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 500;
+    padding: 0.85rem 1.75rem; /* Increased padding for emphasis */
+    border-radius: 10px;
+    font-weight: 600; /* Stronger font weight */
     cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 120px;
-    font-size: 0.95rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    min-width: 140px;
+    font-size: 1rem; /* Slightly larger font for readability */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
 }
+
 
 .sales-dashboard .filter-button:hover {
     background-color: var(--accent-color);
@@ -2109,28 +2111,38 @@ select.form-control {
 }
 
 .sales-tab-button {
-    padding: 0.875rem 1.5rem;
-    background: transparent;
-    border: none;
+    padding: 0.8rem 1.25rem;
+    background: var(--neutral-light);
+    border: 1px solid var(--neutral-dark);
     border-radius: 8px;
     color: var(--text-color);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-width: 180px;
+    min-width: 160px;
     position: relative;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
+
 .sales-tab-button:hover {
-    background-color: var(--neutral-light);
-    color: var(--primary-color);
+    background-color: var(--secondary-color);
+    color: var(--card-background);
+    transform: scale(1.05); /* Subtle scaling for hover effect */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Adds hover shadow */
+    transition: all 0.3s ease;
 }
+
 
 .sales-tab-button.active {
     background-color: var(--primary-color);
     color: var(--card-background);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Subtle shadow for emphasis */
+    font-weight: 600; /* Slightly bold for active tab */
+    transform: scale(1.05); /* Highlight active tab */
+    transition: all 0.3s ease;
 }
+
 
 .sales-tab-button.active::after {
     content: '';
@@ -2147,52 +2159,87 @@ select.form-control {
 /* Chart Container */
 .sales-dashboard .chart-container {
     background-color: var(--card-background);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 2rem;
-    margin: 1.5rem 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    height: 400px;
-    width: 100%;
+    margin: 2rem auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    height: 450px;
+    text-align: center;
+    max-width: 90%; /* Allow more width on larger screens */
 }
+
+
+
+.sales-dashboard .chart-container canvas {
+    height: auto;
+    max-height: 450px; /* Restrict height for readability */
+}
+
+.sales-dashboard .chartjs-render-monitor {
+    transform: translateY(10px);
+    font-size: 0.85rem; /* Slightly smaller labels for better fit */
+    text-align: center; /* Align labels properly */
+}
+
+
+
 
 /* Sales Data Table */
 .sales-dashboard .sales-data-table-container {
     background-color: var(--card-background);
     border-radius: 12px;
     padding: 1.5rem;
-    margin: 1.5rem 0;
+    margin: 2rem auto;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    max-width: 90%;
+    text-align: center;
+    overflow-x: auto;
+}
+
+
+.sales-dashboard .sales-data-table th, 
+.sales-dashboard .sales-data-table td {
+    padding: 1rem;
+    text-align: left; /* Maintain readability */
+    font-size: 0.875rem;
 }
 
 .sales-dashboard .sales-data-table {
     width: 100%;
-    border-collapse: separate;
+    border-collapse: collapse;
     border-spacing: 0;
+    margin-top: 1rem;
 }
 
-.sales-dashboard .sales-data-table thead {
-    background-color: var(--neutral-light);
+.sales-dashboard .sales-data-table th,
+.sales-dashboard .sales-data-table td {
+    text-align: center; /* Centers text */
+    padding: 0.75rem; /* Slightly reduced padding */
+    border: 1px solid var(--neutral-light);
 }
 
 .sales-dashboard .sales-data-table th {
-    padding: 1rem 1.5rem;
-    text-align: left;
+    background-color: var(--neutral-light);
     color: var(--primary-color);
     font-weight: 600;
-    border-bottom: 2px solid var(--primary-color);
-    white-space: nowrap;
 }
+
 
 .sales-dashboard .sales-data-table td {
     padding: 1rem 1.5rem;
+    text-align: left;
     border-bottom: 1px solid var(--neutral-light);
     color: var(--text-color);
+    vertical-align: middle; /* Ensures content is aligned in rows */
 }
 
 .sales-dashboard .sales-data-table tbody tr:hover {
-    background-color: var(--neutral-light);
+    background-color: rgba(234, 232, 229, 0.7); /* Softer hover effect */
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+    transition: all 0.2s ease; /* Smooth hover transition */
 }
+
+
 
 /* Content Section Styling */
 .sales-tab-content {
@@ -2241,6 +2288,62 @@ select.form-control {
         padding: 1rem;
     }
 
+    .sales-dashboard .chart-container {
+        padding: 1rem;
+        height: 300px;
+        max-width: 100%;
+    }
+
+    .sales-dashboard .sales-data-table-container {
+        padding: 1rem;
+        max-width: 100%;
+        margin: 1rem auto;
+        overflow-x: auto;
+    }
+
+    .sales-dashboard .sales-data-table th,
+    .sales-dashboard .sales-data-table td {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+}
+
+
+    .sales-dashboard .sales-data-table-container {
+        max-width: 95%;
+        margin: 1rem auto;
+        overflow-x: auto;
+    }
+
+    .sales-dashboard .sales-data-table th,
+    .sales-dashboard .sales-data-table td {
+        font-size: 0.75rem; /* Slightly smaller text for mobile */
+        padding: 0.5rem;
+    }
+}
+
+
+    .sales-dashboard .chart-container {
+        padding: 1rem;
+        height: auto;
+        min-height: 300px; /* Ensure sufficient height for smaller devices */
+    }
+
+    .sales-dashboard .sales-data-table-container {
+        padding: 1rem;
+        max-width: 100%; /* Adjust for screen size */
+        margin: 1rem auto; /* Center on small screens */
+        overflow-x: auto;
+    }
+
+    .sales-dashboard .sales-data-table th, 
+    .sales-dashboard .sales-data-table td {
+        font-size: 0.75rem; /* Reduced font size */
+        padding: 0.5rem;
+    }
+}
+
+
     .sales-dashboard .page-header {
         padding: 1.5rem;
         margin-bottom: 1.5rem;
@@ -2276,8 +2379,11 @@ select.form-control {
     }
 
     .sales-dashboard .chart-container {
-        height: 300px;
+        height: auto; /* Adjust to content height */
+        min-height: 250px; /* Ensure a readable size */
         padding: 1rem;
+        margin: 1rem auto;
+        width: 90%; /* Center and resize for smaller devices */
     }
 
     .sales-dashboard .sales-data-table-container {
@@ -2359,3 +2465,87 @@ select.form-control {
     font-size: 1rem;
     background-color: var(--background-color);
 }
+
+@media (max-width: 768px) {
+    .sales-dashboard {
+        padding: 1rem;
+    }
+
+    .sales-dashboard .chart-container {
+        padding: 1rem;
+        height: 300px; /* Scaled for smaller devices */
+    }
+
+    .sales-dashboard .sales-data-table-container {
+        padding: 1rem;
+        overflow-x: scroll; /* Adds horizontal scroll for small screens */
+    }
+
+    .sales-dashboard .sales-data-table th, 
+    .sales-dashboard .sales-data-table td {
+        font-size: 0.75rem; /* Reduced font size */
+        padding: 0.5rem; /* Compact padding */
+    }
+
+    .sales-dashboard .filter-button {
+        width: 100%;
+    }
+}
+
+
+    .sales-dashboard .page-header {
+        padding: 1.5rem;
+    }
+
+    .sales-dashboard .chart-container {
+        padding: 1rem;
+        min-height: 250px; /* Ensure a readable size */
+    }
+
+    .sales-dashboard .sales-data-table-container {
+        padding: 1rem;
+        overflow-x: auto; /* Allow horizontal scrolling if necessary */
+    }
+
+    .sales-dashboard .sales-data-table th, 
+    .sales-dashboard .sales-data-table td {
+        font-size: 0.875rem; /* Adjust font size for smaller screens */
+        padding: 0.75rem; /* Reduced padding */
+    }
+
+    .sales-tab-button {
+        min-width: 140px;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+    @media (max-width: 768px) {
+        .sales-dashboard {
+            padding: 1rem;
+        }
+    
+        .sales-dashboard .filter-button {
+            width: 100%;
+        }
+    
+        .sales-dashboard .chart-container {
+            height: auto; /* Adjust to content height */
+            min-height: 250px; /* Ensure a readable size */
+            padding: 1rem;
+            margin: 1rem auto;
+            width: 90%; /* Center and resize for smaller devices */
+        }
+    
+        .sales-dashboard .sales-data-table-container {
+            padding: 1rem;
+            max-width: 100%;
+            margin: 1rem auto;
+            overflow-x: auto;
+        }
+    
+        .sales-dashboard .sales-data-table th,
+        .sales-dashboard .sales-data-table td {
+            font-size: 0.75rem;
+            padding: 0.5rem;
+        }
+    }
+    

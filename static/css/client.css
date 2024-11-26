@@ -1,0 +1,16 @@
+.client-dashboard .container {
+    margin-top: 20px;
+}
+
+.client-dashboard .card {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.client-dashboard .card-header {
+    background-color: #526754;
+    color: white;
+    font-weight: bold;
+    padding: 15px;
+    border-bottom: 2px solid #BC984E;
+}

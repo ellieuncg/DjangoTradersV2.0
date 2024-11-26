@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="client-dashboard">
+    <div class="container">
+        <h1 class="text-center mb-4">Client Dashboard</h1>
+
+        <!-- Annual Sales Chart -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Annual Sales Analysis</h4>
+            </div>
+            <div class="card-body">
+                <canvas id="annualSalesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Top 10 Products</h4>
+            </div>
+            <div class="card-body">
+                <canvas id="topProductsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Categories -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Top 10 Categories</h4>
+            </div>
+            <div class="card-body">
+                <canvas id="topCategoriesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'scripts/client.js' %}"></script>
+{% endblock %}

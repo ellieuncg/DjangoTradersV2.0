@@ -1,53 +1,40 @@
+from django.contrib import admin
 from django.urls import path
-from django.contrib.auth import views as auth_views
-from . import views  # Import the views module
-import logging
+from DjTraders import views
+from django.contrib.auth.views import LogoutView
+from django.contrib.auth.views import LoginView
 
-logger = logging.getLogger(__name__)
-logger.info("Views imported: %s", dir(views))
 
-app_name = "DjTraders"
+
+app_name = 'DjTraders'
 
 urlpatterns = [
-    # Authentication URLs
-    path("accounts/login/", views.custom_login_view, name="login"),
-    path(
-        "accounts/logout/",
-        auth_views.LogoutView.as_view(next_page="DjTraders:Index"),
-        name="logout",
-    ),
-    # Sales Dashboard
-    path("sales/dashboard/", views.SalesDashboard, name="SalesDashboard"),
-    # Main application view
-    path("", views.index, name="Index"),
-    # Customer Management URLs
-    path("customers/", views.DjTradersCustomersView.as_view(), name="Customers"),
-    path(
-        "customers/<int:pk>/",
-        views.DjTradersCustomerDetailView.as_view(),
-        name="CustomerDetail",
-    ),
-    path("customers/create/", views.create_customer, name="CustomerCreate"),
-    path("customers/<int:pk>/update/", views.update_customer, name="CustomerUpdate"),
-    path("customers/<int:pk>/archive/", views.archive_customer, name="CustomerArchive"),
-    path(
-        "customers/<int:pk>/status/",
-        views.update_customer_status,
-        name="CustomerStatus",
-    ),  # Added this line
-    # Customer Dashboard URL
-    path(
-        "customers/<int:pk>/dashboard/",
-        views.CustomerDashboard,
-        name="CustomerDashboard",
-    ),
-    path(
-        "customers/<int:pk>/transactions/",
-        views.CustomerTransactions,
-        name="CustomerTransactions",
-    ),
-    # Product Management URLs
-    path("products/", views.DjTradersProductsView.as_view(), name="Products"),
+    # Admin route
+    path('admin/', admin.site.urls),
+
+    # Home route
+    path('', views.index, name='index'),
+
+    # SalesDashboard (old) route
+    path('salesdashboard/', views.SalesDashboard, name='SalesDashboard'),
+
+    # SalesDash (new) route
+    path('salesdash/', views.SalesDash, name='SalesDash'),
+
+    # Additional routes
+    path('customers/', views.CustomersListView.as_view(), name='Customers'),
+    path('customer/<int:pk>/', views.DjTradersCustomerDetailView.as_view(), name='CustomerDetail'),
+    path('customer/<int:pk>/update/', views.update_customer, name='UpdateCustomer'),
+    path('customer/<int:pk>/archive/', views.archive_customer, name='ArchiveCustomer'),
+
+    # API endpoints for dashboard data
+    path('api/sales-dashboard-data/', views.get_sales_dashboard_data, name='SalesDashboardData'),
+
+    # Client dashboard route
+    path('client_dashboard/', views.client_dashboard, name='client_dashboard'),
+
+    
+     path("products/", views.DjTradersProductsView.as_view(), name="Products"),
     path(
         "products/<int:pk>/",
         views.DjTradersProductDetailView.as_view(),
@@ -59,4 +46,10 @@ urlpatterns = [
     path(
         "products/<int:pk>/status/", views.update_product_status, name="ProductStatus"
     ),
+    
+    path('login/', LoginView.as_view(template_name='DjTraders/login.html'), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+    
+    path('transaction_dashboard/', views.TransactionDashboardView.as_view(), name='transaction_dashboard'),
+
 ]
